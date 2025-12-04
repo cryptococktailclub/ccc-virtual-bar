@@ -1637,3 +1637,52 @@ body.theme-platinum { background:#04040c; }
     min-height:200px;
   }
 }
+/* ======================================
+   FIX: CONSISTENT 4:3 BAR TV ASPECT RATIO
+   ====================================== */
+
+/* Wrap ensures the TV has a stable min width on smaller laptops */
+.bar-tv-mortise {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Strong, enforced TV aspect ratio */
+.bar-tv-screen {
+  width: 100%;
+  aspect-ratio: 4 / 3;              /* Always stays 4x3 */
+  max-width: 640px;                  /* Prevents overscaling on huge screens */
+  min-width: 320px;                  /* Prevents squashing on small laptops */
+  height: auto !important;           /* Prevents CSS conflicts forcing height */
+  object-fit: cover;
+  background: #000;
+  border-radius: 10px;
+}
+
+/* Keep the TV inner frame from collapsing on small screens */
+.bar-tv-inner {
+  width: 100%;
+  min-width: 340px;
+}
+
+/* On smaller screens, let the TV scale down smoothly */
+@media (max-width: 1024px) {
+  .bar-tv-screen {
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bar-tv-screen {
+    max-width: 440px;
+    min-width: 240px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bar-tv-screen {
+    max-width: 360px;
+    min-width: 200px;
+  }
+}
