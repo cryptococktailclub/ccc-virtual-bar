@@ -1602,3 +1602,48 @@ body.theme-platinum .bartender-message-body strong,
 body.theme-platinum .bartender-message-body em {
   color: var(--accent-platinum-1);
 }
+/* =======================================
+   Animated subtitle – "Virtual Bar Experience"
+   ======================================= */
+
+.brand-subtitle-animated {
+  position: relative;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(
+    120deg,
+    var(--accent-neon-pink, #ff1493),
+    var(--accent-gold-1, #ffd700),
+    var(--accent-platinum-1, #e0e0e0)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: cccSubtitleGlow 5s ease-in-out infinite alternate;
+}
+
+/* Subtle shimmering glow pass */
+@keyframes cccSubtitleGlow {
+  0% {
+    text-shadow:
+      0 0 4px rgba(255, 20, 147, 0.4),
+      0 0 12px rgba(255, 20, 147, 0.3);
+    opacity: 0.7;
+    transform: translateY(0);
+  }
+  50% {
+    text-shadow:
+      0 0 6px rgba(255, 215, 0, 0.5),
+      0 0 16px rgba(255, 215, 0, 0.35);
+    opacity: 1;
+    transform: translateY(-0.5px);
+  }
+  100% {
+    text-shadow:
+      0 0 5px rgba(224, 224, 224, 0.5),
+      0 0 14px rgba(224, 224, 224, 0.35);
+    opacity: 0.8;
+    transform: translateY(0);
+  }
+}
