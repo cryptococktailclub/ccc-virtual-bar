@@ -1686,3 +1686,45 @@ body.theme-platinum { background:#04040c; }
     min-width: 200px;
   }
 }
+/* ===== FINAL BAR TV ASPECT FIX – OVERRIDE ===== */
+
+.bar-tv-inner {
+  width: 100%;
+}
+
+.bar-tv-mortise {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Force true 4:3 and remove old height limits */
+.bar-tv-screen {
+  width: 100%;
+  max-width: 640px;          /* nice size on desktop */
+  aspect-ratio: 4 / 3;       /* always 4x3 */
+  height: auto !important;
+  max-height: none !important; /* Kills earlier 220px cap */
+  object-fit: cover;
+  display: block;
+  background: #000;
+}
+
+@media (max-width: 900px) {
+  .bar-tv-screen {
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 700px) {
+  .bar-tv-screen {
+    max-width: 440px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bar-tv-screen {
+    max-width: 100%;
+  }
+}
