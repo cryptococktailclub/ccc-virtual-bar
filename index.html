@@ -1,4 +1,14 @@
- <!-- Top nav -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crypto Cocktail Club – Virtual Bar + AI Bartender</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="theme-base">
+  <div class="app-bg">
+    <!-- Top nav -->
     <header class="top-nav">
       <nav class="nav-links">
         <button class="nav-link is-active" type="button">Listening Room</button>
@@ -27,7 +37,7 @@
       <section class="left-column">
         <!-- Bar TV Archive -->
         <section class="card video-archive-card">
-          <div class="section-header">
+          <div class="section-header compact">
             <h2>Bar TV Archive</h2>
             <p>Cocktail tapes from the CCC vault.</p>
           </div>
@@ -112,16 +122,32 @@
           <div class="bartender-quick-row">
             <span class="bartender-quick-label">Shortcuts:</span>
             <div class="bartender-chip-row">
-              <button class="bartender-chip" data-bartender-prompt="Recommend a refreshing gin sour.">
+              <button
+                class="bartender-chip"
+                type="button"
+                data-bartender-prompt="Recommend a refreshing gin sour."
+              >
                 Gin · Refreshing
               </button>
-              <button class="bartender-chip" data-bartender-prompt="Recommend a stirred whiskey drink, spirit-forward.">
+              <button
+                class="bartender-chip"
+                type="button"
+                data-bartender-prompt="Recommend a stirred whiskey drink, spirit-forward."
+              >
                 Whiskey · Stirred
               </button>
-              <button class="bartender-chip" data-bartender-prompt="Recommend a rum drink with lime and sugar, daiquiri family.">
+              <button
+                class="bartender-chip"
+                type="button"
+                data-bartender-prompt="Recommend a rum drink with lime and sugar, daiquiri family."
+              >
                 Rum · Daiquiri
               </button>
-              <button class="bartender-chip" data-bartender-prompt="Recommend something low-ABV and spritzy.">
+              <button
+                class="bartender-chip"
+                type="button"
+                data-bartender-prompt="Recommend something low-ABV and spritzy."
+              >
                 Low-ABV
               </button>
             </div>
@@ -138,7 +164,9 @@
                 <span class="bartender-time">online · Milk &amp; Honey specs only</span>
               </div>
               <div class="bartender-message-body">
-                Ask for a classic by name (<em>Gold Rush, Penicillin, Paper Plane</em>), tell me your base spirit &amp; mood (<em>“gin, tart, not too sweet”</em>), or list what you have on your home bar and I’ll stay within the Milk &amp; Honey playbook.
+                Ask for a classic by name (<em>Gold Rush, Penicillin, Paper Plane</em>), tell me your
+                base spirit &amp; mood (<em>“gin, tart, not too sweet”</em>), or list what you have on your
+                home bar and I’ll stay within the Milk &amp; Honey playbook.
               </div>
             </div>
           </div>
@@ -245,7 +273,11 @@
               <div class="album-art-wrapper">
                 <div class="album-art" id="albumArt">
                   <div class="album-face">
-                    <img src="BASE_TRANSPARENT.PNG" alt="Crypto Cocktail Club" class="album-logo" />
+                    <img
+                      src="BASE_TRANSPARENT.PNG"
+                      alt="Crypto Cocktail Club"
+                      class="album-logo"
+                    />
                   </div>
                   <div class="album-face album-face-back">
                     <div class="card-back-copy">
@@ -394,8 +426,8 @@
           <ul class="membership-benefits">
             <li>Members-only CCC Discord access</li>
             <li>Whitelist for all future Recipe NFT drops</li>
-            <li>Governance votes on venues & recipe curation</li>
-            <li>Monthly virtual mixology sessions & cocktail tutorials</li>
+            <li>Governance votes on venues &amp; recipe curation</li>
+            <li>Monthly virtual mixology sessions &amp; cocktail tutorials</li>
             <li>Loyalty points for engagement, redeemable for future perks</li>
           </ul>
 
@@ -419,7 +451,7 @@
             <li>24-hour priority mint window for Recipe NFTs</li>
             <li>0.5% share of secondary market fees from Gold Recipe NFTs</li>
             <li>Exclusive virtual tastings with master mixologists</li>
-            <li>Guaranteed $TIPZ utility token airdrop & limited CCC merch</li>
+            <li>Guaranteed $TIPZ utility token airdrop &amp; limited CCC merch</li>
           </ul>
 
           <p class="membership-perfect">
@@ -439,10 +471,10 @@
 
           <ul class="membership-benefits">
             <li>All Gold benefits</li>
-            <li>Genesis Founder status on CCC site & metadata</li>
+            <li>Genesis Founder status on CCC site &amp; metadata</li>
             <li>2× voting weight in DAO proposals</li>
             <li>5× larger $TIPZ airdrop allocation</li>
-            <li>Guaranteed invites to CCC speakeasy openings & launch parties</li>
+            <li>Guaranteed invites to CCC speakeasy openings &amp; launch parties</li>
             <li>1% share of platform fees from Platinum Recipe NFT secondary sales</li>
             <li>Option to join CCC’s creative council / advisory role</li>
           </ul>
@@ -458,7 +490,7 @@
           <h4>Why mint a CCC Membership NFT?</h4>
           <ul>
             <li>Real utility that bridges IRL bar culture with URL experiences.</li>
-            <li>Progressive value through royalties, revenue share & token airdrops.</li>
+            <li>Progressive value through royalties, revenue share &amp; token airdrops.</li>
             <li>Founding rights as part of the Genesis cohort shaping the protocol.</li>
           </ul>
         </div>
@@ -521,6 +553,7 @@
     </footer>
   </div>
 
+  <!-- Audio element used by the listening station / vinyl shelf -->
   <audio id="bar-audio"></audio>
   <script src="script.js"></script>
 </body>
