@@ -69,7 +69,7 @@ body {
   padding: 0;
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: auto; /* allow horizontal scroll instead of cutting off content */
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
   color: var(--text-primary);
 }
@@ -329,7 +329,6 @@ body.theme-platinum .ccc-logo {
 }
 
 /* Nav links */
-
 .nav-links {
   display: flex;
   align-items: center;
@@ -446,7 +445,7 @@ body.theme-platinum .ccc-logo {
   margin-top: 32px;
   margin-bottom: 28px;
   display: grid;
-  grid-template-columns: 1.1fr 1.3fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* balanced columns */
   gap: 20px;
   align-items: flex-start;
 }
@@ -970,6 +969,22 @@ body.theme-platinum .bartender-message-body em {
 .vinyl-item.is-active {
   border-color: rgba(255, 215, 0, 0.9);
   box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+}
+
+/* vinyl landing animation (referenced in JS via inline animation style) */
+@keyframes vinylLand {
+  0% {
+    transform: scale(1) rotate(-3deg);
+  }
+  40% {
+    transform: scale(1.04) rotate(1deg);
+  }
+  70% {
+    transform: scale(0.98) rotate(0deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 .vinyl-spine {
@@ -1566,11 +1581,21 @@ body.theme-platinum .album-art.glow-active {
    RESPONSIVE
    ========================= */
 
-@media (max-width: 1024px) {
+/* Smaller laptops: stack columns earlier for balance */
+@media (max-width: 1100px) {
   .layout {
     grid-template-columns: 1fr;
   }
 
+  .left-column,
+  .right-column {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Tablet & below */
+@media (max-width: 1024px) {
   .album-and-turntable {
     grid-template-columns: 1fr;
   }
@@ -1580,6 +1605,7 @@ body.theme-platinum .album-art.glow-active {
   }
 }
 
+/* Mobile-ish */
 @media (max-width: 768px) {
   .top-nav {
     padding: 8px 12px;
@@ -1607,9 +1633,33 @@ body.theme-platinum .album-art.glow-active {
     gap: 16px;
   }
 
+  main,
+  .card {
+    max-width: 100%;
+  }
+
   .card {
     padding: 16px;
     border-radius: 18px;
+    margin: 0 auto;
+  }
+
+  .video-archive-card,
+  .bartender-card,
+  .vinyl-card,
+  .listening-card,
+  .requests-card {
+    width: 100%;
+  }
+
+  .bar-tv-frame,
+  .bar-tv-shell,
+  .bar-tv-aspect {
+    max-width: 100%;
+  }
+
+  .album-and-turntable {
+    grid-template-columns: 1fr;
   }
 
   .album-art {
@@ -1642,6 +1692,7 @@ body.theme-platinum .album-art.glow-active {
   }
 }
 
+/* Small phones */
 @media (max-width: 480px) {
   .hero-logo {
     width: 110px;
