@@ -1528,3 +1528,77 @@ body.theme-platinum { background:#04040c; }
     min-height:200px;
   }
 }
+/* ===========================
+   THEME-AWARE AI BARTENDER COLORS
+   =========================== */
+
+/* Base theme: neon pink */
+body.theme-base .bartender-name,
+body.theme-base .bartender-result-pill-name,
+body.theme-base .bartender-chip,
+body.theme-base .bartender-result-pill {
+  color: var(--accent-neon-pink);
+}
+
+body.theme-base .bartender-result-pill,
+body.theme-base .bartender-chip {
+  border-color: rgba(255, 20, 147, 0.35);
+  background: radial-gradient(circle at top left,
+    rgba(255, 20, 147, 0.12),
+    rgba(5, 5, 18, 0.98)
+  );
+}
+
+/* Gold theme */
+body.theme-gold .bartender-name,
+body.theme-gold .bartender-result-pill-name,
+body.theme-gold .bartender-chip,
+body.theme-gold .bartender-result-pill {
+  color: var(--accent-gold-1);
+}
+
+body.theme-gold .bartender-result-pill,
+body.theme-gold .bartender-chip {
+  border-color: rgba(255, 215, 0, 0.38);
+  background: radial-gradient(circle at top left,
+    rgba(255, 215, 0, 0.12),
+    rgba(8, 6, 2, 0.98)
+  );
+}
+
+/* Platinum theme */
+body.theme-platinum .bartender-name,
+body.theme-platinum .bartender-result-pill-name,
+body.theme-platinum .bartender-chip,
+body.theme-platinum .bartender-result-pill {
+  color: var(--accent-platinum-1);
+}
+
+body.theme-platinum .bartender-result-pill,
+body.theme-platinum .bartender-chip {
+  border-color: rgba(192, 192, 192, 0.4);
+  background: radial-gradient(circle at top left,
+    rgba(192, 192, 192, 0.12),
+    rgba(3, 5, 10, 0.98)
+  );
+}
+
+/* Keep body copy inside bartender messages readable */
+.bartender-message-body {
+  color: var(--text-muted);
+}
+
+body.theme-base .bartender-message-body strong,
+body.theme-base .bartender-message-body em {
+  color: var(--accent-neon-pink);
+}
+
+body.theme-gold .bartender-message-body strong,
+body.theme-gold .bartender-message-body em {
+  color: var(--accent-gold-1);
+}
+
+body.theme-platinum .bartender-message-body strong,
+body.theme-platinum .bartender-message-body em {
+  color: var(--accent-platinum-1);
+}
