@@ -975,6 +975,10 @@ body.theme-platinum .bartender-message-body em {
   background: radial-gradient(circle at top left, rgba(255, 215, 0, 0.14), rgba(255, 255, 255, 0.03));
   animation: vinylActivePulse 1.4s ease-in-out infinite alternate;
 }
+/* one-shot drop when a record is selected */
+.vinyl-item.vinyl-landing {
+  animation: vinylLand 0.5s ease-out;
+}
 
 /* one-shot landing animation (extra punch when you change tracks) */
 @keyframes vinylLand {
