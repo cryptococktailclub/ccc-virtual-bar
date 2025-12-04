@@ -1786,3 +1786,52 @@ body.theme-platinum { background:#04040c; }
     max-width: 100%;
   }
 }
+/* ================================
+   MOBILE LAYOUT FIX (<= 768px)
+   Make everything fit & centered
+   ================================ */
+@media (max-width: 768px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto; /* don't hard-cut content off */
+  }
+
+  .app-bg {
+    padding: 12px 10px 24px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Single column stack */
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .left-column,
+  .right-column {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Make sure Bar TV never exceeds viewport width */
+  .bar-tv-inner,
+  .bar-tv-mortise,
+  .bar-tv-aspect {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Membership cards: 1 per row on phones */
+  .membership-grid {
+    grid-template-columns: 1fr;
+  }
+}
