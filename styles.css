@@ -1728,3 +1728,61 @@ body.theme-platinum { background:#04040c; }
     max-width: 100%;
   }
 }
+/* ===== FINAL, HARD OVERRIDE – BAR TV TRUE 4:3 ===== */
+
+.bar-tv-mortise {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+}
+
+/* New fixed-ratio container */
+.bar-tv-aspect {
+  position: relative;
+  width: 100%;
+  max-width: 640px;         /* nice size on desktop */
+  margin: 0 auto;
+  padding-top: 75%;         /* 3/4 of width => 4:3 aspect */
+}
+
+/* Video fills that 4:3 box exactly */
+.bar-tv-screen {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #000;
+  display: block;
+}
+
+/* Overlay also fits the aspect wrapper */
+.bar-tv-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+/* Let it scale down cleanly on smaller screens */
+@media (max-width: 900px) {
+  .bar-tv-aspect {
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 700px) {
+  .bar-tv-aspect {
+    max-width: 440px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bar-tv-aspect {
+    max-width: 100%;
+  }
+}
