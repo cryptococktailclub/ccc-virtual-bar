@@ -1647,3 +1647,80 @@ body.theme-platinum .bartender-message-body em {
     transform: translateY(0);
   }
 }
+/* ===============================
+   Header spacing + mobile behavior
+   =============================== */
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.1rem 1.8rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.ccc-logo {
+  max-height: 40px;
+  flex-shrink: 0;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+/* Keep title + subtitle on one line as much as possible */
+.brand-title {
+  font-size: clamp(1.15rem, 1.3vw + 0.8rem, 1.55rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.brand-subtitle-animated {
+  font-size: clamp(0.7rem, 0.9vw + 0.4rem, 0.9rem);
+  letter-spacing: 0.24em;
+  white-space: nowrap;
+}
+
+/* Header nav on the opposite side, with balanced spacing */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Mobile: keep title on one line, allow nav to wrap below */
+@media (max-width: 768px) {
+  .top-nav {
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+  }
+
+  .brand {
+    flex: 1 1 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .nav-links {
+    flex: 1 1 100%;
+    justify-content: center;
+    order: 2;
+  }
+
+  .brand-title,
+  .brand-subtitle-animated {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
