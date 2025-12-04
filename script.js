@@ -302,20 +302,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function highlightVinyl(index) {
-    if (!vinylRow) return;
-    const buttons = Array.from(vinylRow.querySelectorAll(".vinyl-item"));
-    buttons.forEach((btn, i) => {
-      const isActive = i === index;
-      btn.classList.toggle("is-active", isActive);
-      if (isActive) {
-        // landing animation
-        btn.style.animation = "vinylLand 0.5s ease-out";
-        setTimeout(() => {
-          btn.style.animation = "";
-        }, 500);
-      }
-    });
-  }
+  if (!vinylRow) return;
+  const buttons = Array.from(vinylRow.querySelectorAll(".vinyl-item"));
+
+  buttons.forEach((btn, i) => {
+    const isActive = i === index;
+
+    // toggle "is-active" for glow / styling
+    btn.classList.toggle("is-active", isActive);
+
+    // reset landing class so we can re-trigger animation
+    btn.classList.remove("vinyl-landing");
+
+    if (isActive) {
+      // force a reflow so the animation can restart
+      // (Safari / Chrome both need this sometimes)
+      void btn.offsetWidth;
+      btn.classList.add("vinyl-landing");
+    }
+  });
+}
+
 
   if (vinylRow) {
     vinylRow.addEventListener("click", (e) => {
