@@ -1607,3 +1607,157 @@ body.theme-platinum .bartender-message-body em {
     flex-direction: column;
   }
 }
+/* =====================================
+   CCC layout refinements – Dec 2025
+   Smaller scale + cleaner Bar TV header
+   ===================================== */
+
+/* 1. Global scale down a bit */
+body {
+  font-size: 14px; /* default is ~16px – this quietly shrinks everything */
+}
+
+/* 2. Top header tightening */
+
+.top-nav {
+  padding: 8px 14px 10px;
+}
+
+.brand-title {
+  font-size: 0.95rem;
+  letter-spacing: 0.16em;
+}
+
+.brand-subtitle,
+.brand-subtitle-animated {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+}
+
+/* keep nav compact */
+.nav-link {
+  font-size: 0.72rem;
+  padding: 4px 10px;
+}
+
+/* 3. Section headers – make them lighter and smaller */
+
+.section-header h1,
+.section-header h2 {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.section-header.compact h2 {
+  font-size: 0.78rem;
+}
+
+.section-header p {
+  font-size: 0.7rem;
+}
+
+/* 4. Bar TV – scale the whole shell down slightly
+   so the header no longer feels huge */
+
+.video-archive-card {
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+
+.bar-tv-shell {
+  transform: scale(0.9);
+  transform-origin: top center;
+}
+
+/* make the CRT a bit shorter so it doesn’t dominate */
+.bar-tv-screen {
+  aspect-ratio: 4 / 3;    /* more compact than 16 / 9 */
+  max-height: 220px;
+}
+
+/* 5. Listening Station – slightly more compact controls */
+
+.now-playing-label {
+  font-size: 0.68rem;
+}
+
+#track-title {
+  font-size: 0.9rem;
+}
+
+#track-artist,
+.track-duration {
+  font-size: 0.74rem;
+}
+
+.play-btn {
+  padding: 0.35rem 1rem;
+  font-size: 0.75rem;
+}
+
+.icon-btn {
+  padding: 0.22rem 0.55rem;
+  font-size: 0.7rem;
+}
+
+/* 6. AI Bartender – make it feel lighter */
+
+.bartender-message {
+  font-size: 0.78rem;
+  padding: 6px 8px;
+}
+
+.bartender-input {
+  font-size: 0.78rem;
+  padding: 6px 8px;
+}
+
+.bartender-chip,
+.bartender-result-pill {
+  font-size: 0.7rem;
+  padding: 3px 9px;
+}
+
+/* 7. Desktop width: center content in a more reasonable max width */
+
+.app-bg {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* 8. Mobile – keep header from looking gigantic */
+
+@media (max-width: 768px) {
+  .top-nav {
+    flex-wrap: wrap;
+    row-gap: 0.4rem;
+  }
+
+  .brand {
+    flex: 1 1 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .nav-links {
+    flex: 1 1 100%;
+    justify-content: center;
+    order: 2;
+  }
+
+  .brand-title,
+  .brand-subtitle,
+  .brand-subtitle-animated {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* make cards a bit tighter on mobile */
+  .card {
+    padding: 0.8rem 0.8rem 0.7rem;
+  }
+}
