@@ -1,7 +1,7 @@
 // Crypto Cocktail Club – Virtual Listening Bar + AI Bartender
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ---------- AUDIO PLAYER (unchanged core) ----------
+  // ---------- AUDIO PLAYER ----------
   const audio = document.getElementById("bar-audio");
   const playBtn = document.getElementById("play-btn");
   const prevBtn = document.getElementById("prev-btn");
@@ -28,42 +28,44 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  const MEDIA_BASE = "https://visionary-beignet-7d270e.netlify.app";
+
   const tracks = [
     {
       title: "Toby’s Mix",
       artist: "Toby",
       durationLabel: "58:24",
-      file: "audio/tobys-mix.mp3",
+      file: `${MEDIA_BASE}/audio/tobys-mix.mp3`,
     },
     {
       title: "Gold Hour Spritz",
       artist: "CCC – Summer Mix",
       durationLabel: "1:00:00",
-      file: "audio/Summer mix.mp3",
+      file: `${MEDIA_BASE}/audio/Summer mix.mp3`,
     },
     {
       title: "Midnight Chrome",
       artist: "Kartell Tribute – Roche Musique",
       durationLabel: "1:00:00",
-      file: "audio/Kartell Tribute Set - Roche Musique.mp3",
+      file: `${MEDIA_BASE}/audio/Kartell Tribute Set - Roche Musique.mp3`,
     },
     {
       title: "Poolside Mirage",
       artist: "Solomun Boiler Room",
       durationLabel: "1:00:00",
-      file: "audio/Solomun Boiler Room DJ Set.mp3",
+      file: `${MEDIA_BASE}/audio/Solomun Boiler Room DJ Set.mp3`,
     },
     {
       title: "Khruangbin – Pitchfork Live",
       artist: "Khruangbin",
       durationLabel: "1:00:00",
-      file: "audio/Khruangbin at Villain _ Pitchfork Live.mp3",
+      file: `${MEDIA_BASE}/audio/Khruangbin at Villain _ Pitchfork Live.mp3`,
     },
     {
       title: "Succession Beats",
       artist: "Jsco Music",
       durationLabel: "1:00:00",
-      file: "audio/Succession Beats - Jsco Music .mp3",
+      file: `${MEDIA_BASE}/audio/Succession Beats - Jsco Music .mp3`,
     },
   ];
 
@@ -263,15 +265,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const tvVolumeSlider = document.getElementById("barTvVolume");
 
   const tvChannels = [
-    { src: "video/bar_tape_01.mp4", title: "Bar Tape 01" },
-    { src: "video/bar_tape_02.mp4", title: "Bar Tape 02" },
-    { src: "video/bar_tape_03.mp4", title: "Bar Tape 03" },
-    { src: "video/bar_tape_04.mp4", title: "Bar Tape 04" },
-    { src: "video/bar_tape_05.mp4", title: "Bar Tape 05" },
-    { src: "video/bar_tape_06.mp4", title: "Bar Tape 06" },
-    { src: "video/bar_tape_07.mp4", title: "Bar Tape 07" },
-    { src: "video/bar_tape_08.mp4", title: "Bar Tape 08" },
-    { src: "video/bar_tape_09.mp4", title: "Bar Tape 09" }
+    { src: `${MEDIA_BASE}/video/bar_tape_01.mp4`, title: "Bar Tape 01" },
+    { src: `${MEDIA_BASE}/video/bar_tape_02.mp4`, title: "Bar Tape 02" },
+    { src: `${MEDIA_BASE}/video/bar_tape_03.mp4`, title: "Bar Tape 03" },
+    { src: `${MEDIA_BASE}/video/bar_tape_04.mp4`, title: "Bar Tape 04" },
+    { src: `${MEDIA_BASE}/video/bar_tape_05.mp4`, title: "Bar Tape 05" },
+    { src: `${MEDIA_BASE}/video/bar_tape_06.mp4`, title: "Bar Tape 06" },
+    { src: `${MEDIA_BASE}/video/bar_tape_07.mp4`, title: "Bar Tape 07" },
+    { src: `${MEDIA_BASE}/video/bar_tape_08.mp4`, title: "Bar Tape 08" },
+    { src: `${MEDIA_BASE}/video/bar_tape_09.mp4`, title: "Bar Tape 09" }
   ];
 
   let tvIndex = 0;
@@ -365,7 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ---------- REQUESTS QUEUE (unchanged) ----------
+  // ---------- REQUESTS QUEUE ----------
   const requestsListEl = document.getElementById("requestsList");
   const requestsForm = document.getElementById("requestsForm");
   const requestNameInput = document.getElementById("requestName");
@@ -462,7 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ---------- AI BARTENDER (NEW) ----------
+  // ---------- AI BARTENDER ----------
   const bartenderResultsEl = document.getElementById("bartenderResults");
   const bartenderMessagesEl = document.getElementById("bartenderMessages");
   const bartenderForm = document.getElementById("bartenderForm");
