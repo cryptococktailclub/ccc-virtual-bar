@@ -1,4 +1,4 @@
-/* =========================
+ /* =========================
    ROOT + THEME VARIABLES
    ========================= */
 :root {
@@ -72,12 +72,6 @@ body {
   overflow-x: auto; /* allow horizontal scroll instead of cutting off content */
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
   color: var(--text-primary);
-}
-
-/* main content wrapper */
-.app-bg {
-  min-height: 100vh;
-  padding-bottom: 32px;
 }
 
 main,
