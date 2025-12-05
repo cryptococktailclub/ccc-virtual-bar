@@ -69,16 +69,17 @@ body {
   padding: 0;
   width: 100%;
   max-width: 100%;
-  overflow-x: auto; /* allow horizontal scroll instead of cutting off content */
+  overflow-x: auto;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
   color: var(--text-primary);
 }
 
+/* 🔧 Wider main container so both columns have more room */
 main,
 .membership-card,
 .ccc-footer-legal,
 .ccc-footer-social {
-  max-width: 1180px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -228,7 +229,7 @@ body.theme-platinum .hero-logo {
   left: 50%;
   transform: translate(-50%, -24px);
   width: 100%;
-  max-width: 1180px;
+  max-width: 1320px; /* match main width */
   margin: 0 auto;
   padding: 10px 16px;
   border-radius: 999px;
@@ -440,12 +441,14 @@ body.theme-platinum .ccc-logo {
    MAIN LAYOUT
    ========================= */
 
+/* 🔧 Wider + equal columns */
 .layout {
   margin-top: 32px;
   margin-bottom: 28px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)); /* equal, flexible columns */
-  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+  row-gap: 20px;
   align-items: flex-start;
 }
 
@@ -454,7 +457,7 @@ body.theme-platinum .ccc-logo {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  min-width: 0; /* KEY FIX: allow columns to shrink so right side doesn't get squeezed */
+  min-width: 0; /* allow shrink so neither gets squeezed */
 }
 
 /* CARD */
@@ -509,15 +512,15 @@ body.theme-platinum .ccc-logo {
   background: #1a120c;
   border: 1px solid rgba(0, 0, 0, 0.9);
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.9);
-  max-width: 100%;    /* prevent overflow past column */
-  overflow: hidden;   /* clip halo / speaker edges inside card */
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* Soft CRT glow halo */
 .bar-tv-frame::before {
   content: "";
   position: absolute;
-  inset: -10px; /* tightened halo so it doesn't visually collide with grid gap */
+  inset: -10px;
   border-radius: inherit;
   background: radial-gradient(circle at center, rgba(255, 255, 255, 0.14), transparent 65%);
   opacity: 0.35;
@@ -587,10 +590,11 @@ body.theme-platinum .bar-tv-frame::before {
   justify-content: center;
 }
 
+/* 🔧 Slightly narrower internal max-width so right column has more space */
 .bar-tv-aspect {
   position: relative;
   width: 100%;
-  max-width: 580px;   /* slightly narrower so the right column has breathing room */
+  max-width: 540px;
   margin: 0 auto;
   padding-top: 75%; /* 4:3 */
   border-radius: 10px;
@@ -755,7 +759,7 @@ body.theme-platinum .bar-tv-frame::before {
 }
 
 /* =========================
-   AI BARTENDER
+   AI BARTENDER / BAR BOT
    ========================= */
 
 .bartender-card {
@@ -1589,7 +1593,7 @@ body.theme-platinum .album-art.glow-active {
    ========================= */
 
 .ccc-footer-legal {
-  max-width: 1180px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 10px 18px 4px;
   font-size: 0.68rem;
@@ -1598,7 +1602,7 @@ body.theme-platinum .album-art.glow-active {
 }
 
 .ccc-footer-social {
-  max-width: 1180px;
+  max-width: 1320px;
   margin: 0 auto 26px;
   padding: 10px 18px 4px;
   display: flex;
@@ -1650,8 +1654,8 @@ body.theme-platinum .album-art.glow-active {
    RESPONSIVE
    ========================= */
 
-/* Smaller laptops: stack columns earlier for balance */
-@media (max-width: 1100px) {
+/* Smaller laptops: stack columns earlier for true full-width right side */
+@media (max-width: 1120px) {
   .layout {
     grid-template-columns: 1fr;
   }
