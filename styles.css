@@ -509,13 +509,14 @@ body.theme-platinum .ccc-logo {
   background: #1a120c;
   border: 1px solid rgba(0, 0, 0, 0.9);
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.9);
+  overflow: hidden;        /* NEW: clip halo + internals so they don’t spill into gutter */
 }
 
 /* Soft CRT glow halo */
 .bar-tv-frame::before {
   content: "";
   position: absolute;
-  inset: -18px;
+  inset: -10px;            /* was -18px, this tightens the glow */
   border-radius: inherit;
   background: radial-gradient(circle at center, rgba(255, 255, 255, 0.14), transparent 65%);
   opacity: 0.35;
