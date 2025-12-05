@@ -74,6 +74,12 @@ body {
   color: var(--text-primary);
 }
 
+/* main content wrapper */
+.app-bg {
+  min-height: 100vh;
+  padding-bottom: 32px;
+}
+
 main,
 .membership-card,
 .ccc-footer-legal,
