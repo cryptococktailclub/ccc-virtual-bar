@@ -415,7 +415,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const bartenderForm = document.getElementById("bartenderForm");
   const bartenderInput = document.getElementById("bartenderInput");
   const bartenderMessages = document.getElementById("bartenderMessages");
-  const bartenderResults = document.getElementById("bartenderResults"); // currently unused but kept for expansion
+  const bartenderResults = document.getElementById("bartenderResults");
   const bartenderChips = document.querySelectorAll(".bartender-chip");
 
   const BARTENDER_ENDPOINT = "/.netlify/functions/ccc-bartender";
@@ -464,14 +464,12 @@ document.addEventListener("DOMContentLoaded", () => {
     setBartenderTyping(true);
 
     try {
-      console.log("Calling Bar Bot with prompt:", prompt);
-
       const res = await fetch(BARTENDER_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        // 🔧 Send BOTH `message` and `prompt` so it works with either backend signature
+        // send both keys to be backend-agnostic
         body: JSON.stringify({ message: prompt, prompt })
       });
 
@@ -488,13 +486,23 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const data = await res.json();
-      console.log("Bar Bot response:", data);
+      console.log("Bar Bot response raw:", data);
 
-      const reply =
-        data.reply ||
-        data.message ||
-        data.text ||
-        "Here’s a drink idea—but I couldn’t parse a structured reply from the function.";
+      // 🔧 Flexible extraction: handle common OpenAI / custom shapes
+      let reply =
+        data.reply ??
+        data.message ??
+        data.text ??
+        (Array.isArray(data.choices) && data.choices.length > 0
+          ? data.choices[0].message?.content || data.choices[0].text
+          : null);
+
+      if (!reply) {
+        // if still nothing, stringify the object so we SEE what the function returns
+        reply =
+          "Raw Bar Bot response:\n" +
+          (typeof data === "string" ? data : JSON.stringify(data, null, 2));
+      }
 
       appendBartenderMessage({ role: "assistant", content: reply });
     } catch (err) {
