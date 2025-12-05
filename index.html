@@ -66,13 +66,12 @@
 
   <!-- MAIN LAYOUT -->
   <main class="layout">
-
-    <!-- LEFT COLUMN -->
-    <section class="left-column">
-
-      <!-- BAR TV ARCHIVE -->
+  <!-- TOP ROW: Bar TV (left) + Vinyl + Listening (right) -->
+  <section class="top-row">
+    <!-- LEFT: Bar TV -->
+    <div class="top-left">
       <section class="card video-archive-card">
-        <div class="section-header compact">
+        <div class="section-header">
           <h2>Bar TV Archive</h2>
           <p>Cocktail tapes from the CCC vault.</p>
         </div>
@@ -103,6 +102,7 @@
                 </div>
               </div>
 
+              <!-- TV volume slider (vertical tab) -->
               <div class="bar-tv-volume-wrap">
                 <span class="bar-tv-volume-label">VOL</span>
                 <input
@@ -116,9 +116,16 @@
                 />
               </div>
 
-              <button type="button" class="bar-tv-channel-btn" id="barTvChannelBtn">CH+</button>
-              <button type="button" class="bar-tv-play-btn" id="barTvPlayBtn">⏸</button>
-              <button type="button" class="bar-tv-sound-btn" id="barTvMuteBtn">Sound: Off</button>
+              <!-- TV controls -->
+              <button type="button" class="bar-tv-channel-btn" id="barTvChannelBtn">
+                CH+
+              </button>
+              <button type="button" class="bar-tv-play-btn" id="barTvPlayBtn">
+                ⏸
+              </button>
+              <button type="button" class="bar-tv-sound-btn" id="barTvMuteBtn">
+                Sound: Off
+              </button>
             </div>
 
             <div class="bar-tv-bottom">
@@ -131,60 +138,18 @@
           </div>
 
           <div class="video-archive-meta">
-            <div class="video-archive-title" id="barTvTitle">Bar Tape 01</div>
+            <div class="video-archive-title" id="barTvTitle">
+              Bar Tape 01
+            </div>
             <div class="video-archive-label">Cocktail Tapes</div>
           </div>
         </div>
       </section>
+    </div>
 
-      <!-- AI BARTENDER -->
-      <section class="card bartender-card">
-        <div class="section-header">
-          <h2>Bar Bot</h2>
-          <p>Ask for Milk &amp; Honey specs, riffs, or ingredient-driven ideas.</p>
-        </div>
-
-        <div class="bartender-quick-row">
-          <span class="bartender-quick-label">Shortcuts:</span>
-          <div class="bartender-chip-row">
-            <button class="bartender-chip" data-bartender-prompt="Recommend a refreshing gin sour.">Gin · Refreshing</button>
-            <button class="bartender-chip" data-bartender-prompt="Recommend a stirred whiskey drink, spirit-forward.">Whiskey · Stirred</button>
-            <button class="bartender-chip" data-bartender-prompt="Recommend a rum drink with lime and sugar, daiquiri family.">Rum · Daiquiri</button>
-            <button class="bartender-chip" data-bartender-prompt="Recommend something low-ABV and spritzy.">Low-ABV</button>
-          </div>
-        </div>
-
-        <div class="bartender-results" id="bartenderResults"></div>
-
-        <div class="bartender-messages" id="bartenderMessages">
-          <div class="bartender-message bartender-message-bot">
-            <div class="bartender-avatar"></div>
-            <div class="bartender-message-body">
-              Ask for a classic (<em>Gold Rush, Penicillin, Paper Plane</em>), list spirits you have, or tell me your mood.
-            </div>
-          </div>
-        </div>
-
-        <form class="bartender-form" id="bartenderForm">
-          <textarea
-            id="bartenderInput"
-            class="bartender-input"
-            rows="2"
-            placeholder="Ask Bar Bot anything…"
-          ></textarea>
-
-          <div class="bartender-footer-row">
-            <span class="bartender-hint">Powered by CCC · Milk &amp; Honey Specs Inside</span>
-            <button type="submit" class="bartender-submit-btn">Ask Bar Bot</button>
-          </div>
-        </form>
-      </section>
-    </section>
-
-    <!-- RIGHT COLUMN -->
-    <section class="right-column">
-
-      <!-- VINYL SHELF -->
+    <!-- RIGHT: Vinyl Shelf + Listening Station -->
+    <div class="top-right">
+      <!-- Vinyl Shelf -->
       <section class="card vinyl-card">
         <div class="section-header">
           <h2>Vinyl Shelf</h2>
@@ -194,68 +159,88 @@
         <div class="vinyl-row" id="vinylRow">
           <button class="vinyl-item is-active" type="button" data-track-index="0">
             <div class="vinyl-spine">VOL. 01</div>
-            <div class="vinyl-face"><h3>Analog Neon</h3><p>Toby’s Mix – bar warm-up.</p></div>
+            <div class="vinyl-face">
+              <h3>Analog Neon</h3>
+              <p>Toby’s Mix – bar warm-up.</p>
+            </div>
           </button>
 
           <button class="vinyl-item" type="button" data-track-index="1">
             <div class="vinyl-spine">VOL. 02</div>
-            <div class="vinyl-face"><h3>Gold Hour Spritz</h3><p>Summer mix for sunset pours.</p></div>
+            <div class="vinyl-face">
+              <h3>Gold Hour Spritz</h3>
+              <p>Summer mix for sunset pours.</p>
+            </div>
           </button>
 
           <button class="vinyl-item" type="button" data-track-index="2">
             <div class="vinyl-spine">VOL. 03</div>
-            <div class="vinyl-face"><h3>Midnight Chrome</h3><p>Kartell Set – Roche Musique.</p></div>
+            <div class="vinyl-face">
+              <h3>Midnight Chrome</h3>
+              <p>Kartell tribute – Roche Musique.</p>
+            </div>
           </button>
 
           <button class="vinyl-item" type="button" data-track-index="3">
             <div class="vinyl-spine">VOL. 04</div>
-            <div class="vinyl-face"><h3>Poolside Mirage</h3><p>Solomun Boiler Room.</p></div>
+            <div class="vinyl-face">
+              <h3>Poolside Mirage</h3>
+              <p>Solomun Boiler Room, beach-synth energy.</p>
+            </div>
           </button>
 
           <button class="vinyl-item" type="button" data-track-index="4">
             <div class="vinyl-spine">VOL. 05</div>
-            <div class="vinyl-face"><h3>Khruangbin Live</h3><p>Pitchfork at Villain.</p></div>
+            <div class="vinyl-face">
+              <h3>Khruangbin Live</h3>
+              <p>Pitchfork Live at Villain.</p>
+            </div>
           </button>
 
           <button class="vinyl-item" type="button" data-track-index="5">
             <div class="vinyl-spine">VOL. 06</div>
-            <div class="vinyl-face"><h3>Succession Beats</h3><p>Jsco Music.</p></div>
+            <div class="vinyl-face">
+              <h3>Succession Beats</h3>
+              <p>Jsco Music – late night plotting.</p>
+            </div>
           </button>
         </div>
       </section>
 
-      <!-- LISTENING STATION -->
+      <!-- Listening Station -->
       <section class="card listening-card">
         <div class="section-header-main">
           <div class="section-header">
             <h1>Listening Station</h1>
             <p>Slow pours, warm vinyl, chrome neon.</p>
           </div>
-
           <div class="theme-toggle" id="themeToggle">
-            <button class="theme-pill is-active" data-theme="base">Base</button>
-            <button class="theme-pill" data-theme="gold">Gold</button>
-            <button class="theme-pill" data-theme="platinum">Platinum</button>
+            <button class="theme-pill is-active" type="button" data-theme="base">Base</button>
+            <button class="theme-pill" type="button" data-theme="gold">Gold</button>
+            <button class="theme-pill" type="button" data-theme="platinum">Platinum</button>
           </div>
         </div>
 
         <div class="listening-main">
           <div class="album-and-turntable">
+            <!-- Album card -->
             <div class="album-art-wrapper">
               <div class="album-art" id="albumArt">
                 <div class="album-face">
-                  <img src="BASE_TRANSPARENT.PNG" class="album-logo" alt="CCC" />
+                  <img src="BASE_TRANSPARENT.PNG" alt="Crypto Cocktail Club" class="album-logo" />
                 </div>
                 <div class="album-face album-face-back">
                   <div class="card-back-copy">
                     <h3>Crypto Cocktail Club</h3>
-                    <p>Your seat at the bar.</p>
-                    <p>Tiers: Base · Gold · Platinum</p>
+                    <p>One seat at the listening bar.</p>
+                    <p>IRL + URL service, vinyl-forward sound.</p>
+                    <p class="card-back-tier">Base · Gold · Platinum</p>
                   </div>
                 </div>
               </div>
             </div>
 
+            <!-- Turntable -->
             <div class="turntable">
               <div class="turntable-platter" id="turntablePlatter">
                 <div class="turntable-label"></div>
@@ -263,9 +248,9 @@
               <div class="tonearm"></div>
             </div>
 
+            <!-- Audio player -->
             <div class="player-panel">
               <div class="now-playing-label">Now Playing</div>
-
               <div class="now-playing-info">
                 <div>
                   <h2 id="track-title">Toby’s Mix</h2>
@@ -285,13 +270,20 @@
               </div>
 
               <div class="player-controls">
-                <button class="icon-btn" id="prev-btn">◀◀</button>
-                <button class="play-btn" id="play-btn">Play</button>
-                <button class="icon-btn" id="next-btn">▶▶</button>
+                <button class="icon-btn" id="prev-btn" type="button">◀◀</button>
+                <button class="play-btn" id="play-btn" type="button">Play</button>
+                <button class="icon-btn" id="next-btn" type="button">▶▶</button>
 
                 <div class="volume-block">
                   <span class="volume-label">Volume</span>
-                  <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.8" />
+                  <input
+                    type="range"
+                    id="volume-slider"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.8"
+                  />
                 </div>
               </div>
 
@@ -302,37 +294,85 @@
                 <span class="eq-bar eq-bar-4"></span>
               </div>
 
-              <p class="player-note">Tap a record from the shelf to drop it onto the deck.</p>
+              <div class="player-footer">
+                <p class="player-note">
+                  Tap a record from the shelf to drop it onto the deck.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
+    </div>
+  </section>
 
-      <!-- REQUEST QUEUE -->
-      <section class="card requests-card">
-        <div class="section-header compact">
-          <h2>Requests Queue</h2>
-          <p>Tell the bar what you want to hear next.</p>
+  <!-- FULL-WIDTH BAR BOT -->
+  <section class="card bartender-card">
+    <div class="section-header">
+      <h2>Bar Bot</h2>
+      <p>Ask for Milk &amp; Honey specs, riffs, or ingredient-driven ideas.</p>
+    </div>
+
+    <!-- Quick chips -->
+    <div class="bartender-quick-row">
+      <span class="bartender-quick-label">Shortcuts:</span>
+      <div class="bartender-chip-row">
+        <button class="bartender-chip" data-bartender-prompt="Recommend a refreshing gin sour.">
+          Gin · Refreshing
+        </button>
+        <button
+          class="bartender-chip"
+          data-bartender-prompt="Recommend a stirred whiskey drink, spirit-forward."
+        >
+          Whiskey · Stirred
+        </button>
+        <button
+          class="bartender-chip"
+          data-bartender-prompt="Recommend a rum drink with lime and sugar, daiquiri family."
+        >
+          Rum · Daiquiri
+        </button>
+        <button class="bartender-chip" data-bartender-prompt="Recommend something low-ABV and spritzy.">
+          Low-ABV
+        </button>
+      </div>
+    </div>
+
+    <!-- Results from local M&H DB (kept for future use) -->
+    <div class="bartender-results" id="bartenderResults"></div>
+
+    <!-- Chat thread -->
+    <div class="bartender-messages" id="bartenderMessages">
+      <div class="bartender-message bartender-message-bot">
+        <div class="bartender-message-body">
+          Ask for a classic by name (<em>Gold Rush, Penicillin, Paper Plane</em>), tell me your base
+          spirit &amp; mood (<em>“gin, tart, not too sweet”</em>), or list what you have on your home bar
+          and I’ll stay within the Milk &amp; Honey playbook.
         </div>
+      </div>
+    </div>
 
-        <div class="requests-list" id="requestsList"></div>
-
-        <form class="requests-form" id="requestsForm">
-          <div class="requests-row">
-            <input id="requestName" class="requests-input requests-input-name" placeholder="Your name" maxlength="32" />
-            <input id="requestTrack" class="requests-input requests-input-track" placeholder="Track / set request" maxlength="80" required />
-          </div>
-
-          <textarea id="requestNote" class="requests-input requests-input-note" rows="2" maxlength="160" placeholder="Optional note…"></textarea>
-
-          <div class="requests-footer">
-            <span class="requests-hint">Saved only on this device</span>
-            <button class="requests-submit" type="submit">Add to queue</button>
-          </div>
-        </form>
-      </section>
-    </section>
-  </main>
+    <!-- Input -->
+    <form class="bartender-form" id="bartenderForm">
+      <div class="bartender-input-row">
+        <textarea
+          id="bartenderInput"
+          class="bartender-input"
+          rows="2"
+          placeholder="Ask Bar Bot anything… (e.g. “What’s the spec for a Gold Rush?” or “Make me a tequila sour, no egg.”)"
+        ></textarea>
+      </div>
+      <div class="bartender-footer-row">
+        <span class="bartender-hint">
+          Powered by Crypto Cocktail Club · Specs inspired by Milk &amp; Honey.
+        </span>
+        <button type="submit" class="bartender-submit-btn">
+          Ask Bar Bot
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
 
   <!-- MEMBERSHIP SECTION -->
   <section class="card membership-card">
