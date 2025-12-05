@@ -80,11 +80,12 @@ body {
   padding-bottom: 32px;
 }
 
+/* widen main container a bit so columns breathe */
 main,
 .membership-card,
 .ccc-footer-legal,
 .ccc-footer-social {
-  max-width: 1180px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -234,7 +235,7 @@ body.theme-platinum .hero-logo {
   left: 50%;
   transform: translate(-50%, -24px);
   width: 100%;
-  max-width: 1180px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 10px 16px;
   border-radius: 999px;
@@ -447,12 +448,16 @@ body.theme-platinum .ccc-logo {
    MAIN LAYOUT
    ========================= */
 
+/* 2-column grid: 
+   Left  = Bar TV + Bar Bot
+   Right = Vinyl Shelf + Listening Room (+ Requests)
+*/
 .layout {
   margin-top: 32px;
   margin-bottom: 28px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* balanced columns */
-  gap: 20px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.05fr);
+  gap: 24px;
   align-items: flex-start;
 }
 
@@ -461,7 +466,7 @@ body.theme-platinum .ccc-logo {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  min-width: 0; /* prevents column content from forcing overflow */
+  min-width: 0; /* prevents overflow cut-off */
 }
 
 /* CARD */
@@ -952,7 +957,7 @@ body.theme-platinum .bartender-message-body em {
 
 .vinyl-item {
   min-width: 150px;
-  max-width: 170px;
+  max-width: 190px;
   border-radius: 18px;
   padding: 8px;
   background: rgba(255, 255, 255, 0.04);
@@ -1029,9 +1034,10 @@ body.theme-platinum .bartender-message-body em {
   margin-top: 8px;
 }
 
+/* Make inner grid very flexible so it never forces overflow */
 .album-and-turntable {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
   gap: 18px;
   align-items: center;
 }
@@ -1069,6 +1075,7 @@ body.theme-platinum .bartender-message-body em {
   padding: 10px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: #13041f;
+  max-width: 260px;
 }
 
 body.theme-gold .album-art-wrapper {
@@ -1144,11 +1151,17 @@ body.theme-platinum .album-art.glow-active {
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: #131024;
-  display: grid;
-  grid-template-columns: auto;
+  display: flex;
   justify-content: center;
 }
 
+/* Keep platter centered and not too huge */
+.turntable-inner {
+  max-width: 260px;
+  width: 100%;
+}
+
+/* we use the existing platter element directly */
 .turntable-platter {
   width: 180px;
   height: 180px;
@@ -1156,6 +1169,7 @@ body.theme-platinum .album-art.glow-active {
   background: conic-gradient(from 200deg, #15111f, #2c2037, #15111f);
   border: 10px solid #05010f;
   position: relative; /* needed for drop animation */
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1165,11 +1179,7 @@ body.theme-platinum .album-art.glow-active {
     0 10px 25px rgba(0, 0, 0, 0.9);
 }
 
-/* VINYL DROP animation (doesn't interfere with spin) */
-.turntable-platter.drop-in {
-  animation: platter-spin 18s linear infinite paused, recordDrop 0.55s ease-out;
-}
-
+/* spin */
 @keyframes platter-spin {
   from {
     transform: rotate(0);
@@ -1179,7 +1189,11 @@ body.theme-platinum .album-art.glow-active {
   }
 }
 
-/* "drop" using top offset instead of transform */
+/* drop using top offset (JS toggles .drop-in) */
+.turntable-platter.drop-in {
+  animation: platter-spin 18s linear infinite paused, recordDrop 0.55s ease-out;
+}
+
 @keyframes recordDrop {
   0% {
     top: -32px;
@@ -1196,7 +1210,7 @@ body.theme-platinum .album-art.glow-active {
   animation-play-state: running;
 }
 
-/* THEME-COLORED LABEL (SPEAKER) */
+/* THEME-COLORED LABEL (SPEAKER DISC) */
 .turntable-label {
   width: 54px;
   height: 54px;
@@ -1558,7 +1572,7 @@ body.theme-platinum .turntable-label {
    ========================= */
 
 .ccc-footer-legal {
-  max-width: 1180px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 10px 18px 4px;
   font-size: 0.68rem;
@@ -1567,7 +1581,7 @@ body.theme-platinum .turntable-label {
 }
 
 .ccc-footer-social {
-  max-width: 1180px;
+  max-width: 1320px;
   margin: 0 auto 26px;
   padding: 10px 18px 4px;
   display: flex;
@@ -1620,7 +1634,7 @@ body.theme-platinum .turntable-label {
    ========================= */
 
 /* Smaller laptops: stack columns earlier for balance */
-@media (max-width: 1100px) {
+@media (max-width: 1150px) {
   .layout {
     grid-template-columns: 1fr;
   }
@@ -1636,6 +1650,15 @@ body.theme-platinum .turntable-label {
 @media (max-width: 1024px) {
   .album-and-turntable {
     grid-template-columns: 1fr;
+  }
+
+  .album-art-wrapper {
+    max-width: 280px;
+    margin: 0 auto;
+  }
+
+  .turntable {
+    justify-content: center;
   }
 
   .membership-grid {
@@ -1694,10 +1717,6 @@ body.theme-platinum .turntable-label {
   .bar-tv-shell,
   .bar-tv-aspect {
     max-width: 100%;
-  }
-
-  .album-and-turntable {
-    grid-template-columns: 1fr;
   }
 
   .album-art {
