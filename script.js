@@ -1,7 +1,9 @@
-// Crypto Cocktail Club – Virtual Listening Bar
+// Crypto Cocktail Club – Virtual Bar Experience
+// Bar TV, Vinyl Player, Requests Queue, Bar Bot (AI)
 
+// Run after DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-  // ---------- AUDIO PLAYER ----------
+  // ---------- AUDIO PLAYER (Listening Station) ----------
   const audio = document.getElementById("bar-audio");
   const playBtn = document.getElementById("play-btn");
   const prevBtn = document.getElementById("prev-btn");
@@ -73,31 +75,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updatePlayUI(isPlaying) {
-    if (!playBtn) return;
-    playBtn.textContent = isPlaying ? "Pause" : "Play";
+    if (playBtn) {
+      playBtn.textContent = isPlaying ? "Pause" : "Play";
+    }
 
     if (turntablePlatter) {
-      if (isPlaying) {
-        turntablePlatter.classList.add("is-playing");
-      } else {
-        turntablePlatter.classList.remove("is-playing");
-      }
+      turntablePlatter.classList.toggle("is-playing", isPlaying);
     }
 
     if (playerEq) {
-      if (isPlaying) {
-        playerEq.classList.add("is-playing");
-      } else {
-        playerEq.classList.remove("is-playing");
-      }
+      playerEq.classList.toggle("is-playing", isPlaying);
     }
 
     if (albumArt) {
-      if (isPlaying) {
-        albumArt.classList.add("glow-active");
-      } else {
-        albumArt.classList.remove("glow-active");
-      }
+      albumArt.classList.toggle("glow-active", isPlaying);
     }
   }
 
@@ -115,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!audio) return;
     const track = tracks[index];
     if (!track) return;
-
     currentTrackIndex = index;
     audio.src = track.src;
     updateTrackMeta(index);
@@ -126,9 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!audio) return;
     audio
       .play()
-      .then(() => {
-        updatePlayUI(true);
-      })
+      .then(() => updatePlayUI(true))
       .catch((err) => {
         console.warn("Audio play blocked:", err);
       });
@@ -160,21 +148,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (audio && volumeSlider) {
     audio.volume = parseFloat(volumeSlider.value ?? "0.8");
-
     volumeSlider.addEventListener("input", () => {
       audio.volume = parseFloat(volumeSlider.value || "0.8");
     });
   }
 
-  if (audio && playBtn) {
-    playBtn.addEventListener("click", togglePlay);
-  }
-  if (audio && nextBtn) {
-    nextBtn.addEventListener("click", playNextTrack);
-  }
-  if (audio && prevBtn) {
-    prevBtn.addEventListener("click", playPrevTrack);
-  }
+  if (audio && playBtn) playBtn.addEventListener("click", togglePlay);
+  if (audio && nextBtn) nextBtn.addEventListener("click", playNextTrack);
+  if (audio && prevBtn) prevBtn.addEventListener("click", playPrevTrack);
 
   if (audio && timelineBar && timelineProgress && timeCurrentEl && timeRemainingEl) {
     timelineBar.addEventListener("click", (e) => {
@@ -203,9 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     window.addEventListener("mouseup", () => {
-      if (isScrubbing) {
-        isScrubbing = false;
-      }
+      if (isScrubbing) isScrubbing = false;
     });
 
     audio.addEventListener("timeupdate", () => {
@@ -216,9 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
       timeRemainingEl.textContent = "-" + formatTime(audio.duration - audio.currentTime);
     });
 
-    audio.addEventListener("ended", () => {
-      playNextTrack();
-    });
+    audio.addEventListener("ended", playNextTrack);
   }
 
   function animateVinylToTurntable(sourceButton) {
@@ -228,10 +205,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const platterRect = turntablePlatter.getBoundingClientRect();
 
     const size = Math.min(btnRect.width, btnRect.height, 140);
-
     const startX = btnRect.left + btnRect.width / 2 - size / 2;
     const startY = btnRect.top + btnRect.height / 2 - size / 2;
-
     const endX = platterRect.left + platterRect.width / 2 - size / 2;
     const endY = platterRect.top + platterRect.height / 2 - size / 2;
 
@@ -273,7 +248,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (vinylRow) {
     const vinylButtons = Array.from(vinylRow.querySelectorAll(".vinyl-item"));
-
     vinylButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         const idx = Number(btn.dataset.trackIndex || 0);
@@ -286,7 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadTrack(currentTrackIndex);
 
-  // ---------- THEME TOGGLE (no logo swap) ----------
+  // ---------- THEME TOGGLE (Base / Gold / Platinum – colors only) ----------
   const themeButtons = Array.from(document.querySelectorAll(".theme-pill"));
   const bodyEl = document.body;
 
@@ -294,7 +268,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!bodyEl) return;
 
     bodyEl.classList.remove("theme-base", "theme-gold", "theme-platinum");
-
     switch (theme) {
       case "gold":
         bodyEl.classList.add("theme-gold");
@@ -319,7 +292,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
-
   setTheme("base");
 
   // ---------- BAR TV ----------
@@ -439,11 +411,11 @@ document.addEventListener("DOMContentLoaded", () => {
     loadChannel(currentChannelIndex);
   }
 
-  // ---------- BAR BOT (AI BARTENDER) ----------
+  // ---------- BAR BOT (AI Bartender → Bar Bot) ----------
   const bartenderForm = document.getElementById("bartenderForm");
   const bartenderInput = document.getElementById("bartenderInput");
   const bartenderMessages = document.getElementById("bartenderMessages");
-  const bartenderResults = document.getElementById("bartenderResults");
+  const bartenderResults = document.getElementById("bartenderResults"); // currently unused but kept for expansion
   const bartenderChips = document.querySelectorAll(".bartender-chip");
 
   const BARTENDER_ENDPOINT = "/.netlify/functions/ccc-bartender";
@@ -481,6 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
           '<div class="bartender-typing"><span>.</span><span>.</span><span>.</span></div>';
         bartenderMessages.appendChild(typingEl);
       }
+      bartenderMessages.scrollTop = bartenderMessages.scrollHeight;
     } else if (typingEl) {
       typingEl.remove();
     }
@@ -491,33 +464,45 @@ document.addEventListener("DOMContentLoaded", () => {
     setBartenderTyping(true);
 
     try {
+      console.log("Calling Bar Bot with prompt:", prompt);
+
       const res = await fetch(BARTENDER_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ message: prompt })
+        // 🔧 Send BOTH `message` and `prompt` so it works with either backend signature
+        body: JSON.stringify({ message: prompt, prompt })
       });
 
       if (!res.ok) {
-        console.error("Bar Bot HTTP error", res.status, await res.text());
+        const text = await res.text();
+        console.error("Bar Bot HTTP error", res.status, text);
         appendBartenderMessage({
           role: "assistant",
           content:
-            "I couldn’t reach the Bar Bot right now. Check your Netlify function and OpenAI key."
+            `I couldn’t reach the Bar Bot (HTTP ${res.status}).` +
+            ` If you’re debugging, check Netlify logs and the ccc-bartender function.`
         });
         return;
       }
 
       const data = await res.json();
-      const reply = data.reply || data.message || "Here’s a drink idea—for best results, ask again.";
+      console.log("Bar Bot response:", data);
+
+      const reply =
+        data.reply ||
+        data.message ||
+        data.text ||
+        "Here’s a drink idea—but I couldn’t parse a structured reply from the function.";
+
       appendBartenderMessage({ role: "assistant", content: reply });
     } catch (err) {
       console.error("Bar Bot request failed", err);
       appendBartenderMessage({
         role: "assistant",
         content:
-          "Something went wrong talking to the Bar Bot. Check your connection and Netlify logs."
+          "Something went wrong talking to the Bar Bot. Check your connection and Netlify function logs."
       });
     } finally {
       setBartenderTyping(false);
@@ -534,7 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (bartenderChips && bartenderChips.length) {
+  if (bartenderChips && bartenderChips.length && bartenderInput) {
     bartenderChips.forEach((chip) => {
       chip.addEventListener("click", () => {
         const preset = chip.getAttribute("data-bartender-prompt");
@@ -606,7 +591,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       localStorage.setItem("cccRequests", JSON.stringify(list));
     } catch {
-      // ignore
+      // ignore quota errors
     }
   }
 
@@ -641,7 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
       saveRequests(requests);
       renderRequests(requests);
 
-      if (requestTrackInput) requestTrackInput.value = "";
+      requestTrackInput.value = "";
       if (requestNoteInput) requestNoteInput.value = "";
     });
   }
