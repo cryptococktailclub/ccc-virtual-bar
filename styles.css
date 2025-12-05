@@ -1,4 +1,4 @@
- /* =========================
+/* =========================
    ROOT + THEME VARIABLES
    ========================= */
 :root {
@@ -69,9 +69,15 @@ body {
   padding: 0;
   width: 100%;
   max-width: 100%;
-  overflow-x: auto; /* allow horizontal scroll instead of cutting off content */
+  overflow-x: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
   color: var(--text-primary);
+}
+
+/* main content wrapper */
+.app-bg {
+  min-height: 100vh;
+  padding-bottom: 32px;
 }
 
 main,
@@ -455,6 +461,7 @@ body.theme-platinum .ccc-logo {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  min-width: 0; /* prevents column content from forcing overflow */
 }
 
 /* CARD */
@@ -971,7 +978,7 @@ body.theme-platinum .bartender-message-body em {
   box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
 }
 
-/* vinyl landing animation (referenced in JS via inline animation style) */
+/* vinyl landing animation */
 @keyframes vinylLand {
   0% {
     transform: scale(1) rotate(-3deg);
@@ -996,14 +1003,16 @@ body.theme-platinum .bartender-message-body em {
   color: var(--text-muted);
 }
 
+/* FONT COLOR: WHITE FOR READABILITY */
 .vinyl-face h3 {
   margin: 0 0 2px;
   font-size: 0.86rem;
+  color: #ffffff;
 }
 .vinyl-face p {
   margin: 0;
   font-size: 0.78rem;
-  color: var(--text-muted);
+  color: #ffffff;
 }
 
 /* =========================
@@ -1146,7 +1155,7 @@ body.theme-platinum .album-art.glow-active {
   border-radius: 50%;
   background: conic-gradient(from 200deg, #15111f, #2c2037, #15111f);
   border: 10px solid #05010f;
-  position: relative;
+  position: relative; /* needed for drop animation */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1156,8 +1165,9 @@ body.theme-platinum .album-art.glow-active {
     0 10px 25px rgba(0, 0, 0, 0.9);
 }
 
-.turntable-platter.is-playing {
-  animation-play-state: running;
+/* VINYL DROP animation (doesn't interfere with spin) */
+.turntable-platter.drop-in {
+  animation: platter-spin 18s linear infinite paused, recordDrop 0.55s ease-out;
 }
 
 @keyframes platter-spin {
@@ -1169,12 +1179,40 @@ body.theme-platinum .album-art.glow-active {
   }
 }
 
+/* "drop" using top offset instead of transform */
+@keyframes recordDrop {
+  0% {
+    top: -32px;
+  }
+  60% {
+    top: 6px;
+  }
+  100% {
+    top: 0;
+  }
+}
+
+.turntable-platter.is-playing {
+  animation-play-state: running;
+}
+
+/* THEME-COLORED LABEL (SPEAKER) */
 .turntable-label {
   width: 54px;
   height: 54px;
   border-radius: 50%;
   background: radial-gradient(circle at top, var(--accent-neon-pink), #05010f 62%);
   box-shadow: 0 0 12px rgba(255, 20, 147, 0.75);
+}
+
+body.theme-gold .turntable-label {
+  background: radial-gradient(circle at top, var(--accent-gold-1), #3a2100 62%);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.9);
+}
+
+body.theme-platinum .turntable-label {
+  background: radial-gradient(circle at top, var(--accent-plat-2), #050b1e 62%);
+  box-shadow: 0 0 12px rgba(192, 208, 232, 0.9);
 }
 
 /* Player */
