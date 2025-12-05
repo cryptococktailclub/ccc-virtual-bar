@@ -26,15 +26,15 @@
 
 /* Theme backgrounds */
 body.theme-base {
-  background: radial-gradient(circle at top, #321031 0, #05010f 45%, #020008 100%);
+  background: radial-gradient(circle at top, #ff1493 0, #351058 40%, #05010f 100%);
 }
 
 body.theme-gold {
-  background: radial-gradient(circle at top, #40210a 0, #06030a 45%, #020006 100%);
+  background: radial-gradient(circle at top, #ffcf40 0, #5a3602 40%, #06030a 100%);
 }
 
 body.theme-platinum {
-  background: radial-gradient(circle at top, #101624 0, #03030a 45%, #010107 100%);
+  background: radial-gradient(circle at top, #e0ecff 0, #283552 40%, #02010b 100%);
 }
 
 /* Fade + color transitions */
@@ -69,12 +69,12 @@ body {
   padding: 0;
   width: 100%;
   max-width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
   color: var(--text-primary);
 }
 
-/* 🔧 Wider main container so both columns have more room */
+/* Main container widths */
 main,
 .membership-card,
 .ccc-footer-legal,
@@ -99,7 +99,7 @@ main,
   overflow: hidden;
 }
 
-/* Tier-reactive hero gradients */
+/* Theme-reactive hero gradients */
 body.theme-base .ccc-hero {
   background: radial-gradient(circle at top, #ff1493 0, #351058 40%, #05010f 100%);
 }
@@ -110,7 +110,7 @@ body.theme-platinum .ccc-hero {
   background: radial-gradient(circle at top, #e0ecff 0, #283552 40%, #02010b 100%);
 }
 
-/* Hero animated subtle shimmer */
+/* Hero shimmer */
 .ccc-hero::before {
   content: "";
   position: absolute;
@@ -164,7 +164,6 @@ body.theme-platinum .ccc-hero {
   filter: drop-shadow(0 0 25px rgba(0, 0, 0, 0.95));
 }
 
-/* Theme halo around hero logo */
 body.theme-base .hero-logo {
   box-shadow: 0 0 18px rgba(255, 20, 147, 0.9);
   border-radius: 999px;
@@ -220,7 +219,7 @@ body.theme-platinum .hero-logo {
 }
 
 /* =========================
-   HEADER (HIDDEN UNTIL SCROLL)
+   HEADER (TOP NAV)
    ========================= */
 
 .top-nav {
@@ -229,7 +228,7 @@ body.theme-platinum .hero-logo {
   left: 50%;
   transform: translate(-50%, -24px);
   width: 100%;
-  max-width: 1320px; /* match main width */
+  max-width: 1320px;
   margin: 0 auto;
   padding: 10px 16px;
   border-radius: 999px;
@@ -363,85 +362,11 @@ body.theme-platinum .ccc-logo {
   transform: translateY(-1px);
 }
 
-/* Mobile nav button */
-.mobile-nav-button {
-  display: none;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: rgba(5, 1, 15, 0.9);
-  color: #fff;
-  padding: 4px 10px;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-/* =========================
-   MOBILE NAV DRAWER
-   ========================= */
-
-.mobile-nav-drawer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: -260px;
-  background: rgba(5, 2, 15, 0.98);
-  border-radius: 18px 18px 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px 16px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 60;
-  box-shadow: 0 -14px 40px rgba(0, 0, 0, 0.85);
-  transition: transform 0.3s ease-out;
-  transform: translateY(100%);
-}
-
-.mobile-nav-drawer.open {
-  transform: translateY(0);
-  bottom: 0;
-}
-
-.mobile-nav-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(6px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease-out;
-  z-index: 55;
-}
-
-.mobile-nav-backdrop.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.mobile-nav-close {
-  align-self: flex-end;
-  border: none;
-  background: transparent;
-  color: #fff;
-  font-size: 1.1rem;
-  cursor: pointer;
-  margin-bottom: 4px;
-}
-
-.mobile-nav-item {
-  border-radius: 999px;
-  padding: 8px 12px;
-  font-size: 0.88rem;
-  text-decoration: none;
-  color: #f8f5ff;
-  background: rgba(255, 255, 255, 0.06);
-}
-
 /* =========================
    MAIN LAYOUT
    ========================= */
 
-/* Main layout: one full-width column that holds a 2-column top row + full-width Bar Bot */
+/* Main wrapper */
 .layout {
   margin-top: 32px;
   margin-bottom: 28px;
@@ -450,7 +375,7 @@ body.theme-platinum .ccc-logo {
 /* Top row: Bar TV (left) + Vinyl + Listening (right) */
 .top-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   column-gap: 24px;
   row-gap: 20px;
   align-items: flex-start;
@@ -464,9 +389,14 @@ body.theme-platinum .ccc-logo {
   min-width: 0;
 }
 
-/* Bar Bot card already uses full width of main container */
-.bartender-card {
-  margin-top: 18px;
+/* Cards */
+
+.card {
+  background: linear-gradient(150deg, rgba(12, 7, 28, 0.98), rgba(3, 0, 10, 0.98));
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-subtle);
+  padding: 20px 20px 18px;
+  box-shadow: var(--shadow-soft);
 }
 
 /* Section headers */
@@ -589,13 +519,12 @@ body.theme-platinum .bar-tv-frame::before {
   justify-content: center;
 }
 
-/* 🔧 Slightly narrower internal max-width so right column has more space */
 .bar-tv-aspect {
   position: relative;
   width: 100%;
-  max-width: 540px;
+  max-width: 560px;
   margin: 0 auto;
-  padding-top: 75%; /* 4:3 */
+  padding-top: 75%; /* 4:3 aspect ratio */
   border-radius: 10px;
   overflow: hidden;
   background: #000;
@@ -758,13 +687,14 @@ body.theme-platinum .bar-tv-frame::before {
 }
 
 /* =========================
-   AI BARTENDER / BAR BOT
+   BAR BOT (AI)
    ========================= */
 
 .bartender-card {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 20px;
 }
 
 .bartender-quick-row {
@@ -820,7 +750,7 @@ body.theme-platinum .bar-tv-frame::before {
   background: rgba(3, 3, 12, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 6px 8px;
-  max-height: 260px;
+  max-height: 280px;
   overflow-y: auto;
   font-size: 0.8rem;
 }
@@ -925,7 +855,7 @@ body.theme-platinum .bartender-avatar {
   cursor: pointer;
 }
 
-/* Theme tinting for bartender text emphasis */
+/* Theme tinting for bartender emphasis */
 body.theme-base .bartender-message-body em {
   color: var(--accent-neon-pink);
 }
@@ -986,7 +916,6 @@ body.theme-platinum .bartender-message-body em {
   animation: vinylLand 0.5s ease-out;
 }
 
-/* one-shot landing animation */
 @keyframes vinylLand {
   0% {
     transform: translateY(-4px) scale(0.98) rotate(-2deg);
@@ -1002,7 +931,6 @@ body.theme-platinum .bartender-message-body em {
   }
 }
 
-/* continuous breathing for active vinyl */
 @keyframes vinylActivePulse {
   0% {
     box-shadow: 0 0 8px rgba(255, 215, 0, 0.25);
@@ -1163,7 +1091,6 @@ body.theme-platinum .album-art.glow-active {
   animation: albumSweep 3.6s linear infinite;
 }
 
-/* subtle breathing glow */
 @keyframes albumGlowPulse {
   0% {
     transform: translateY(0) scale(1);
@@ -1173,7 +1100,6 @@ body.theme-platinum .album-art.glow-active {
   }
 }
 
-/* highlight sweep across the card */
 @keyframes albumSweep {
   0% {
     opacity: 0;
@@ -1389,7 +1315,6 @@ body.theme-platinum .album-art.glow-active {
   opacity: 0.65;
 }
 
-/* When JS adds .is-playing we animate; JS will toggle this class */
 .player-eq.is-playing .eq-bar {
   animation: eqPulse 0.7s infinite ease-in-out;
 }
@@ -1413,100 +1338,11 @@ body.theme-platinum .album-art.glow-active {
 }
 
 /* =========================
-   REQUEST QUEUE
-   ========================= */
-
-.requests-list {
-  margin-top: 4px;
-  max-height: 220px;
-  overflow-y: auto;
-  padding: 6px;
-  border-radius: 10px;
-  background: rgba(5, 5, 18, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 0.78rem;
-}
-
-.request-item {
-  padding: 6px 8px;
-  margin-bottom: 6px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.requests-form {
-  margin-top: 8px;
-  padding: 8px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(8, 8, 24, 0.96);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.requests-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.requests-input {
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(3, 3, 18, 0.96);
-  color: #fff;
-  font-size: 0.78rem;
-  padding: 6px 8px;
-  flex: 1;
-}
-
-.requests-input-name {
-  flex: 1 1 32%;
-}
-.requests-input-track {
-  flex: 2 1 60%;
-}
-.requests-input-note {
-  width: 100%;
-  resize: vertical;
-}
-
-.requests-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.requests-hint {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-}
-
-.requests-submit {
-  border-radius: 999px;
-  border: none;
-  padding: 6px 12px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  background: linear-gradient(120deg, var(--accent-neon-pink), var(--accent-gold-1));
-  color: #05010f;
-  cursor: pointer;
-}
-
-/* =========================
-   MEMBERSHIP
+   MEMBERSHIP SECTION
    ========================= */
 
 .membership-card {
   margin-bottom: 20px;
-}
-
-.membership-intro {
-  margin: 6px 0 10px;
-  font-size: 0.82rem;
-  color: var(--text-muted);
 }
 
 .membership-grid {
@@ -1653,9 +1489,8 @@ body.theme-platinum .album-art.glow-active {
    RESPONSIVE
    ========================= */
 
-/* Smaller laptops: stack columns earlier for true full-width right side */
+/* Stack top row on smaller laptops / tablets */
 @media (max-width: 1120px) {
-  /* Stack Bar TV and Vinyl/Listening vertically */
   .top-row {
     grid-template-columns: 1fr;
   }
@@ -1703,15 +1538,37 @@ body.theme-platinum .album-art.glow-active {
     max-width: 100%;
   }
 
+  .album-and-turntable {
+    grid-template-columns: 1fr;
+  }
+
+  .album-art {
+    height: 190px;
+  }
+
+  .turntable-platter {
+    width: 150px;
+    height: 150px;
+    border-width: 8px;
+  }
+
   .vinyl-row {
     flex-direction: column;
     overflow-x: hidden;
   }
-
   .vinyl-item {
     min-width: 0;
     max-width: 100%;
     width: 100%;
+  }
+
+  .membership-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ccc-footer-social {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
@@ -1723,10 +1580,6 @@ body.theme-platinum .album-art.glow-active {
   }
   .hero-title {
     font-size: 1.3rem;
-  }
-
-  .top-nav {
-    transform: translate(-50%, -22px);
   }
 
   .album-art {
