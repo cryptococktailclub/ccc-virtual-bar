@@ -1,96 +1,7 @@
-// Crypto Cocktail Club – Virtual Bar Experience
-// Front-end interactions: hero, themes, audio, Bar TV, AI bartender, requests, mobile nav.
+// Crypto Cocktail Club – Virtual Listening Bar
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ---------- CONSTANTS ----------
-  const MEDIA_BASE = "https://visionary-beignet-7d270e.netlify.app/";
-
-  // ---------- HERO + HEADER ----------
-  const hero = document.getElementById("ccc-hero");
-  const header = document.getElementById("ccc-header");
-  const scrollArrow = document.querySelector(".hero-scroll-indicator");
-
-  function updateHeaderVisibility() {
-    if (!hero || !header) return;
-    const heroHeight = hero.offsetHeight || window.innerHeight;
-    const threshold = heroHeight * 0.55;
-    if (window.scrollY > threshold) {
-      header.classList.add("header-visible");
-    } else {
-      header.classList.remove("header-visible");
-    }
-  }
-
-  window.addEventListener("scroll", updateHeaderVisibility);
-  window.addEventListener("resize", updateHeaderVisibility);
-  updateHeaderVisibility();
-
-  if (scrollArrow) {
-    scrollArrow.addEventListener("click", () => {
-      const layout = document.querySelector(".layout");
-      if (layout) {
-        layout.scrollIntoView({ behavior: "smooth" });
-      }
-    });
-  }
-
-  // ---------- MOBILE NAV DRAWER ----------
-  const mobileMenuBtn = document.getElementById("mobileMenuBtn");
-  const mobileDrawer = document.getElementById("mobileNavDrawer");
-  const mobileBackdrop = document.getElementById("mobileNavBackdrop");
-  const mobileCloseBtn = mobileDrawer ? mobileDrawer.querySelector(".mobile-nav-close") : null;
-
-  function openMobileNav() {
-    if (!mobileDrawer || !mobileBackdrop) return;
-    mobileDrawer.classList.add("open");
-    mobileBackdrop.classList.add("visible");
-  }
-
-  function closeMobileNav() {
-    if (!mobileDrawer || !mobileBackdrop) return;
-    mobileDrawer.classList.remove("open");
-    mobileBackdrop.classList.remove("visible");
-  }
-
-  if (mobileMenuBtn) {
-    mobileMenuBtn.addEventListener("click", openMobileNav);
-  }
-  if (mobileBackdrop) {
-    mobileBackdrop.addEventListener("click", closeMobileNav);
-  }
-  if (mobileCloseBtn) {
-    mobileCloseBtn.addEventListener("click", closeMobileNav);
-  }
-
-  // ---------- THEME TOGGLER ----------
-  const body = document.body;
-  const themeButtons = Array.from(document.querySelectorAll(".theme-pill[data-theme]"));
-
-  function setTheme(theme) {
-    themeButtons.forEach((btn) => {
-      btn.classList.toggle("is-active", btn.dataset.theme === theme);
-    });
-    body.classList.remove("theme-base", "theme-gold", "theme-platinum");
-    body.classList.add(`theme-${theme}`);
-  }
-
-  themeButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const theme = btn.dataset.theme || "base";
-      setTheme(theme);
-    });
-  });
-
-  // Default theme
-  if (
-    !body.classList.contains("theme-base") &&
-    !body.classList.contains("theme-gold") &&
-    !body.classList.contains("theme-platinum")
-  ) {
-    setTheme("base");
-  }
-
-  // ---------- AUDIO PLAYER / VINYL ----------
+  // ---------- AUDIO PLAYER ----------
   const audio = document.getElementById("bar-audio");
   const playBtn = document.getElementById("play-btn");
   const prevBtn = document.getElementById("prev-btn");
@@ -99,7 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const turntablePlatter = document.getElementById("turntablePlatter");
   const albumArt = document.getElementById("albumArt");
   const playerEq = document.getElementById("playerEq");
-  const dockTrackEl = document.getElementById("dockTrack");
 
   const trackTitleEl = document.getElementById("track-title");
   const trackArtistEl = document.getElementById("track-artist");
@@ -108,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const timeRemainingEl = document.getElementById("time-remaining");
   const timelineBar = document.getElementById("timeline-bar");
   const timelineProgress = document.getElementById("timeline-progress");
+  const dockTrackEl = document.getElementById("dockTrack");
 
   const vinylRow = document.getElementById("vinylRow");
 
@@ -116,88 +27,99 @@ document.addEventListener("DOMContentLoaded", () => {
       title: "Toby’s Mix",
       artist: "Toby",
       durationLabel: "58:24",
-      file: MEDIA_BASE + "audio/tobys-mix.mp3",
+      src: "https://visionary-beignet-7d270e.netlify.app/audio/tobys-mix.mp3"
     },
     {
       title: "Gold Hour Spritz",
-      artist: "CCC – Summer Mix",
-      durationLabel: "1:00:00",
-      file: MEDIA_BASE + "audio/Summer mix.mp3",
+      artist: "Summer Mix",
+      durationLabel: "59:59",
+      src: "https://visionary-beignet-7d270e.netlify.app/audio/Summer%20mix.mp3"
     },
     {
       title: "Midnight Chrome",
       artist: "Kartell Tribute – Roche Musique",
-      durationLabel: "1:00:00",
-      file: MEDIA_BASE + "audio/Kartell Tribute Set - Roche Musique.mp3",
+      durationLabel: "59:32",
+      src: "https://visionary-beignet-7d270e.netlify.app/audio/Kartell%20Tribute%20Set%20-%20Roche%20Musique.mp3"
     },
     {
       title: "Poolside Mirage",
       artist: "Solomun Boiler Room",
-      durationLabel: "1:00:00",
-      file: MEDIA_BASE + "audio/Solomun Boiler Room DJ Set.mp3",
+      durationLabel: "59:45",
+      src: "https://visionary-beignet-7d270e.netlify.app/audio/Solomun%20Boiler%20Room%20DJ%20Set.mp3"
     },
     {
       title: "Khruangbin Live",
       artist: "Pitchfork Live at Villain",
-      durationLabel: "1:00:00",
-      file: MEDIA_BASE + "audio/Khruangbin at Villain _ Pitchfork Live.mp3",
+      durationLabel: "43:20",
+      src: "https://visionary-beignet-7d270e.netlify.app/audio/Khruangbin%20at%20Villain%20_%20Pitchfork%20Live.mp3"
     },
     {
       title: "Succession Beats",
       artist: "Jsco Music",
-      durationLabel: "1:00:00",
-      file: MEDIA_BASE + "audio/Succession Beats - Jsco Music .mp3",
-    },
+      durationLabel: "59:05",
+      src: "https://visionary-beignet-7d270e.netlify.app/audio/Succession%20Beats%20-%20Jsco%20Music%20.mp3"
+    }
   ];
 
   let currentTrackIndex = 0;
-  let isPlaying = false;
-  let timelineDragging = false;
+  let isScrubbing = false;
 
   function formatTime(seconds) {
-    if (!isFinite(seconds) || seconds < 0) return "0:00";
-    const s = Math.floor(seconds);
-    const m = Math.floor(s / 60);
-    const r = s % 60;
-    return `${m}:${r.toString().padStart(2, "0")}`;
+    if (!Number.isFinite(seconds)) return "0:00";
+    const s = Math.max(0, Math.floor(seconds));
+    const min = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${min}:${sec.toString().padStart(2, "0")}`;
   }
 
-  function updateDockTrack(track) {
-    if (dockTrackEl) {
-      dockTrackEl.textContent = `${track.title} — ${track.artist}`;
+  function updatePlayUI(isPlaying) {
+    if (!playBtn) return;
+    playBtn.textContent = isPlaying ? "Pause" : "Play";
+
+    if (turntablePlatter) {
+      if (isPlaying) {
+        turntablePlatter.classList.add("is-playing");
+      } else {
+        turntablePlatter.classList.remove("is-playing");
+      }
+    }
+
+    if (playerEq) {
+      if (isPlaying) {
+        playerEq.classList.add("is-playing");
+      } else {
+        playerEq.classList.remove("is-playing");
+      }
+    }
+
+    if (albumArt) {
+      if (isPlaying) {
+        albumArt.classList.add("glow-active");
+      } else {
+        albumArt.classList.remove("glow-active");
+      }
     }
   }
 
-  function updateNowPlayingDisplay(track) {
+  function updateTrackMeta(index) {
+    const track = tracks[index];
+    if (!track) return;
     if (trackTitleEl) trackTitleEl.textContent = track.title;
     if (trackArtistEl) trackArtistEl.textContent = track.artist;
     if (trackDurationEl) trackDurationEl.textContent = track.durationLabel;
-    updateDockTrack(track);
-  }
-
-  function setPlayingState(playing) {
-    isPlaying = playing;
-    if (playBtn) {
-      playBtn.textContent = playing ? "Pause" : "Play";
-    }
-    if (turntablePlatter) {
-      turntablePlatter.classList.toggle("is-playing", playing);
-    }
-    if (albumArt) {
-      albumArt.classList.toggle("glow-active", playing);
-    }
-    if (playerEq) {
-      playerEq.classList.toggle("is-playing", playing);
-    }
+    if (timeRemainingEl) timeRemainingEl.textContent = "-" + track.durationLabel;
+    if (dockTrackEl) dockTrackEl.textContent = `${track.title} — ${track.artist}`;
   }
 
   function loadTrack(index) {
     if (!audio) return;
-    const clampedIndex = ((index % tracks.length) + tracks.length) % tracks.length;
-    currentTrackIndex = clampedIndex;
-    const track = tracks[clampedIndex];
-    audio.src = track.file;
-    updateNowPlayingDisplay(track);
+    const track = tracks[index];
+    if (!track) return;
+
+    currentTrackIndex = index;
+    audio.src = track.src;
+    updateTrackMeta(index);
+    highlightVinyl(index);
   }
 
   function playCurrentTrack() {
@@ -205,144 +127,200 @@ document.addEventListener("DOMContentLoaded", () => {
     audio
       .play()
       .then(() => {
-        setPlayingState(true);
+        updatePlayUI(true);
       })
-      .catch(() => {
-        setPlayingState(false);
+      .catch((err) => {
+        console.warn("Audio play blocked:", err);
       });
   }
 
   function pauseCurrentTrack() {
     if (!audio) return;
     audio.pause();
-    setPlayingState(false);
+    updatePlayUI(false);
   }
 
-  if (volumeSlider && audio) {
-    audio.volume = parseFloat(volumeSlider.value || "0.8");
+  function togglePlay() {
+    if (!audio) return;
+    if (audio.paused) playCurrentTrack();
+    else pauseCurrentTrack();
+  }
+
+  function playNextTrack() {
+    const nextIndex = (currentTrackIndex + 1) % tracks.length;
+    loadTrack(nextIndex);
+    playCurrentTrack();
+  }
+
+  function playPrevTrack() {
+    const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+    loadTrack(prevIndex);
+    playCurrentTrack();
+  }
+
+  if (audio && volumeSlider) {
+    audio.volume = parseFloat(volumeSlider.value ?? "0.8");
+
     volumeSlider.addEventListener("input", () => {
-      const v = parseFloat(volumeSlider.value || "0.8");
-      audio.volume = isNaN(v) ? 0.8 : v;
+      audio.volume = parseFloat(volumeSlider.value || "0.8");
     });
   }
 
-  if (playBtn) {
-    playBtn.addEventListener("click", () => {
-      if (!audio) return;
-      if (audio.paused) {
-        playCurrentTrack();
-      } else {
-        pauseCurrentTrack();
-      }
-    });
+  if (audio && playBtn) {
+    playBtn.addEventListener("click", togglePlay);
+  }
+  if (audio && nextBtn) {
+    nextBtn.addEventListener("click", playNextTrack);
+  }
+  if (audio && prevBtn) {
+    prevBtn.addEventListener("click", playPrevTrack);
   }
 
-  if (prevBtn) {
-    prevBtn.addEventListener("click", () => {
-      loadTrack(currentTrackIndex - 1);
-      playCurrentTrack();
-      highlightVinyl(currentTrackIndex);
-    });
-  }
-
-  if (nextBtn) {
-    nextBtn.addEventListener("click", () => {
-      loadTrack(currentTrackIndex + 1);
-      playCurrentTrack();
-      highlightVinyl(currentTrackIndex);
-    });
-  }
-
-  if (timelineBar && audio) {
-    const handleSeek = (clientX) => {
-      const rect = timelineBar.getBoundingClientRect();
-      const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
-      if (!isFinite(ratio) || !audio.duration) return;
-      audio.currentTime = ratio * audio.duration;
-    };
-
+  if (audio && timelineBar && timelineProgress && timeCurrentEl && timeRemainingEl) {
     timelineBar.addEventListener("click", (e) => {
-      handleSeek(e.clientX);
+      const rect = timelineBar.getBoundingClientRect();
+      const ratio = (e.clientX - rect.left) / rect.width;
+      if (!Number.isFinite(ratio) || !audio.duration) return;
+      audio.currentTime = ratio * audio.duration;
     });
 
     timelineBar.addEventListener("mousedown", (e) => {
-      timelineDragging = true;
-      handleSeek(e.clientX);
+      isScrubbing = true;
+      const rect = timelineBar.getBoundingClientRect();
+      const ratio = (e.clientX - rect.left) / rect.width;
+      if (audio.duration && Number.isFinite(ratio)) {
+        audio.currentTime = Math.max(0, Math.min(audio.duration * ratio, audio.duration));
+      }
     });
 
     window.addEventListener("mousemove", (e) => {
-      if (timelineDragging) {
-        handleSeek(e.clientX);
+      if (!isScrubbing) return;
+      const rect = timelineBar.getBoundingClientRect();
+      const ratio = (e.clientX - rect.left) / rect.width;
+      if (audio.duration && Number.isFinite(ratio)) {
+        audio.currentTime = Math.max(0, Math.min(audio.duration * ratio, audio.duration));
       }
     });
+
     window.addEventListener("mouseup", () => {
-      timelineDragging = false;
+      if (isScrubbing) {
+        isScrubbing = false;
+      }
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (!audio.duration) return;
+      const ratio = audio.currentTime / audio.duration;
+      timelineProgress.style.width = `${ratio * 100}%`;
+      timeCurrentEl.textContent = formatTime(audio.currentTime);
+      timeRemainingEl.textContent = "-" + formatTime(audio.duration - audio.currentTime);
+    });
+
+    audio.addEventListener("ended", () => {
+      playNextTrack();
     });
   }
 
-  if (audio) {
-    audio.addEventListener("timeupdate", () => {
-      if (!audio.duration || !timelineProgress) return;
-      const progress = (audio.currentTime / audio.duration) * 100;
-      timelineProgress.style.width = `${progress}%`;
+  function animateVinylToTurntable(sourceButton) {
+    if (!sourceButton || !turntablePlatter) return;
 
-      if (timeCurrentEl) timeCurrentEl.textContent = formatTime(audio.currentTime);
-      if (timeRemainingEl)
-        timeRemainingEl.textContent = `-${formatTime(audio.duration - audio.currentTime)}`;
+    const btnRect = sourceButton.getBoundingClientRect();
+    const platterRect = turntablePlatter.getBoundingClientRect();
+
+    const size = Math.min(btnRect.width, btnRect.height, 140);
+
+    const startX = btnRect.left + btnRect.width / 2 - size / 2;
+    const startY = btnRect.top + btnRect.height / 2 - size / 2;
+
+    const endX = platterRect.left + platterRect.width / 2 - size / 2;
+    const endY = platterRect.top + platterRect.height / 2 - size / 2;
+
+    const flying = document.createElement("div");
+    flying.className = "flying-vinyl";
+    flying.style.width = `${size}px`;
+    flying.style.height = `${size}px`;
+    flying.style.left = `${startX}px`;
+    flying.style.top = `${startY}px`;
+
+    document.body.appendChild(flying);
+
+    requestAnimationFrame(() => {
+      flying.style.transform = `translate(${endX - startX}px, ${endY - startY}px) scale(0.6) rotate(540deg)`;
+      flying.style.opacity = "0";
     });
 
-    audio.addEventListener("play", () => setPlayingState(true));
-    audio.addEventListener("pause", () => setPlayingState(false));
-    audio.addEventListener("ended", () => {
-      // auto-advance to next track
-      loadTrack(currentTrackIndex + 1);
-      playCurrentTrack();
-      highlightVinyl(currentTrackIndex);
+    flying.addEventListener("transitionend", () => {
+      flying.remove();
     });
   }
 
   function highlightVinyl(index) {
-  if (!vinylRow) return;
-  const buttons = Array.from(vinylRow.querySelectorAll(".vinyl-item"));
+    if (!vinylRow) return;
+    const buttons = Array.from(vinylRow.querySelectorAll(".vinyl-item"));
 
-  buttons.forEach((btn, i) => {
-    const isActive = i === index;
+    buttons.forEach((btn, i) => {
+      const isActive = i === index;
 
-    // toggle "is-active" for glow / styling
-    btn.classList.toggle("is-active", isActive);
+      btn.classList.toggle("is-active", isActive);
+      btn.classList.remove("vinyl-landing");
 
-    // reset landing class so we can re-trigger animation
-    btn.classList.remove("vinyl-landing");
-
-    if (isActive) {
-      // force a reflow so the animation can restart
-      // (Safari / Chrome both need this sometimes)
-      void btn.offsetWidth;
-      btn.classList.add("vinyl-landing");
-    }
-  });
-}
-
-
-  if (vinylRow) {
-    vinylRow.addEventListener("click", (e) => {
-      const target = e.target.closest(".vinyl-item");
-      if (!target) return;
-      const idxStr = target.getAttribute("data-track-index");
-      const idx = idxStr ? parseInt(idxStr, 10) : 0;
-      if (!Number.isNaN(idx)) {
-        loadTrack(idx);
-        playCurrentTrack();
-        highlightVinyl(idx);
+      if (isActive) {
+        void btn.offsetWidth; // reflow so animation can restart
+        btn.classList.add("vinyl-landing");
       }
     });
   }
 
-  // Initialize first track
-  if (tracks.length > 0) {
-    loadTrack(0);
-    highlightVinyl(0);
+  if (vinylRow) {
+    const vinylButtons = Array.from(vinylRow.querySelectorAll(".vinyl-item"));
+
+    vinylButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.dataset.trackIndex || 0);
+        animateVinylToTurntable(btn);
+        loadTrack(idx);
+        playCurrentTrack();
+      });
+    });
   }
+
+  loadTrack(currentTrackIndex);
+
+  // ---------- THEME TOGGLE (no logo swap) ----------
+  const themeButtons = Array.from(document.querySelectorAll(".theme-pill"));
+  const bodyEl = document.body;
+
+  function setTheme(theme) {
+    if (!bodyEl) return;
+
+    bodyEl.classList.remove("theme-base", "theme-gold", "theme-platinum");
+
+    switch (theme) {
+      case "gold":
+        bodyEl.classList.add("theme-gold");
+        break;
+      case "platinum":
+        bodyEl.classList.add("theme-platinum");
+        break;
+      default:
+        bodyEl.classList.add("theme-base");
+    }
+
+    themeButtons.forEach((b) => {
+      b.classList.toggle("is-active", b.dataset.theme === theme);
+    });
+  }
+
+  if (themeButtons.length) {
+    themeButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const theme = btn.dataset.theme || "base";
+        setTheme(theme);
+      });
+    });
+  }
+
+  setTheme("base");
 
   // ---------- BAR TV ----------
   const tvVideo = document.getElementById("barTvVideo");
@@ -350,30 +328,57 @@ document.addEventListener("DOMContentLoaded", () => {
   const tvPlayBtn = document.getElementById("barTvPlayBtn");
   const tvMuteBtn = document.getElementById("barTvMuteBtn");
   const tvVolumeSlider = document.getElementById("barTvVolume");
-  const tvInner = document.getElementById("barTvInner");
   const tvTitleEl = document.getElementById("barTvTitle");
 
   const tvChannels = [
-    { src: MEDIA_BASE + "video/bar_tape_01.mp4", title: "Bar Tape 01" },
-    { src: MEDIA_BASE + "video/bar_tape_02.mp4", title: "Bar Tape 02" },
-    { src: MEDIA_BASE + "video/bar_tape_03.mp4", title: "Bar Tape 03" },
-    { src: MEDIA_BASE + "video/bar_tape_04.mp4", title: "Bar Tape 04" },
-    { src: MEDIA_BASE + "video/bar_tape_05.mp4", title: "Bar Tape 05" },
-    { src: MEDIA_BASE + "video/bar_tape_06.mp4", title: "Bar Tape 06" },
-    { src: MEDIA_BASE + "video/bar_tape_07.mp4", title: "Bar Tape 07" },
-    { src: MEDIA_BASE + "video/bar_tape_08.mp4", title: "Bar Tape 08" },
-    { src: MEDIA_BASE + "video/bar_tape_09.mp4", title: "Bar Tape 09" },
+    {
+      title: "Bar Tape 01",
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_01.mp4"
+    },
+    {
+      title: "Bar Tape 02",
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_02.mp4"
+    },
+    {
+      title: "Bar Tape 03",
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_03.mp4"
+    },
+    {
+      title: "Bar Tape 04",
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_04.mp4"
+    },
+    {
+      title: "Bar Tape 05",
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_05.mp4"
+    },
+    {
+      title: "Bar Tape 06",
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_06.mp4"
+    },
+    {
+      title: "Bar Tape 07",
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_07.mp4"
+    },
+    {
+      title: "Bar Tape 08",
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_08.mp4"
+    },
+    {
+      title: "Bar Tape 09",
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_09.mp4"
+    }
   ];
 
-  let tvIndex = 0;
+  let currentChannelIndex = 0;
 
-  function loadTvChannel(index) {
-    if (!tvVideo || !tvInner) return;
-    const clamped = ((index % tvChannels.length) + tvChannels.length) % tvChannels.length;
-    tvIndex = clamped;
-    const ch = tvChannels[clamped];
-    tvInner.classList.add("tv-fading");
-    tvVideo.src = ch.src;
+  function loadChannel(index) {
+    if (!tvVideo) return;
+    const chan = tvChannels[index];
+    if (!chan) return;
+    currentChannelIndex = index;
+    tvVideo.src = chan.src;
+    if (tvTitleEl) tvTitleEl.textContent = chan.title;
+    tvVideo.load();
     tvVideo
       .play()
       .then(() => {
@@ -381,17 +386,19 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch(() => {
         if (tvPlayBtn) tvPlayBtn.textContent = "▶";
-      })
-      .finally(() => {
-        tvInner.classList.remove("tv-fading");
       });
+  }
 
-    if (tvTitleEl) tvTitleEl.textContent = ch.title;
+  if (tvVideo) {
+    tvVideo.addEventListener("loadedmetadata", () => {
+      if (tvPlayBtn) tvPlayBtn.textContent = tvVideo.paused ? "▶" : "⏸";
+    });
   }
 
   if (tvChannelBtn) {
     tvChannelBtn.addEventListener("click", () => {
-      loadTvChannel(tvIndex + 1);
+      const nextIndex = (currentChannelIndex + 1) % tvChannels.length;
+      loadChannel(nextIndex);
     });
   }
 
@@ -424,17 +431,118 @@ document.addEventListener("DOMContentLoaded", () => {
     tvVideo.volume = parseFloat(tvVolumeSlider.value || "0.5");
     tvVolumeSlider.addEventListener("input", () => {
       const v = parseFloat(tvVolumeSlider.value || "0.5");
-      tvVideo.volume = isNaN(v) ? 0.5 : v;
-      tvVideo.muted = v === 0;
-      if (tvMuteBtn) {
-        tvMuteBtn.textContent = tvVideo.muted ? "Sound: Off" : "Sound: On";
-      }
+      tvVideo.volume = v;
     });
   }
 
-  // Initialize TV
-  if (tvChannels.length > 0) {
-    loadTvChannel(0);
+  if (tvVideo) {
+    loadChannel(currentChannelIndex);
+  }
+
+  // ---------- BAR BOT (AI BARTENDER) ----------
+  const bartenderForm = document.getElementById("bartenderForm");
+  const bartenderInput = document.getElementById("bartenderInput");
+  const bartenderMessages = document.getElementById("bartenderMessages");
+  const bartenderResults = document.getElementById("bartenderResults");
+  const bartenderChips = document.querySelectorAll(".bartender-chip");
+
+  const BARTENDER_ENDPOINT = "/.netlify/functions/ccc-bartender";
+
+  function appendBartenderMessage({ role, content }) {
+    if (!bartenderMessages) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("bartender-message");
+    wrapper.classList.add(
+      role === "assistant" ? "bartender-message-bot" : "bartender-message-user"
+    );
+
+    const avatar = document.createElement("div");
+    avatar.className = "bartender-avatar";
+
+    const body = document.createElement("div");
+    body.className = "bartender-message-body";
+    body.innerText = content;
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(body);
+    bartenderMessages.appendChild(wrapper);
+    bartenderMessages.scrollTop = bartenderMessages.scrollHeight;
+  }
+
+  function setBartenderTyping(isTyping) {
+    if (!bartenderMessages) return;
+    let typingEl = bartenderMessages.querySelector(".bartender-typing-row");
+    if (isTyping) {
+      if (!typingEl) {
+        typingEl = document.createElement("div");
+        typingEl.className = "bartender-typing-row";
+        typingEl.innerHTML =
+          '<div class="bartender-typing"><span>.</span><span>.</span><span>.</span></div>';
+        bartenderMessages.appendChild(typingEl);
+      }
+    } else if (typingEl) {
+      typingEl.remove();
+    }
+  }
+
+  async function callBarBot(prompt) {
+    appendBartenderMessage({ role: "user", content: prompt });
+    setBartenderTyping(true);
+
+    try {
+      const res = await fetch(BARTENDER_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: prompt })
+      });
+
+      if (!res.ok) {
+        console.error("Bar Bot HTTP error", res.status, await res.text());
+        appendBartenderMessage({
+          role: "assistant",
+          content:
+            "I couldn’t reach the Bar Bot right now. Check your Netlify function and OpenAI key."
+        });
+        return;
+      }
+
+      const data = await res.json();
+      const reply = data.reply || data.message || "Here’s a drink idea—for best results, ask again.";
+      appendBartenderMessage({ role: "assistant", content: reply });
+    } catch (err) {
+      console.error("Bar Bot request failed", err);
+      appendBartenderMessage({
+        role: "assistant",
+        content:
+          "Something went wrong talking to the Bar Bot. Check your connection and Netlify logs."
+      });
+    } finally {
+      setBartenderTyping(false);
+    }
+  }
+
+  if (bartenderForm && bartenderInput && bartenderMessages) {
+    bartenderForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const prompt = bartenderInput.value.trim();
+      if (!prompt) return;
+      bartenderInput.value = "";
+      callBarBot(prompt);
+    });
+  }
+
+  if (bartenderChips && bartenderChips.length) {
+    bartenderChips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const preset = chip.getAttribute("data-bartender-prompt");
+        if (!preset) return;
+        bartenderInput.value = preset;
+        bartenderInput.focus();
+      });
+    });
   }
 
   // ---------- REQUESTS QUEUE ----------
@@ -444,35 +552,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const requestTrackInput = document.getElementById("requestTrack");
   const requestNoteInput = document.getElementById("requestNote");
 
-  const REQUESTS_KEY = "cccRequests";
-
-  function loadRequests() {
-    try {
-      const stored = localStorage.getItem(REQUESTS_KEY);
-      if (!stored) return [];
-      const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function saveRequests(list) {
-    try {
-      localStorage.setItem(REQUESTS_KEY, JSON.stringify(list));
-    } catch {
-      // ignore
-    }
-  }
+  let requests = [];
 
   function renderRequests(list) {
     if (!requestsListEl) return;
     requestsListEl.innerHTML = "";
+
     if (!list.length) {
       const empty = document.createElement("div");
-      empty.textContent = "No requests yet. Be the first to set the mood.";
-      empty.style.color = "var(--text-muted)";
-      empty.style.fontSize = "0.78rem";
+      empty.className = "request-item";
+      empty.textContent = "No requests yet. Be the first to call a set.";
       requestsListEl.appendChild(empty);
       return;
     }
@@ -480,34 +569,75 @@ document.addEventListener("DOMContentLoaded", () => {
     list.forEach((req) => {
       const item = document.createElement("div");
       item.className = "request-item";
-      const who = req.name ? `${req.name} · ` : "";
-      const note = req.note ? ` — ${req.note}` : "";
-      item.textContent = `${who}${req.track}${note}`;
+
+      const who = document.createElement("div");
+      who.className = "request-who";
+      who.textContent = req.name || "Guest";
+
+      const what = document.createElement("div");
+      what.className = "request-what";
+      what.textContent = req.track;
+
+      const note = document.createElement("div");
+      note.className = "request-note";
+      note.textContent = req.note || "";
+
+      item.appendChild(who);
+      item.appendChild(what);
+      if (req.note) item.appendChild(note);
+
       requestsListEl.appendChild(item);
     });
   }
 
-  let requests = loadRequests();
-  renderRequests(requests);
+  function loadRequests() {
+    try {
+      const raw = localStorage.getItem("cccRequests");
+      if (!raw) return [];
+      const data = JSON.parse(raw);
+      if (!Array.isArray(data)) return [];
+      return data;
+    } catch {
+      return [];
+    }
+  }
+
+  function saveRequests(list) {
+    try {
+      localStorage.setItem("cccRequests", JSON.stringify(list));
+    } catch {
+      // ignore
+    }
+  }
+
+  if (requestsListEl) {
+    requests = loadRequests();
+    renderRequests(requests);
+  }
 
   if (requestsForm) {
     requestsForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const trackVal = requestTrackInput ? requestTrackInput.value.trim() : "";
-      if (!trackVal) return;
-      const nameVal = requestNameInput ? requestNameInput.value.trim() : "";
-      const noteVal = requestNoteInput ? requestNoteInput.value.trim() : "";
+      if (!requestTrackInput) return;
 
-      const entry = {
-        name: nameVal,
-        track: trackVal,
-        note: noteVal,
-        ts: Date.now(),
+      const track = requestTrackInput.value.trim();
+      if (!track) return;
+
+      const name = requestNameInput ? requestNameInput.value.trim() : "";
+      const note = requestNoteInput ? requestNoteInput.value.trim() : "";
+
+      const req = {
+        name,
+        track,
+        note,
+        ts: Date.now()
       };
-      requests.push(entry);
+
+      requests.push(req);
       if (requests.length > 60) {
         requests = requests.slice(-60);
       }
+
       saveRequests(requests);
       renderRequests(requests);
 
@@ -515,111 +645,4 @@ document.addEventListener("DOMContentLoaded", () => {
       if (requestNoteInput) requestNoteInput.value = "";
     });
   }
-
-  // ---------- AI BARTENDER ----------
-  const bartenderForm = document.getElementById("bartenderForm");
-  const bartenderInput = document.getElementById("bartenderInput");
-  const bartenderMessages = document.getElementById("bartenderMessages");
-  const bartenderResults = document.getElementById("bartenderResults");
-  const bartenderChips = Array.from(document.querySelectorAll(".bartender-chip"));
-
-  function appendBartenderMessage(content, isBot = false) {
-    if (!bartenderMessages) return;
-    const wrapper = document.createElement("div");
-    wrapper.className = "bartender-message";
-
-    if (isBot) {
-      wrapper.classList.add("bartender-message-bot");
-      const avatar = document.createElement("div");
-      avatar.className = "bartender-avatar";
-      wrapper.appendChild(avatar);
-    } else {
-      const spacer = document.createElement("div");
-      spacer.style.width = "26px";
-      wrapper.appendChild(spacer);
-    }
-
-    const bodyDiv = document.createElement("div");
-    bodyDiv.className = "bartender-message-body";
-    bodyDiv.innerHTML = content;
-    wrapper.appendChild(bodyDiv);
-
-    bartenderMessages.appendChild(wrapper);
-    bartenderMessages.scrollTop = bartenderMessages.scrollHeight;
-  }
-
-  let typingEl = null;
-
-  function showTyping() {
-    if (!bartenderMessages) return;
-    if (typingEl) return;
-    typingEl = document.createElement("div");
-    typingEl.className = "bartender-typing";
-    typingEl.innerHTML = `CCC Bartender is mixing<span>.</span><span>.</span><span>.</span>`;
-    bartenderMessages.appendChild(typingEl);
-    bartenderMessages.scrollTop = bartenderMessages.scrollHeight;
-  }
-
-  function hideTyping() {
-    if (typingEl && bartenderMessages) {
-      bartenderMessages.removeChild(typingEl);
-    }
-    typingEl = null;
-  }
-
-  async function sendToBartender(prompt) {
-    showTyping();
-    try {
-      const res = await fetch("/.netlify/functions/ccc-bartender", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: prompt }),
-      });
-
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-      const data = await res.json();
-      const reply = data && (data.reply || data.message || data.text);
-      hideTyping();
-      if (reply) {
-        appendBartenderMessage(reply, true);
-      } else {
-        appendBartenderMessage(
-          "I couldn't quite parse that reply from the back bar. Try again in a moment.",
-          true
-        );
-      }
-    } catch (err) {
-      console.error("Bartender error:", err);
-      hideTyping();
-      appendBartenderMessage(
-        "I couldn’t reach the back bar AI right now. Check your Netlify function and OpenAI key.",
-        true
-      );
-    }
-  }
-
-  if (bartenderForm) {
-    bartenderForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      if (!bartenderInput) return;
-      const val = bartenderInput.value.trim();
-      if (!val) return;
-      appendBartenderMessage(val, false);
-      bartenderInput.value = "";
-      sendToBartender(val);
-    });
-  }
-
-  bartenderChips.forEach((chip) => {
-    chip.addEventListener("click", () => {
-      const prompt = chip.getAttribute("data-bartender-prompt") || chip.textContent || "";
-      if (!prompt) return;
-      appendBartenderMessage(prompt, false);
-      sendToBartender(prompt);
-    });
-  });
 });
