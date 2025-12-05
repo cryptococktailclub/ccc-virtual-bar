@@ -1,642 +1,572 @@
-// Crypto Cocktail Club – Virtual Bar Experience
-// Bar TV, Vinyl Player, Requests Queue, Bar Bot (AI)
-
-// Run after DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-  // ---------- AUDIO PLAYER (Listening Station) ----------
+  /* =========================
+     THEME TOGGLE
+     ========================= */
+  const body = document.body;
+  const themeButtons = document.querySelectorAll(".theme-pill");
+
+  function setTheme(theme) {
+    body.classList.remove("theme-base", "theme-gold", "theme-platinum");
+    body.classList.add(`theme-${theme}`);
+  }
+
+  themeButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      themeButtons.forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      const theme = btn.dataset.theme || "base";
+      setTheme(theme);
+    });
+  });
+
+  /* =========================
+     STICKY HEADER AFTER HERO
+     ========================= */
+  const header = document.getElementById("mainHeader");
+  const hero = document.querySelector(".ccc-hero");
+  const mobileNavButton = document.getElementById("mobileNavButton");
+  const mobileNavDrawer = document.getElementById("mobileNavDrawer");
+  const mobileNavBackdrop = document.getElementById("mobileNavBackdrop");
+  const mobileNavClose = document.getElementById("mobileNavClose");
+
+  function updateHeaderVisibility() {
+    if (!hero || !header) return;
+    const threshold = hero.offsetHeight * 0.6;
+    if (window.scrollY > threshold) {
+      header.classList.add("header-visible");
+    } else {
+      header.classList.remove("header-visible");
+    }
+  }
+
+  updateHeaderVisibility();
+  window.addEventListener("scroll", updateHeaderVisibility);
+
+  if (mobileNavButton && mobileNavDrawer && mobileNavBackdrop && mobileNavClose) {
+    const openMobileNav = () => {
+      mobileNavDrawer.classList.add("open");
+      mobileNavBackdrop.classList.add("visible");
+    };
+    const closeMobileNav = () => {
+      mobileNavDrawer.classList.remove("open");
+      mobileNavBackdrop.classList.remove("visible");
+    };
+    mobileNavButton.addEventListener("click", openMobileNav);
+    mobileNavClose.addEventListener("click", closeMobileNav);
+    mobileNavBackdrop.addEventListener("click", closeMobileNav);
+  }
+
+  /* =========================
+     AUDIO PLAYER + VINYL SHELF
+     ========================= */
   const audio = document.getElementById("bar-audio");
+  const trackTitleEl = document.getElementById("track-title");
+  const trackArtistEl = document.getElementById("track-artist");
+  const trackDurationEl = document.getElementById("track-duration");
   const playBtn = document.getElementById("play-btn");
   const prevBtn = document.getElementById("prev-btn");
   const nextBtn = document.getElementById("next-btn");
   const volumeSlider = document.getElementById("volume-slider");
+  const timelineBar = document.getElementById("timeline-bar");
+  const timelineProgress = document.getElementById("timeline-progress");
+  const timeCurrentEl = document.getElementById("time-current");
+  const timeRemainingEl = document.getElementById("time-remaining");
+  const dockTrackEl = document.getElementById("dockTrack");
   const turntablePlatter = document.getElementById("turntablePlatter");
   const albumArt = document.getElementById("albumArt");
   const playerEq = document.getElementById("playerEq");
-
-  const trackTitleEl = document.getElementById("track-title");
-  const trackArtistEl = document.getElementById("track-artist");
-  const trackDurationEl = document.getElementById("track-duration");
-  const timeCurrentEl = document.getElementById("time-current");
-  const timeRemainingEl = document.getElementById("time-remaining");
-  const timelineBar = document.getElementById("timeline-bar");
-  const timelineProgress = document.getElementById("timeline-progress");
-  const dockTrackEl = document.getElementById("dockTrack");
-
   const vinylRow = document.getElementById("vinylRow");
+  const vinylItems = vinylRow ? vinylRow.querySelectorAll(".vinyl-item") : [];
 
-  const tracks = [
+  // NOTE: keep URLs matching your Netlify media bucket
+  const TRACKS = [
     {
       title: "Toby’s Mix",
       artist: "Toby",
-      durationLabel: "58:24",
-      src: "https://visionary-beignet-7d270e.netlify.app/audio/tobys-mix.mp3"
+      duration: "58:24",
+      src: "https://visionary-beignet-7d270e.netlify.app/audio/tobys-mix.mp3",
     },
     {
       title: "Gold Hour Spritz",
       artist: "Summer Mix",
-      durationLabel: "59:59",
-      src: "https://visionary-beignet-7d270e.netlify.app/audio/Summer%20mix.mp3"
+      duration: "59:10",
+      src: "https://visionary-beignet-7d270e.netlify.app/audio/summer_mix.mp3",
     },
     {
       title: "Midnight Chrome",
       artist: "Kartell Tribute – Roche Musique",
-      durationLabel: "59:32",
-      src: "https://visionary-beignet-7d270e.netlify.app/audio/Kartell%20Tribute%20Set%20-%20Roche%20Musique.mp3"
+      duration: "60:02",
+      src: "https://visionary-beignet-7d270e.netlify.app/audio/kartell_tribute.mp3",
     },
     {
       title: "Poolside Mirage",
       artist: "Solomun Boiler Room",
-      durationLabel: "59:45",
-      src: "https://visionary-beignet-7d270e.netlify.app/audio/Solomun%20Boiler%20Room%20DJ%20Set.mp3"
+      duration: "59:45",
+      src: "https://visionary-beignet-7d270e.netlify.app/audio/solomun_boiler_room.mp3",
     },
     {
       title: "Khruangbin Live",
       artist: "Pitchfork Live at Villain",
-      durationLabel: "43:20",
-      src: "https://visionary-beignet-7d270e.netlify.app/audio/Khruangbin%20at%20Villain%20_%20Pitchfork%20Live.mp3"
+      duration: "47:30",
+      src: "https://visionary-beignet-7d270e.netlify.app/audio/khruangbin_live.mp3",
     },
     {
       title: "Succession Beats",
       artist: "Jsco Music",
-      durationLabel: "59:05",
-      src: "https://visionary-beignet-7d270e.netlify.app/audio/Succession%20Beats%20-%20Jsco%20Music%20.mp3"
-    }
+      duration: "42:12",
+      src: "https://visionary-beignet-7d270e.netlify.app/audio/succession_beats.mp3",
+    },
   ];
 
   let currentTrackIndex = 0;
-  let isScrubbing = false;
+  let isDraggingTimeline = false;
 
   function formatTime(seconds) {
-    if (!Number.isFinite(seconds)) return "0:00";
-    const s = Math.max(0, Math.floor(seconds));
-    const min = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${min}:${sec.toString().padStart(2, "0")}`;
+    if (isNaN(seconds)) return "0:00";
+    const s = Math.floor(seconds);
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return `${m}:${r.toString().padStart(2, "0")}`;
   }
 
-  function updatePlayUI(isPlaying) {
-    if (playBtn) {
-      playBtn.textContent = isPlaying ? "Pause" : "Play";
-    }
-
-    if (turntablePlatter) {
-      turntablePlatter.classList.toggle("is-playing", isPlaying);
-    }
-
-    if (playerEq) {
-      playerEq.classList.toggle("is-playing", isPlaying);
-    }
-
-    if (albumArt) {
-      albumArt.classList.toggle("glow-active", isPlaying);
-    }
+  function setActiveVinyl(index) {
+    vinylItems.forEach((item, i) => {
+      if (i === index) {
+        item.classList.add("is-active");
+        // subtle bounce animation
+        item.style.animation = "none";
+        void item.offsetWidth;
+        item.style.animation = "vinylLand 0.45s ease-out";
+      } else {
+        item.classList.remove("is-active");
+        item.style.animation = "none";
+      }
+    });
   }
 
-  function updateTrackMeta(index) {
-    const track = tracks[index];
-    if (!track) return;
-    if (trackTitleEl) trackTitleEl.textContent = track.title;
-    if (trackArtistEl) trackArtistEl.textContent = track.artist;
-    if (trackDurationEl) trackDurationEl.textContent = track.durationLabel;
-    if (timeRemainingEl) timeRemainingEl.textContent = "-" + track.durationLabel;
-    if (dockTrackEl) dockTrackEl.textContent = `${track.title} — ${track.artist}`;
+  // record "drop" animation for platter
+  function triggerVinylDrop() {
+    if (!turntablePlatter) return;
+    turntablePlatter.classList.remove("drop-in");
+    // force reflow
+    void turntablePlatter.offsetWidth;
+    turntablePlatter.classList.add("drop-in");
   }
 
-  function loadTrack(index) {
-    if (!audio) return;
-    const track = tracks[index];
-    if (!track) return;
+  function updateDockTrack(track) {
+    if (!dockTrackEl || !track) return;
+    dockTrackEl.textContent = `${track.title} — ${track.artist}`;
+  }
+
+  function loadTrack(index, { autoplay = false } = {}) {
+    const track = TRACKS[index];
+    if (!track || !audio) return;
+
     currentTrackIndex = index;
     audio.src = track.src;
-    updateTrackMeta(index);
-    highlightVinyl(index);
+    audio.load();
+
+    if (trackTitleEl) trackTitleEl.textContent = track.title;
+    if (trackArtistEl) trackArtistEl.textContent = track.artist;
+    if (trackDurationEl) trackDurationEl.textContent = track.duration;
+    if (timeCurrentEl) timeCurrentEl.textContent = "0:00";
+    if (timeRemainingEl) timeRemainingEl.textContent = `-${track.duration}`;
+    if (timelineProgress) timelineProgress.style.width = "0%";
+
+    setActiveVinyl(index);
+    updateDockTrack(track);
+    triggerVinylDrop();
+
+    if (autoplay) {
+      playAudio();
+    } else {
+      pauseAudio();
+    }
   }
 
-  function playCurrentTrack() {
+  function setPlayingState(isPlaying) {
+    if (playBtn) playBtn.textContent = isPlaying ? "Pause" : "Play";
+    if (turntablePlatter) {
+      if (isPlaying) turntablePlatter.classList.add("is-playing");
+      else turntablePlatter.classList.remove("is-playing");
+    }
+    if (playerEq) {
+      if (isPlaying) playerEq.classList.add("is-playing");
+      else playerEq.classList.remove("is-playing");
+    }
+    if (albumArt) {
+      if (isPlaying) albumArt.classList.add("glow-active");
+      else albumArt.classList.remove("glow-active");
+    }
+  }
+
+  function playAudio() {
     if (!audio) return;
     audio
       .play()
-      .then(() => updatePlayUI(true))
-      .catch((err) => {
-        console.warn("Audio play blocked:", err);
+      .then(() => {
+        setPlayingState(true);
+      })
+      .catch(() => {
+        setPlayingState(false);
       });
   }
 
-  function pauseCurrentTrack() {
+  function pauseAudio() {
     if (!audio) return;
     audio.pause();
-    updatePlayUI(false);
+    setPlayingState(false);
   }
 
-  function togglePlay() {
-    if (!audio) return;
-    if (audio.paused) playCurrentTrack();
-    else pauseCurrentTrack();
+  if (playBtn) {
+    playBtn.addEventListener("click", () => {
+      if (!audio) return;
+      if (audio.paused) playAudio();
+      else pauseAudio();
+    });
   }
 
-  function playNextTrack() {
-    const nextIndex = (currentTrackIndex + 1) % tracks.length;
-    loadTrack(nextIndex);
-    playCurrentTrack();
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      const nextIndex = (currentTrackIndex - 1 + TRACKS.length) % TRACKS.length;
+      loadTrack(nextIndex, { autoplay: true });
+    });
   }
 
-  function playPrevTrack() {
-    const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
-    loadTrack(prevIndex);
-    playCurrentTrack();
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      const nextIndex = (currentTrackIndex + 1) % TRACKS.length;
+      loadTrack(nextIndex, { autoplay: true });
+    });
   }
 
-  if (audio && volumeSlider) {
-    audio.volume = parseFloat(volumeSlider.value ?? "0.8");
+  if (volumeSlider && audio) {
+    audio.volume = parseFloat(volumeSlider.value || "0.8");
     volumeSlider.addEventListener("input", () => {
-      audio.volume = parseFloat(volumeSlider.value || "0.8");
+      audio.volume = parseFloat(volumeSlider.value);
     });
   }
 
-  if (audio && playBtn) playBtn.addEventListener("click", togglePlay);
-  if (audio && nextBtn) nextBtn.addEventListener("click", playNextTrack);
-  if (audio && prevBtn) prevBtn.addEventListener("click", playPrevTrack);
-
-  if (audio && timelineBar && timelineProgress && timeCurrentEl && timeRemainingEl) {
-    timelineBar.addEventListener("click", (e) => {
-      const rect = timelineBar.getBoundingClientRect();
-      const ratio = (e.clientX - rect.left) / rect.width;
-      if (!Number.isFinite(ratio) || !audio.duration) return;
-      audio.currentTime = ratio * audio.duration;
+  if (audio) {
+    audio.addEventListener("timeupdate", () => {
+      if (isDraggingTimeline) return;
+      const current = audio.currentTime;
+      const duration = audio.duration || 0;
+      if (timeCurrentEl) timeCurrentEl.textContent = formatTime(current);
+      if (timeRemainingEl) timeRemainingEl.textContent = `-${formatTime(duration - current)}`;
+      if (timelineProgress && duration > 0) {
+        const pct = (current / duration) * 100;
+        timelineProgress.style.width = `${pct}%`;
+      }
     });
+
+    audio.addEventListener("ended", () => {
+      const nextIndex = (currentTrackIndex + 1) % TRACKS.length;
+      loadTrack(nextIndex, { autoplay: true });
+    });
+  }
+
+  if (timelineBar && audio) {
+    const seek = (event) => {
+      const rect = timelineBar.getBoundingClientRect();
+      const ratio = Math.min(Math.max(0, event.clientX - rect.left), rect.width) / rect.width;
+      const duration = audio.duration || 0;
+      audio.currentTime = ratio * duration;
+    };
 
     timelineBar.addEventListener("mousedown", (e) => {
-      isScrubbing = true;
-      const rect = timelineBar.getBoundingClientRect();
-      const ratio = (e.clientX - rect.left) / rect.width;
-      if (audio.duration && Number.isFinite(ratio)) {
-        audio.currentTime = Math.max(0, Math.min(audio.duration * ratio, audio.duration));
-      }
+      isDraggingTimeline = true;
+      seek(e);
     });
 
     window.addEventListener("mousemove", (e) => {
-      if (!isScrubbing) return;
-      const rect = timelineBar.getBoundingClientRect();
-      const ratio = (e.clientX - rect.left) / rect.width;
-      if (audio.duration && Number.isFinite(ratio)) {
-        audio.currentTime = Math.max(0, Math.min(audio.duration * ratio, audio.duration));
-      }
+      if (!isDraggingTimeline) return;
+      seek(e);
     });
 
     window.addEventListener("mouseup", () => {
-      if (isScrubbing) isScrubbing = false;
-    });
-
-    audio.addEventListener("timeupdate", () => {
-      if (!audio.duration) return;
-      const ratio = audio.currentTime / audio.duration;
-      timelineProgress.style.width = `${ratio * 100}%`;
-      timeCurrentEl.textContent = formatTime(audio.currentTime);
-      timeRemainingEl.textContent = "-" + formatTime(audio.duration - audio.currentTime);
-    });
-
-    audio.addEventListener("ended", playNextTrack);
-  }
-
-  function animateVinylToTurntable(sourceButton) {
-    if (!sourceButton || !turntablePlatter) return;
-
-    const btnRect = sourceButton.getBoundingClientRect();
-    const platterRect = turntablePlatter.getBoundingClientRect();
-
-    const size = Math.min(btnRect.width, btnRect.height, 140);
-    const startX = btnRect.left + btnRect.width / 2 - size / 2;
-    const startY = btnRect.top + btnRect.height / 2 - size / 2;
-    const endX = platterRect.left + platterRect.width / 2 - size / 2;
-    const endY = platterRect.top + platterRect.height / 2 - size / 2;
-
-    const flying = document.createElement("div");
-    flying.className = "flying-vinyl";
-    flying.style.width = `${size}px`;
-    flying.style.height = `${size}px`;
-    flying.style.left = `${startX}px`;
-    flying.style.top = `${startY}px`;
-
-    document.body.appendChild(flying);
-
-    requestAnimationFrame(() => {
-      flying.style.transform = `translate(${endX - startX}px, ${endY - startY}px) scale(0.6) rotate(540deg)`;
-      flying.style.opacity = "0";
-    });
-
-    flying.addEventListener("transitionend", () => {
-      flying.remove();
-    });
-  }
-
-  function highlightVinyl(index) {
-    if (!vinylRow) return;
-    const buttons = Array.from(vinylRow.querySelectorAll(".vinyl-item"));
-
-    buttons.forEach((btn, i) => {
-      const isActive = i === index;
-
-      btn.classList.toggle("is-active", isActive);
-      btn.classList.remove("vinyl-landing");
-
-      if (isActive) {
-        void btn.offsetWidth; // reflow so animation can restart
-        btn.classList.add("vinyl-landing");
+      if (isDraggingTimeline) {
+        isDraggingTimeline = false;
       }
     });
   }
 
-  if (vinylRow) {
-    const vinylButtons = Array.from(vinylRow.querySelectorAll(".vinyl-item"));
-    vinylButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const idx = Number(btn.dataset.trackIndex || 0);
-        animateVinylToTurntable(btn);
-        loadTrack(idx);
-        playCurrentTrack();
-      });
+  // Vinyl click → load track + drop animation
+  vinylItems.forEach((item, index) => {
+    item.addEventListener("click", () => {
+      loadTrack(index, { autoplay: true });
     });
-  }
+  });
 
-  loadTrack(currentTrackIndex);
+  // initial track
+  loadTrack(currentTrackIndex, { autoplay: false });
 
-  // ---------- THEME TOGGLE (Base / Gold / Platinum – colors only) ----------
-  const themeButtons = Array.from(document.querySelectorAll(".theme-pill"));
-  const bodyEl = document.body;
+  /* =========================
+     BAR TV
+     ========================= */
+  const barTvVideo = document.getElementById("barTvVideo");
+  const barTvChannelBtn = document.getElementById("barTvChannelBtn");
+  const barTvPlayBtn = document.getElementById("barTvPlayBtn");
+  const barTvMuteBtn = document.getElementById("barTvMuteBtn");
+  const barTvVolume = document.getElementById("barTvVolume");
+  const barTvTitle = document.getElementById("barTvTitle");
 
-  function setTheme(theme) {
-    if (!bodyEl) return;
-
-    bodyEl.classList.remove("theme-base", "theme-gold", "theme-platinum");
-    switch (theme) {
-      case "gold":
-        bodyEl.classList.add("theme-gold");
-        break;
-      case "platinum":
-        bodyEl.classList.add("theme-platinum");
-        break;
-      default:
-        bodyEl.classList.add("theme-base");
-    }
-
-    themeButtons.forEach((b) => {
-      b.classList.toggle("is-active", b.dataset.theme === theme);
-    });
-  }
-
-  if (themeButtons.length) {
-    themeButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const theme = btn.dataset.theme || "base";
-        setTheme(theme);
-      });
-    });
-  }
-  setTheme("base");
-
-  // ---------- BAR TV ----------
-  const tvVideo = document.getElementById("barTvVideo");
-  const tvChannelBtn = document.getElementById("barTvChannelBtn");
-  const tvPlayBtn = document.getElementById("barTvPlayBtn");
-  const tvMuteBtn = document.getElementById("barTvMuteBtn");
-  const tvVolumeSlider = document.getElementById("barTvVolume");
-  const tvTitleEl = document.getElementById("barTvTitle");
-
-  const tvChannels = [
+  const BAR_TAPES = [
     {
       title: "Bar Tape 01",
-      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_01.mp4"
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_01.mp4",
     },
     {
       title: "Bar Tape 02",
-      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_02.mp4"
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_02.mp4",
     },
     {
       title: "Bar Tape 03",
-      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_03.mp4"
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_03.mp4",
     },
     {
       title: "Bar Tape 04",
-      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_04.mp4"
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_04.mp4",
     },
     {
       title: "Bar Tape 05",
-      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_05.mp4"
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_05.mp4",
     },
     {
       title: "Bar Tape 06",
-      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_06.mp4"
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_06.mp4",
     },
     {
       title: "Bar Tape 07",
-      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_07.mp4"
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_07.mp4",
     },
     {
       title: "Bar Tape 08",
-      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_08.mp4"
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_08.mp4",
     },
     {
       title: "Bar Tape 09",
-      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_09.mp4"
-    }
+      src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_09.mp4",
+    },
   ];
 
-  let currentChannelIndex = 0;
+  let currentBarTapeIndex = 0;
 
-  function loadChannel(index) {
-    if (!tvVideo) return;
-    const chan = tvChannels[index];
-    if (!chan) return;
-    currentChannelIndex = index;
-    tvVideo.src = chan.src;
-    if (tvTitleEl) tvTitleEl.textContent = chan.title;
-    tvVideo.load();
-    tvVideo
-      .play()
-      .then(() => {
-        if (tvPlayBtn) tvPlayBtn.textContent = "⏸";
-      })
-      .catch(() => {
-        if (tvPlayBtn) tvPlayBtn.textContent = "▶";
-      });
+  function loadBarTape(index) {
+    if (!barTvVideo) return;
+    const tape = BAR_TAPES[index];
+    if (!tape) return;
+
+    currentBarTapeIndex = index;
+    barTvVideo.src = tape.src;
+    barTvVideo.load();
+    barTvVideo.play().catch(() => {});
+    if (barTvTitle) barTvTitle.textContent = tape.title;
+    if (barTvPlayBtn) barTvPlayBtn.textContent = "⏸";
   }
 
-  if (tvVideo) {
-    tvVideo.addEventListener("loadedmetadata", () => {
-      if (tvPlayBtn) tvPlayBtn.textContent = tvVideo.paused ? "▶" : "⏸";
+  if (barTvChannelBtn) {
+    barTvChannelBtn.addEventListener("click", () => {
+      const nextIndex = (currentBarTapeIndex + 1) % BAR_TAPES.length;
+      loadBarTape(nextIndex);
     });
   }
 
-  if (tvChannelBtn) {
-    tvChannelBtn.addEventListener("click", () => {
-      const nextIndex = (currentChannelIndex + 1) % tvChannels.length;
-      loadChannel(nextIndex);
-    });
-  }
-
-  if (tvPlayBtn && tvVideo) {
-    tvPlayBtn.addEventListener("click", () => {
-      if (tvVideo.paused) {
-        tvVideo
-          .play()
-          .then(() => {
-            tvPlayBtn.textContent = "⏸";
-          })
-          .catch(() => {
-            tvPlayBtn.textContent = "▶";
-          });
+  if (barTvPlayBtn && barTvVideo) {
+    barTvPlayBtn.addEventListener("click", () => {
+      if (barTvVideo.paused) {
+        barTvVideo.play().catch(() => {});
+        barTvPlayBtn.textContent = "⏸";
       } else {
-        tvVideo.pause();
-        tvPlayBtn.textContent = "▶";
+        barTvVideo.pause();
+        barTvPlayBtn.textContent = "▶";
       }
     });
   }
 
-  if (tvMuteBtn && tvVideo) {
-    tvMuteBtn.addEventListener("click", () => {
-      tvVideo.muted = !tvVideo.muted;
-      tvMuteBtn.textContent = tvVideo.muted ? "Sound: Off" : "Sound: On";
+  if (barTvMuteBtn && barTvVideo) {
+    barTvMuteBtn.addEventListener("click", () => {
+      barTvVideo.muted = !barTvVideo.muted;
+      barTvMuteBtn.textContent = barTvVideo.muted ? "Sound: Off" : "Sound: On";
     });
   }
 
-  if (tvVolumeSlider && tvVideo) {
-    tvVideo.volume = parseFloat(tvVolumeSlider.value || "0.5");
-    tvVolumeSlider.addEventListener("input", () => {
-      const v = parseFloat(tvVolumeSlider.value || "0.5");
-      tvVideo.volume = v;
+  if (barTvVolume && barTvVideo) {
+    barTvVideo.volume = parseFloat(barTvVolume.value || "0.5");
+    barTvVolume.addEventListener("input", () => {
+      barTvVideo.volume = parseFloat(barTvVolume.value);
     });
   }
 
-  if (tvVideo) {
-    loadChannel(currentChannelIndex);
+  // initial tape
+  loadBarTape(currentBarTapeIndex);
+
+  /* =========================
+     REQUEST QUEUE
+     ========================= */
+  const requestsForm = document.getElementById("requestsForm");
+  const requestsList = document.getElementById("requestsList");
+  const requestNameInput = document.getElementById("requestName");
+  const requestTrackInput = document.getElementById("requestTrack");
+  const requestNoteInput = document.getElementById("requestNote");
+
+  function renderRequests() {
+    if (!requestsList) return;
+    const saved = JSON.parse(localStorage.getItem("cccRequests") || "[]");
+    requestsList.innerHTML = "";
+    saved.forEach((req) => {
+      const div = document.createElement("div");
+      div.className = "request-item";
+      div.innerHTML = `
+        <strong>${req.track}</strong>
+        <div>${req.name || "Guest"}</div>
+        ${req.note ? `<div>${req.note}</div>` : ""}
+      `;
+      requestsList.appendChild(div);
+    });
   }
 
-  // ---------- BAR BOT (AI Bartender → Bar Bot) ----------
+  if (requestsForm) {
+    requestsForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = requestNameInput?.value.trim() || "";
+      const track = requestTrackInput?.value.trim() || "";
+      const note = requestNoteInput?.value.trim() || "";
+      if (!track) return;
+      const saved = JSON.parse(localStorage.getItem("cccRequests") || "[]");
+      saved.unshift({
+        name,
+        track,
+        note,
+        ts: Date.now(),
+      });
+      localStorage.setItem("cccRequests", JSON.stringify(saved.slice(0, 40)));
+      if (requestTrackInput) requestTrackInput.value = "";
+      if (requestNoteInput) requestNoteInput.value = "";
+      renderRequests();
+    });
+  }
+
+  renderRequests();
+
+  /* =========================
+     BAR BOT (AI BARTENDER)
+     ========================= */
   const bartenderForm = document.getElementById("bartenderForm");
   const bartenderInput = document.getElementById("bartenderInput");
   const bartenderMessages = document.getElementById("bartenderMessages");
   const bartenderResults = document.getElementById("bartenderResults");
   const bartenderChips = document.querySelectorAll(".bartender-chip");
 
-  const BARTENDER_ENDPOINT = "/.netlify/functions/ccc-bartender";
+  // very lightweight recipe metadata stub (full data comes from server / PDF extraction)
+  const MH_RECIPES = [
+    { name: "Gold Rush", category: "whiskey sour", glass: "rocks", method: "shake" },
+    { name: "Penicillin", category: "scotch sour", glass: "rocks", method: "shake" },
+    { name: "Paper Plane", category: "whiskey sour", glass: "coupe", method: "shake" },
+  ];
 
-  function appendBartenderMessage({ role, content }) {
+  function appendBartenderMessage({ from, text }) {
     if (!bartenderMessages) return;
-
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("bartender-message");
-    wrapper.classList.add(
-      role === "assistant" ? "bartender-message-bot" : "bartender-message-user"
-    );
+    const wrap = document.createElement("div");
+    wrap.className = "bartender-message";
 
     const avatar = document.createElement("div");
     avatar.className = "bartender-avatar";
 
     const body = document.createElement("div");
     body.className = "bartender-message-body";
-    body.innerText = content;
 
-    wrapper.appendChild(avatar);
-    wrapper.appendChild(body);
-    bartenderMessages.appendChild(wrapper);
+    if (from === "bot") {
+      wrap.classList.add("bartender-message-bot");
+    } else {
+      wrap.classList.add("bartender-message-user");
+    }
+
+    if (from === "bot") {
+      body.innerHTML = text;
+      wrap.appendChild(avatar);
+      wrap.appendChild(body);
+    } else {
+      body.textContent = text;
+      wrap.appendChild(body);
+    }
+
+    bartenderMessages.appendChild(wrap);
     bartenderMessages.scrollTop = bartenderMessages.scrollHeight;
   }
 
-  function setBartenderTyping(isTyping) {
+  function setTyping(isTyping) {
     if (!bartenderMessages) return;
-    let typingEl = bartenderMessages.querySelector(".bartender-typing-row");
-    if (isTyping) {
-      if (!typingEl) {
-        typingEl = document.createElement("div");
-        typingEl.className = "bartender-typing-row";
-        typingEl.innerHTML =
-          '<div class="bartender-typing"><span>.</span><span>.</span><span>.</span></div>';
-        bartenderMessages.appendChild(typingEl);
-      }
+    let el = bartenderMessages.querySelector(".bartender-typing");
+    if (isTyping && !el) {
+      el = document.createElement("div");
+      el.className = "bartender-typing";
+      el.innerHTML = `<span>.</span><span>.</span><span>.</span>`;
+      bartenderMessages.appendChild(el);
       bartenderMessages.scrollTop = bartenderMessages.scrollHeight;
-    } else if (typingEl) {
-      typingEl.remove();
+    } else if (!isTyping && el) {
+      el.remove();
     }
   }
 
-  async function callBarBot(prompt) {
-  appendBartenderMessage({ role: "user", content: prompt });
-  setBartenderTyping(true);
+  async function askBartender(question) {
+    if (!question) return;
+    appendBartenderMessage({ from: "user", text: question });
+    setTyping(true);
 
-  try {
-    const res = await fetch(BARTENDER_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      // send both keys to be backend-agnostic
-      body: JSON.stringify({ message: prompt, prompt })
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("Bar Bot HTTP error", res.status, text);
-      appendBartenderMessage({
-        role: "assistant",
-        content:
-          `I couldn’t reach the Bar Bot (HTTP ${res.status}).` +
-          ` If you’re debugging, check Netlify logs and the ccc-bartender function.`
+    try {
+      // send a small subset of recipes; server has full text
+      const response = await fetch("/.netlify/functions/ccc-bartender", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question,
+          recipes: MH_RECIPES,
+        }),
       });
-      return;
+
+      if (!response.ok) {
+        appendBartenderMessage({
+          from: "bot",
+          text:
+            "I couldn’t reach the back bar AI right now. Check your Netlify function and OpenAI key.",
+        });
+        return;
+      }
+
+      const data = await response.json();
+      const answer = data.answer || "";
+      appendBartenderMessage({ from: "bot", text: answer });
+    } catch (err) {
+      appendBartenderMessage({
+        from: "bot",
+        text: "Looks like there’s a connection issue. Try again in a moment.",
+      });
+    } finally {
+      setTyping(false);
     }
-
-    const data = await res.json();
-    console.log("Bar Bot response raw:", data);
-
-    // 🔧 Now also handle `answer` (what your function is returning)
-    let reply =
-      data.reply ??
-      data.message ??
-      data.text ??
-      data.answer ?? // <-- this line is the key fix
-      (Array.isArray(data.choices) && data.choices.length > 0
-        ? data.choices[0].message?.content || data.choices[0].text
-        : null);
-
-    if (!reply) {
-      // If still nothing, stringify the object so we SEE what the function returns
-      reply =
-        "Raw Bar Bot response:\n" +
-        (typeof data === "string" ? data : JSON.stringify(data, null, 2));
-    }
-
-    appendBartenderMessage({ role: "assistant", content: reply });
-  } catch (err) {
-    console.error("Bar Bot request failed", err);
-    appendBartenderMessage({
-      role: "assistant",
-      content:
-        "Something went wrong talking to the Bar Bot. Check your connection and Netlify function logs."
-    });
-  } finally {
-    setBartenderTyping(false);
   }
-}
 
-  if (bartenderForm && bartenderInput && bartenderMessages) {
+  if (bartenderForm && bartenderInput) {
     bartenderForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const prompt = bartenderInput.value.trim();
-      if (!prompt) return;
+      const q = bartenderInput.value.trim();
+      if (!q) return;
       bartenderInput.value = "";
-      callBarBot(prompt);
+      askBartender(q);
     });
   }
 
-  if (bartenderChips && bartenderChips.length && bartenderInput) {
-    bartenderChips.forEach((chip) => {
-      chip.addEventListener("click", () => {
-        const preset = chip.getAttribute("data-bartender-prompt");
-        if (!preset) return;
-        bartenderInput.value = preset;
-        bartenderInput.focus();
-      });
+  bartenderChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const prompt = chip.getAttribute("data-bartender-prompt");
+      if (!prompt) return;
+      askBartender(prompt);
     });
-  }
+  });
 
-  // ---------- REQUESTS QUEUE ----------
-  const requestsListEl = document.getElementById("requestsList");
-  const requestsForm = document.getElementById("requestsForm");
-  const requestNameInput = document.getElementById("requestName");
-  const requestTrackInput = document.getElementById("requestTrack");
-  const requestNoteInput = document.getElementById("requestNote");
-
-  let requests = [];
-
-  function renderRequests(list) {
-    if (!requestsListEl) return;
-    requestsListEl.innerHTML = "";
-
-    if (!list.length) {
-      const empty = document.createElement("div");
-      empty.className = "request-item";
-      empty.textContent = "No requests yet. Be the first to call a set.";
-      requestsListEl.appendChild(empty);
-      return;
-    }
-
-    list.forEach((req) => {
-      const item = document.createElement("div");
-      item.className = "request-item";
-
-      const who = document.createElement("div");
-      who.className = "request-who";
-      who.textContent = req.name || "Guest";
-
-      const what = document.createElement("div");
-      what.className = "request-what";
-      what.textContent = req.track;
-
-      const note = document.createElement("div");
-      note.className = "request-note";
-      note.textContent = req.note || "";
-
-      item.appendChild(who);
-      item.appendChild(what);
-      if (req.note) item.appendChild(note);
-
-      requestsListEl.appendChild(item);
-    });
-  }
-
-  function loadRequests() {
-    try {
-      const raw = localStorage.getItem("cccRequests");
-      if (!raw) return [];
-      const data = JSON.parse(raw);
-      if (!Array.isArray(data)) return [];
-      return data;
-    } catch {
-      return [];
-    }
-  }
-
-  function saveRequests(list) {
-    try {
-      localStorage.setItem("cccRequests", JSON.stringify(list));
-    } catch {
-      // ignore quota errors
-    }
-  }
-
-  if (requestsListEl) {
-    requests = loadRequests();
-    renderRequests(requests);
-  }
-
-  if (requestsForm) {
-    requestsForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      if (!requestTrackInput) return;
-
-      const track = requestTrackInput.value.trim();
-      if (!track) return;
-
-      const name = requestNameInput ? requestNameInput.value.trim() : "";
-      const note = requestNoteInput ? requestNoteInput.value.trim() : "";
-
-      const req = {
-        name,
-        track,
-        note,
-        ts: Date.now()
-      };
-
-      requests.push(req);
-      if (requests.length > 60) {
-        requests = requests.slice(-60);
-      }
-
-      saveRequests(requests);
-      renderRequests(requests);
-
-      requestTrackInput.value = "";
-      if (requestNoteInput) requestNoteInput.value = "";
-    });
+  // simple local "results" panel example (shows the stubbed recipes)
+  if (bartenderResults) {
+    bartenderResults.innerHTML = MH_RECIPES.map((r) => `<div>${r.name}</div>`).join("");
   }
 });
