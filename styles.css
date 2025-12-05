@@ -1655,14 +1655,9 @@ body.theme-platinum .album-art.glow-active {
 
 /* Smaller laptops: stack columns earlier for true full-width right side */
 @media (max-width: 1120px) {
-  .layout {
+  /* Stack Bar TV and Vinyl/Listening vertically */
+  .top-row {
     grid-template-columns: 1fr;
-  }
-
-  .left-column,
-  .right-column {
-    width: 100%;
-    max-width: 100%;
   }
 }
 
@@ -1679,48 +1674,26 @@ body.theme-platinum .album-art.glow-active {
 
 /* Mobile-ish */
 @media (max-width: 768px) {
-  .top-nav {
-    padding: 8px 12px;
-    border-radius: 16px;
-  }
-
-  .desktop-only {
-    display: none;
-  }
-
-  .mobile-nav-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
   .layout {
     margin-top: 20px;
+  }
+
+  .top-row {
     grid-template-columns: 1fr;
     gap: 16px;
-  }
-
-  .left-column,
-  .right-column {
-    gap: 16px;
-  }
-
-  main,
-  .card {
-    max-width: 100%;
   }
 
   .card {
     padding: 16px;
     border-radius: 18px;
     margin: 0 auto;
+    max-width: 100%;
   }
 
   .video-archive-card,
   .bartender-card,
   .vinyl-card,
-  .listening-card,
-  .requests-card {
+  .listening-card {
     width: 100%;
   }
 
@@ -1730,37 +1703,15 @@ body.theme-platinum .album-art.glow-active {
     max-width: 100%;
   }
 
-  .album-and-turntable {
-    grid-template-columns: 1fr;
-  }
-
-  .album-art {
-    height: 190px;
-  }
-
-  .turntable-platter {
-    width: 150px;
-    height: 150px;
-    border-width: 8px;
-  }
-
   .vinyl-row {
     flex-direction: column;
     overflow-x: hidden;
   }
+
   .vinyl-item {
     min-width: 0;
     max-width: 100%;
     width: 100%;
-  }
-
-  .membership-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .ccc-footer-social {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }
 
