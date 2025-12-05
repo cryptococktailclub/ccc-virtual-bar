@@ -1,20 +1,34 @@
 // netlify/functions/ccc-bartender.js
 
 const SYSTEM_PROMPT = `
-You are the house bartender for Crypto Cocktail Club, trained on the Milk & Honey cocktail canon.
+You are the CCC Bar Bot, house bartender for Crypto Cocktail Club,
+trained on the Milk & Honey cocktail canon.
 
-Rules:
+Core behavior:
 - Default to STRICT MILK & HONEY MODE.
 - Only give specs for drinks that exist in the Milk & Honey data you receive.
 - When asked for a known cocktail: give exact specs (amounts in oz), glass, ice, method, and garnish.
-- When user asks for variations or creative riffs: you may invent, but stay in the spirit of Milk & Honey (balanced, thoughtful, no gimmicks).
+- When user asks for variations or creative riffs: you may invent, but stay in the spirit of Milk & Honey
+  (balanced, thoughtful, no gimmicks).
 - When user lists ingredients: suggest 1–3 cocktails from the supplied data that fit, and explain why.
 - Do NOT hallucinate specs for drinks not present in the supplied recipe list. If you’re not sure, say so.
 - Measurements: always in oz (e.g. 2 oz, ¾ oz).
-- Format responses as:
-  1) Short description
-  2) Full spec (bulleted)
-  3) Brief notes (when useful).
+
+Style rules:
+- NEVER respond with greetings like “Hi, how can I help you?” or “What can I make you tonight?”.
+- NEVER ask the user what they want — always interpret the question and answer with a concrete recipe or short list of options.
+- Keep answers concise but complete; assume the reader is comfortable with cocktail terminology.
+
+Formatting:
+1) Short one-line description of the drink or set of options.
+2) Full spec in bullet form:
+   - Name
+   - Ingredients (with oz measurements)
+   - Method (shake/stir/build + steps)
+   - Glassware
+   - Ice
+   - Garnish
+3) Brief notes or variations (when useful).
 `;
 
 exports.handler = async (event, context) => {
@@ -41,8 +55,29 @@ exports.handler = async (event, context) => {
     body = {};
   }
 
-  const question = body.question || "";
+  // 🔧 Accept multiple possible fields from the frontend
+  const rawQuestion =
+    body.question ||
+    body.message ||
+    body.prompt ||
+    body.input ||
+    "";
+
+  const question =
+    typeof rawQuestion === "string" ? rawQuestion.trim() : String(rawQuestion || "").trim();
+
   const recipes = Array.isArray(body.recipes) ? body.recipes : [];
+
+  // If the user somehow sends an empty prompt, return a helpful hint instead of wasting an OpenAI call
+  if (!question) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        answer:
+          "Tell me a drink by name (e.g. “Gold Rush”, “Penicillin”), a base spirit and mood (e.g. “rye, stirred, boozy”), or list what’s on your bar and I’ll stay within the Milk & Honey playbook.",
+      }),
+    };
+  }
 
   // Build compact recipe context from the subset sent by the browser
   const recipeContext = recipes
@@ -63,8 +98,8 @@ Ice: ${r.ice || "-"} · Garnish: ${r.garnish || "-"}
     {
       role: "user",
       content:
-        `Here is a subset of Milk & Honey recipes you may rely on:\n\n` +
-        recipeContext +
+        `Here is a subset of Milk & Honey recipes you may rely on (if any are provided):\n\n` +
+        (recipeContext || "(No explicit recipes were supplied in this request.)") +
         `\n\nUser question: ${question}`,
     },
   ];
