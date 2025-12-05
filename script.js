@@ -460,62 +460,63 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function callBarBot(prompt) {
-    appendBartenderMessage({ role: "user", content: prompt });
-    setBartenderTyping(true);
+  appendBartenderMessage({ role: "user", content: prompt });
+  setBartenderTyping(true);
 
-    try {
-      const res = await fetch(BARTENDER_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        // send both keys to be backend-agnostic
-        body: JSON.stringify({ message: prompt, prompt })
-      });
+  try {
+    const res = await fetch(BARTENDER_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      // send both keys to be backend-agnostic
+      body: JSON.stringify({ message: prompt, prompt })
+    });
 
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("Bar Bot HTTP error", res.status, text);
-        appendBartenderMessage({
-          role: "assistant",
-          content:
-            `I couldn’t reach the Bar Bot (HTTP ${res.status}).` +
-            ` If you’re debugging, check Netlify logs and the ccc-bartender function.`
-        });
-        return;
-      }
-
-      const data = await res.json();
-      console.log("Bar Bot response raw:", data);
-
-      // 🔧 Flexible extraction: handle common OpenAI / custom shapes
-      let reply =
-        data.reply ??
-        data.message ??
-        data.text ??
-        (Array.isArray(data.choices) && data.choices.length > 0
-          ? data.choices[0].message?.content || data.choices[0].text
-          : null);
-
-      if (!reply) {
-        // if still nothing, stringify the object so we SEE what the function returns
-        reply =
-          "Raw Bar Bot response:\n" +
-          (typeof data === "string" ? data : JSON.stringify(data, null, 2));
-      }
-
-      appendBartenderMessage({ role: "assistant", content: reply });
-    } catch (err) {
-      console.error("Bar Bot request failed", err);
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("Bar Bot HTTP error", res.status, text);
       appendBartenderMessage({
         role: "assistant",
         content:
-          "Something went wrong talking to the Bar Bot. Check your connection and Netlify function logs."
+          `I couldn’t reach the Bar Bot (HTTP ${res.status}).` +
+          ` If you’re debugging, check Netlify logs and the ccc-bartender function.`
       });
-    } finally {
-      setBartenderTyping(false);
+      return;
     }
+
+    const data = await res.json();
+    console.log("Bar Bot response raw:", data);
+
+    // 🔧 Now also handle `answer` (what your function is returning)
+    let reply =
+      data.reply ??
+      data.message ??
+      data.text ??
+      data.answer ?? // <-- this line is the key fix
+      (Array.isArray(data.choices) && data.choices.length > 0
+        ? data.choices[0].message?.content || data.choices[0].text
+        : null);
+
+    if (!reply) {
+      // If still nothing, stringify the object so we SEE what the function returns
+      reply =
+        "Raw Bar Bot response:\n" +
+        (typeof data === "string" ? data : JSON.stringify(data, null, 2));
+    }
+
+    appendBartenderMessage({ role: "assistant", content: reply });
+  } catch (err) {
+    console.error("Bar Bot request failed", err);
+    appendBartenderMessage({
+      role: "assistant",
+      content:
+        "Something went wrong talking to the Bar Bot. Check your connection and Netlify function logs."
+    });
+  } finally {
+    setBartenderTyping(false);
   }
+}
 
   if (bartenderForm && bartenderInput && bartenderMessages) {
     bartenderForm.addEventListener("submit", (e) => {
