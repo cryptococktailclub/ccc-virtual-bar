@@ -17,25 +17,57 @@
         <img src="BASE_TRANSPARENT.PNG" class="ccc-logo" alt="CCC Logo" />
         <div class="brand-text">
           <span class="brand-title">Crypto Cocktail Club</span>
-          <span class="brand-subtitle brand-subtitle-animated">Virtual Bar Experience</span>
+          <span class="brand-subtitle brand-subtitle-animated">
+            Virtual Bar Experience
+          </span>
         </div>
       </div>
 
       <nav class="nav-links desktop-only">
-        <button class="nav-link is-active" type="button" data-scroll-target="vinylShelfSection">Listening Room</button>
-        <a href="https://cryptococktailclub.com" target="_blank" rel="noopener noreferrer" class="nav-link">Litepaper</a>
+        <button
+          class="nav-link is-active"
+          type="button"
+          data-scroll-target="vinylShelfSection"
+        >
+          Listening Room
+        </button>
+        <a
+          href="https://cryptococktailclub.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="nav-link nav-icon-link"
+          aria-label="Open CCC Litepaper"
+          title="Litepaper"
+        >
+          📄
+        </a>
       </nav>
 
-      <button class="mobile-nav-button" id="mobileNavButton">☰</button>
+      <button class="mobile-nav-button" id="mobileNavButton" type="button">
+        ☰
+      </button>
     </header>
 
+    <!-- Mobile nav -->
     <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
     <nav class="mobile-nav-drawer" id="mobileNavDrawer">
-      <button class="mobile-nav-close" id="mobileNavClose">✕</button>
-      <button class="mobile-nav-item" data-scroll-target="vinylShelfSection">Listening Room</button>
-      <a href="https://cryptococktailclub.com" target="_blank" class="mobile-nav-item">Litepaper</a>
+      <button class="mobile-nav-close" id="mobileNavClose" type="button">✕</button>
+      <button
+        class="mobile-nav-item"
+        type="button"
+        data-scroll-target="vinylShelfSection"
+      >
+        Listening Room
+      </button>
+      <a
+        href="https://cryptococktailclub.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mobile-nav-item"
+      >
+        Litepaper
+      </a>
     </nav>
-
 
     <!-- ===========================
          HERO SECTION
@@ -52,12 +84,12 @@
       </div>
     </section>
 
-
     <!-- ===========================
-         VINYL SHELF (Section 1)
+         MAIN (ONE COLUMN)
     ============================ -->
     <main class="layout-main">
 
+      <!-- VINYL SHELF -->
       <section class="card vinyl-card" id="vinylShelfSection">
         <div class="section-header">
           <h2>Vinyl Shelf</h2>
@@ -115,10 +147,7 @@
         </div>
       </section>
 
-
-      <!-- ===========================
-           LISTENING ROOM (Section 2)
-      ============================ -->
+      <!-- LISTENING ROOM -->
       <section class="card listening-card">
         <div class="section-header-main">
           <div class="section-header">
@@ -126,9 +155,15 @@
             <p>Slow pours, warm vinyl, chrome neon.</p>
           </div>
           <div class="theme-toggle" id="themeToggle">
-            <button class="theme-pill is-active" data-theme="base">Base</button>
-            <button class="theme-pill" data-theme="gold">Gold</button>
-            <button class="theme-pill" data-theme="platinum">Platinum</button>
+            <button class="theme-pill is-active" type="button" data-theme="base">
+              Base
+            </button>
+            <button class="theme-pill" type="button" data-theme="gold">
+              Gold
+            </button>
+            <button class="theme-pill" type="button" data-theme="platinum">
+              Platinum
+            </button>
           </div>
         </div>
 
@@ -139,7 +174,11 @@
             <div class="album-art-wrapper">
               <div class="album-art" id="albumArt">
                 <div class="album-face">
-                  <img src="BASE_TRANSPARENT.PNG" class="album-logo" alt="CCC Logo" />
+                  <img
+                    src="BASE_TRANSPARENT.PNG"
+                    class="album-logo"
+                    alt="CCC Logo"
+                  />
                 </div>
                 <div class="album-face album-face-back">
                   <div class="card-back-copy">
@@ -152,14 +191,13 @@
               </div>
             </div>
 
-            <!-- Turntable -->
+            <!-- Turntable + Player -->
             <div class="turntable">
               <div class="turntable-inner">
                 <div class="turntable-platter" id="turntablePlatter">
                   <div class="turntable-label"></div>
                 </div>
 
-                <!-- Audio Player -->
                 <div class="player-panel">
                   <div class="now-playing-label">Now Playing</div>
                   <div class="now-playing-info">
@@ -172,7 +210,10 @@
 
                   <div class="player-timeline">
                     <div class="timeline-bar" id="timeline-bar">
-                      <div class="timeline-progress" id="timeline-progress"></div>
+                      <div
+                        class="timeline-progress"
+                        id="timeline-progress"
+                      ></div>
                     </div>
                     <div class="timeline-meta">
                       <span id="time-current">0:00</span>
@@ -181,13 +222,26 @@
                   </div>
 
                   <div class="player-controls">
-                    <button class="icon-btn" id="prev-btn">◀◀</button>
-                    <button class="play-btn" id="play-btn">Play</button>
-                    <button class="icon-btn" id="next-btn">▶▶</button>
+                    <button class="icon-btn" id="prev-btn" type="button">
+                      ◀◀
+                    </button>
+                    <button class="play-btn" id="play-btn" type="button">
+                      Play
+                    </button>
+                    <button class="icon-btn" id="next-btn" type="button">
+                      ▶▶
+                    </button>
 
                     <div class="volume-block">
                       <span class="volume-label">Volume</span>
-                      <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.8" />
+                      <input
+                        type="range"
+                        id="volume-slider"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value="0.8"
+                      />
                     </div>
                   </div>
 
@@ -197,32 +251,52 @@
                     <span class="eq-bar eq-bar-3"></span>
                     <span class="eq-bar eq-bar-4"></span>
                   </div>
-
                 </div>
               </div>
-            </div><!-- end turntable -->
+            </div><!-- /turntable -->
 
           </div>
         </div>
       </section>
 
-
-      <!-- ===========================
-           BAR BOT (Section 3)
-      ============================ -->
+      <!-- BAR BOT (AI BARTENDER) -->
       <section class="card bartender-card">
         <div class="section-header">
           <h2>Bar Bot</h2>
-          <p>Your AI bartender — powered by Milk & Honey specs.</p>
+          <p>Your AI bartender — powered by Milk &amp; Honey specs.</p>
         </div>
 
         <div class="bartender-quick-row">
           <span class="bartender-quick-label">Shortcuts:</span>
           <div class="bartender-chip-row">
-            <button class="bartender-chip" data-bartender-prompt="Recommend a refreshing gin sour.">Gin · Refreshing</button>
-            <button class="bartender-chip" data-bartender-prompt="Recommend a stirred whiskey drink, spirit-forward.">Whiskey · Stirred</button>
-            <button class="bartender-chip" data-bartender-prompt="Suggest a rum daiquiri variation.">Rum · Daiquiri</button>
-            <button class="bartender-chip" data-bartender-prompt="Recommend something low-ABV and spritzy.">Low-ABV</button>
+            <button
+              class="bartender-chip"
+              type="button"
+              data-bartender-prompt="Recommend a refreshing gin sour."
+            >
+              Gin · Refreshing
+            </button>
+            <button
+              class="bartender-chip"
+              type="button"
+              data-bartender-prompt="Recommend a stirred whiskey drink, spirit-forward."
+            >
+              Whiskey · Stirred
+            </button>
+            <button
+              class="bartender-chip"
+              type="button"
+              data-bartender-prompt="Suggest a rum daiquiri variation."
+            >
+              Rum · Daiquiri
+            </button>
+            <button
+              class="bartender-chip"
+              type="button"
+              data-bartender-prompt="Recommend something low-ABV and spritzy."
+            >
+              Low-ABV
+            </button>
           </div>
         </div>
 
@@ -232,24 +306,30 @@
           <div class="bartender-message bartender-message-bot">
             <div class="bartender-avatar"></div>
             <div class="bartender-message-body">
-              <strong>Bar Bot:</strong> Ask for a classic, list ingredients, or request a riff — I’ll stay true to the Milk & Honey playbook.
+              <strong>Bar Bot:</strong>
+              Ask for a classic, list ingredients, or request a riff — I’ll stay in
+              the Milk &amp; Honey universe.
             </div>
           </div>
         </div>
 
         <form class="bartender-form" id="bartenderForm">
-          <textarea id="bartenderInput" class="bartender-input" rows="2" placeholder="Ask Bar Bot anything…"></textarea>
+          <textarea
+            id="bartenderInput"
+            class="bartender-input"
+            rows="2"
+            placeholder="Ask Bar Bot anything… e.g. “What’s the spec for a Gold Rush?”"
+          ></textarea>
           <div class="bartender-footer-row">
-            <span class="bartender-hint">CCC Bar Bot · Milk & Honey Specs</span>
-            <button class="bartender-submit-btn" type="submit">Ask Bar Bot</button>
+            <span class="bartender-hint">CCC Bar Bot · Milk &amp; Honey specs only.</span>
+            <button class="bartender-submit-btn" type="submit">
+              Ask Bar Bot
+            </button>
           </div>
         </form>
       </section>
 
-
-      <!-- ===========================
-           BAR TV (Section 4)
-      ============================ -->
+      <!-- BAR TV -->
       <section class="card video-archive-card">
         <div class="section-header">
           <h2>Bar TV Archive</h2>
@@ -258,7 +338,6 @@
 
         <div class="bar-tv-frame">
           <div class="bar-tv-shell">
-
             <div class="bar-tv-shell-top">
               <div class="bar-tv-brand">CCC-Vision</div>
               <div class="bar-tv-lights">
@@ -267,26 +346,56 @@
               </div>
             </div>
 
-            <div class="bar-tv-inner">
+            <div class="bar-tv-inner" id="barTvInner">
               <div class="bar-tv-mortise">
                 <div class="bar-tv-aspect">
                   <video
                     id="barTvVideo"
                     class="bar-tv-screen"
                     src="https://visionary-beignet-7d270e.netlify.app/video/bar_tape_01.mp4"
-                    muted loop autoplay playsinline preload="metadata"
+                    muted
+                    loop
+                    autoplay
+                    playsinline
+                    preload="metadata"
                   ></video>
                 </div>
               </div>
 
               <div class="bar-tv-volume-wrap">
                 <span class="bar-tv-volume-label">VOL</span>
-                <input type="range" id="barTvVolume" class="bar-tv-volume" min="0" max="1" step="0.05" value="0.5" />
+                <input
+                  type="range"
+                  id="barTvVolume"
+                  class="bar-tv-volume"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value="0.5"
+                />
               </div>
 
-              <button class="bar-tv-channel-btn" id="barTvChannelBtn">CH+</button>
-              <button class="bar-tv-play-btn" id="barTvPlayBtn">⏸</button>
-              <button class="bar-tv-sound-btn" id="barTvMuteBtn">Sound: Off</button>
+              <button
+                class="bar-tv-channel-btn"
+                id="barTvChannelBtn"
+                type="button"
+              >
+                CH+
+              </button>
+              <button
+                class="bar-tv-play-btn"
+                id="barTvPlayBtn"
+                type="button"
+              >
+                ⏸
+              </button>
+              <button
+                class="bar-tv-sound-btn"
+                id="barTvMuteBtn"
+                type="button"
+              >
+                Sound: Off
+              </button>
             </div>
 
             <div class="bar-tv-bottom">
@@ -296,42 +405,86 @@
                 <div class="tv-knob small"></div>
               </div>
             </div>
-
           </div>
 
           <div class="video-archive-meta">
-            <div class="video-archive-title" id="barTvTitle">Bar Tape 01</div>
+            <div class="video-archive-title" id="barTvTitle">
+              Bar Tape 01
+            </div>
             <div class="video-archive-label">Cocktail Tapes</div>
           </div>
-
         </div>
       </section>
-
     </main>
 
-
-    <!-- ===========================
-         FOOTER + DISCLAIMER
-    ============================ -->
+    <!-- DISCLAIMER -->
     <section class="ccc-footer-legal">
-      © Crypto Cocktail Club. All video and audio content are presented for cultural and community enjoyment only. CCC claims no ownership of third-party works. Contact us for removal.
+      © Crypto Cocktail Club. All video and audio content featured in this virtual lounge
+      is presented for community enjoyment, cultural reference, and archival appreciation only.
+      CCC does not claim ownership of any third-party recordings. All rights remain with their
+      respective creators and copyright holders. If you are a rights holder and have concerns,
+      please contact us for prompt removal.
     </section>
 
+    <!-- FOOTER -->
     <footer class="ccc-footer-social">
       <div class="footer-now">
         <span class="footer-label">Now Playing</span>
         <span class="footer-track" id="dockTrack">Toby’s Mix — Toby</span>
       </div>
-
       <div class="footer-links">
-        <a href="https://x.com/Cocktail2Crypto" target="_blank" class="footer-link primary">Follow us on X</a>
-        <a href="https://discord.gg/6N6H8nnv" target="_blank" class="footer-link secondary">Join Discord</a>
+        <a
+          href="https://x.com/Cocktail2Crypto"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-link primary"
+        >
+          Follow us on X
+        </a>
+        <a
+          href="https://discord.gg/6N6H8nnv"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-link secondary"
+        >
+          Join Discord
+        </a>
       </div>
     </footer>
-
   </div>
 
   <audio id="bar-audio"></audio>
   <script src="script.js"></script>
+
+  <!-- Small inline helper to add vinyl drop + album glow -->
+  <script>
+    (function () {
+      const albumArt = document.getElementById("albumArt");
+      const audioEl = document.getElementById("bar-audio");
+      const vinylItems = document.querySelectorAll(".vinyl-item");
+
+      if (!albumArt) return;
+
+      // Drop animation when a vinyl is clicked
+      vinylItems.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          albumArt.classList.remove("album-drop");
+          // Force reflow so animation can retrigger
+          void albumArt.offsetWidth;
+          albumArt.classList.add("album-drop");
+        });
+      });
+
+      // Glow while music is playing (fallback if core JS doesn't already handle it)
+      if (audioEl) {
+        audioEl.addEventListener("play", () => {
+          albumArt.classList.add("glow-active");
+        });
+        audioEl.addEventListener("pause", () => {
+          albumArt.classList.remove("glow-active");
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
