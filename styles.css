@@ -1,623 +1,856 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2822
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+/* ========================================================================
+   CRYPTO COCKTAIL CLUB — VIRTUAL BAR EXPERIENCE
+   styles.css v5 — immersive bar environment engine
+   ======================================================================== */
 
-\f0\fs24 \cf0 /* =========================================================\
-   ROOT VARIABLES \'97 THEME REACTIVE WOOD + CCC COLORS\
-   ========================================================= */\
-:root \{\
-  /* Accents */\
-  --accent-pink: #ff1493;\
-  --accent-gold: #ffd700;\
-  --accent-plat: #d6e2ff;\
-\
-  --text-primary: #ffffff;\
-  --text-muted: #c3bcd9;\
-\
-  --shadow-deep: 0 22px 50px rgba(0,0,0,0.65);\
-\
-  /* Dynamic wood coloring (updated by theme classes) */\
-  --wood-top: #1a0f18;\
-  --wood-mid: #2c0e2b;\
-  --wood-bottom: #12030f;\
-\
-  /* Pendant glow colors */\
-  --orb-core: #fff9e5;\
-  --orb-mid: rgba(255,105,180,0.35);\
-  --orb-halo: rgba(255,20,147,0.25);\
-\
-  /* Counter underlight color */\
-  --counter-glow: rgba(255,105,180,0.25);\
-\}\
-\
-/* ========== THEME OVERRIDES ========== */\
-\
-/* GOLD */\
-body.theme-gold \{\
-  --wood-top: #2b1905;\
-  --wood-mid: #6a4008;\
-  --wood-bottom: #1b0d03;\
-\
-  --orb-core: #fff6d7;\
-  --orb-mid: rgba(255,210,80,0.45);\
-  --orb-halo: rgba(255,215,0,0.35);\
-\
-  --counter-glow: rgba(255,195,80,0.35);\
-\}\
-\
-/* PLATINUM */\
-body.theme-platinum \{\
-  --wood-top: #10131a;\
-  --wood-mid: #2a2f3a;\
-  --wood-bottom: #080a0f;\
-\
-  --orb-core: #f8fbff;\
-  --orb-mid: rgba(150,170,220,0.45);\
-  --orb-halo: rgba(200,210,255,0.32);\
-\
-  --counter-glow: rgba(200,210,255,0.28);\
-\}\
-\
-/* =========================================================\
-   GLOBAL RESET + TYPOGRAPHY\
-   ========================================================= */\
-* \{\
-  margin: 0;\
-  padding: 0;\
-  box-sizing: border-box;\
-\}\
-\
-html, body \{\
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;\
-  background: #05010f;\
-  color: var(--text-primary);\
-  width: 100%;\
-  overflow-x: hidden;\
-\}\
-\
-/* Smooth UI transitions */\
-body, .card, .bar-backwall, .bar-counter \{\
-  transition: all 0.5s ease;\
-\}\
-\
-/* =========================================================\
-   STICKY HEADER\
-   ========================================================= */\
-.top-nav \{\
-  position: fixed;\
-  top: -80px;\
-  left: 50%;\
-  transform: translateX(-50%);\
-  width: 96%;\
-  max-width: 1180px;\
-  padding: 10px 16px;\
-  background: rgba(10, 5, 25, 0.92);\
-  border-radius: 28px;\
-  border: 1px solid rgba(255,255,255,0.08);\
-  box-shadow: 0 14px 40px rgba(0,0,0,0.6);\
-  display: flex;\
-  justify-content: space-between;\
-  align-items: center;\
-  z-index: 50;\
-  opacity: 0;\
-  transition: top 0.4s ease, opacity 0.4s ease;\
-\}\
-\
-.top-nav.visible \{\
-  top: 12px;\
-  opacity: 1;\
-\}\
-\
-.nav-links \{\
-  display: flex;\
-  gap: 10px;\
-\}\
-\
-.nav-link \{\
-  padding: 6px 12px;\
-  font-size: 0.82rem;\
-  border-radius: 999px;\
-  color: var(--text-muted);\
-  cursor: pointer;\
-  background: rgba(255,255,255,0.06);\
-  text-decoration: none;\
-\}\
-\
-.nav-link:hover \{\
-  background: rgba(255,255,255,0.12);\
-\}\
-\
-.nav-icon-link \{\
-  font-size: 1.2rem;\
-  padding: 4px 10px;\
-\}\
-\
-/* Mobile Menu */\
-.mobile-nav-button \{\
-  display: none;\
-  background: rgba(255,255,255,0.08);\
-  padding: 6px 10px;\
-  border-radius: 8px;\
-  color: white;\
-  font-size: 1.2rem;\
-\}\
-\
-/* Mobile Menu Drawer */\
-.mobile-nav-backdrop \{\
-  position: fixed;\
-  inset: 0;\
-  background: rgba(0,0,0,0.55);\
-  backdrop-filter: blur(4px);\
-  opacity: 0;\
-  pointer-events: none;\
-  transition: opacity 0.3s ease;\
-\}\
-\
-.mobile-nav-backdrop.visible \{\
-  opacity: 1;\
-  pointer-events: auto;\
-\}\
-\
-.mobile-nav-drawer \{\
-  position: fixed;\
-  bottom: -260px;\
-  left: 0;\
-  right: 0;\
-  background: #0c0718;\
-  padding: 16px;\
-  border-radius: 18px 18px 0 0;\
-  transition: transform 0.3s ease;\
-  transform: translateY(100%);\
-  z-index: 60;\
-\}\
-\
-.mobile-nav-drawer.open \{\
-  transform: translateY(0);\
-\}\
-\
-.mobile-nav-item \{\
-  display: block;\
-  padding: 10px;\
-  margin-bottom: 8px;\
-  background: rgba(255,255,255,0.08);\
-  border-radius: 10px;\
-  color: white;\
-  text-decoration: none;\
-\}\
-\
-/* =========================================================\
-   HERO SECTION\
-   ========================================================= */\
-.ccc-hero \{\
-  min-height: 92vh;\
-  padding: 40px 16px;\
-  display: flex;\
-  flex-direction: column;\
-  justify-content: center;\
-  text-align: center;\
-\}\
-\
-.hero-inner \{\
-  animation: heroFadeIn 1s ease forwards;\
-  opacity: 0;\
-  transform: translateY(30px);\
-\}\
-\
-@keyframes heroFadeIn \{\
-  to \{ opacity: 1; transform: translateY(0); \}\
-\}\
-\
-.hero-logo \{\
-  width: 150px;\
-  height: 150px;\
-  margin-bottom: 16px;\
-  filter: drop-shadow(0 0 25px rgba(0,0,0,0.8));\
-\}\
-\
-.hero-title \{\
-  font-size: 2rem;\
-  letter-spacing: 0.1em;\
-  text-transform: uppercase;\
-\}\
-\
-.hero-subtitle \{\
-  margin-top: 10px;\
-  font-size: 1rem;\
-  color: var(--text-muted);\
-\}\
-\
-.scroll-arrow \{\
-  font-size: 1.4rem;\
-  opacity: 0.9;\
-  animation: arrowBounce 1.4s infinite ease-in-out;\
-\}\
-\
-@keyframes arrowBounce \{\
-  0%,100% \{ transform: translateY(0); \}\
-  50% \{ transform: translateY(6px); \}\
-\}\
-\
-/* =========================================================\
-   BAR BACKWALL \'97 THEME-REACTIVE WOOD\
-   ========================================================= */\
-.bar-backwall \{\
-  width: 100%;\
-  padding: 60px 16px 30px;\
-  background: linear-gradient(180deg, var(--wood-top), var(--wood-mid), var(--wood-bottom));\
-  box-shadow: inset 0 0 80px rgba(0,0,0,0.5);\
-  position: relative;\
-\}\
-\
-/* Pendant Lights */\
-.bar-lights \{\
-  display: flex;\
-  justify-content: space-evenly;\
-  margin-bottom: 20px;\
-\}\
-\
-.light-orb \{\
-  width: 38px;\
-  height: 38px;\
-  border-radius: 50%;\
-  background: radial-gradient(circle,\
-    var(--orb-core) 0%,\
-    var(--orb-mid) 45%,\
-    var(--orb-halo) 80%,\
-    transparent 100%\
-  );\
-  filter: blur(1px);\
-  animation: orbPulse 4s infinite ease-in-out;\
-\}\
-\
-@keyframes orbPulse \{\
-  0% \{ transform: scale(1); opacity: 0.85; \}\
-  50% \{ transform: scale(1.08); opacity: 1; \}\
-  100% \{ transform: scale(1); opacity: 0.85; \}\
-\}\
-\
-/* =========================================================\
-   VINYL SHELF\
-   ========================================================= */\
-.vinyl-shelf-wrapper \{\
-  background: linear-gradient(180deg, #00000033, transparent);\
-  padding: 10px 0 20px;\
-\}\
-\
-.vinyl-row \{\
-  display: flex;\
-  gap: 14px;\
-  overflow-x: auto;\
-  padding: 10px 4px;\
-\}\
-\
-.vinyl-item \{\
-  min-width: 150px;\
-  padding: 10px;\
-  border-radius: 14px;\
-  background: rgba(255,255,255,0.06);\
-  border: 1px solid rgba(255,255,255,0.14);\
-  color: white;\
-  backdrop-filter: blur(4px);\
-  cursor: pointer;\
-  transition: transform 0.2s ease, box-shadow 0.2s ease;\
-\}\
-\
-.vinyl-item:hover \{\
-  transform: translateY(-3px);\
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5);\
-\}\
-\
-.vinyl-item.is-active \{\
-  border-color: var(--accent-gold);\
-  box-shadow: 0 0 15px var(--accent-gold);\
-\}\
-\
-.vinyl-spine \{\
-  writing-mode: vertical-rl;\
-  font-size: 0.8rem;\
-  color: var(--text-muted);\
-\}\
-\
-.vinyl-face h3 \{\
-  font-size: 0.9rem;\
-\}\
-\
-/* =========================================================\
-   MOUNTED BAR TV (4\'d73 CRT)\
-   ========================================================= */\
-.bar-tv-mounted \{\
-  width: 100%;\
-  margin-top: 40px;\
-  display: flex;\
-  justify-content: center;\
-\}\
-\
-.bar-tv-frame \{\
-  width: 420px;\
-  padding: 14px;\
-  background: #25190c;\
-  border-radius: 20px;\
-  border: 2px solid rgba(0,0,0,0.8);\
-  box-shadow:\
-    inset 0 0 8px rgba(0,0,0,0.9),\
-    0 0 40px rgba(255,180,60,0.25);\
-\}\
-\
-.bar-tv-aspect \{\
-  width: 100%;\
-  padding-top: 75%; /* 4\'d73 ratio */\
-  position: relative;\
-  overflow: hidden;\
-  border-radius: 10px;\
-  background: black;\
-\}\
-\
-.bar-tv-screen \{\
-  position: absolute;\
-  inset: 0;\
-  object-fit: cover;\
-\}\
-\
-/* TV Controls */\
-.bar-tv-controls \{\
-  margin-top: 12px;\
-  display: flex;\
-  justify-content: space-between;\
-\}\
-\
-.tv-btn \{\
-  flex: 1;\
-  margin: 0 4px;\
-  padding: 6px;\
-  border-radius: 8px;\
-  background: rgba(255,255,255,0.06);\
-  color: white;\
-  cursor: pointer;\
-\}\
-\
-/* =========================================================\
-   COUNTER SECTION\
-   ========================================================= */\
-.bar-counter \{\
-  margin-top: 0;\
-  background: linear-gradient(180deg, #2a1a0a, #120903);\
-  box-shadow: inset 0 -40px 80px var(--counter-glow);\
-  padding: 40px 16px;\
-  display: grid;\
-  gap: 30px;\
-\}\
-\
-.counter-left, .counter-right \{\
-  width: 100%;\
-\}\
-\
-/* =========================================================\
-   LISTENING ROOM \'97 TURNTABLE + ALBUM ART\
-   ========================================================= */\
-.album-art-wrapper \{\
-  padding: 10px;\
-  background: rgba(255,255,255,0.06);\
-  border-radius: 16px;\
-  margin-bottom: 20px;\
-\}\
-\
-.album-art \{\
-  position: relative;\
-  height: 220px;\
-  border-radius: 14px;\
-  overflow: hidden;\
-  background: radial-gradient(circle, #ff149380, #05010f);\
-  transition: transform 0.6s, box-shadow 0.6s;\
-\}\
-\
-.album-art:hover \{\
-  transform: rotateY(180deg);\
-\}\
-\
-.album-face \{\
-  position: absolute;\
-  inset: 0;\
-  backface-visibility: hidden;\
-\}\
-\
-.album-face-back \{\
-  background: #0b0115;\
-  padding: 20px;\
-  transform: rotateY(180deg);\
-\}\
-\
-.album-logo \{\
-  width: 100%;\
-  height: 100%;\
-  object-fit: contain;\
-\}\
-\
-/* Vinyl drop animation */\
-.album-drop \{\
-  animation: vinylDrop 0.5s ease;\
-\}\
-\
-@keyframes vinylDrop \{\
-  0% \{ transform: translateY(-12px) scale(0.9); \}\
-  70% \{ transform: translateY(4px) scale(1.05); \}\
-  100% \{ transform: translateY(0) scale(1); \}\
-\}\
-\
-/* Turntable */\
-.turntable \{\
-  display: flex;\
-  justify-content: center;\
-  margin-bottom: 12px;\
-\}\
-\
-.turntable-platter \{\
-  width: 180px;\
-  height: 180px;\
-  border-radius: 50%;\
-  border: 12px solid #000;\
-  background: conic-gradient(#333, #111);\
-  display: flex;\
-  align-items: center;\
-  justify-content: center;\
-  animation: platterSpin 18s linear infinite;\
-  animation-play-state: paused;\
-\}\
-\
-.turntable-platter.playing \{\
-  animation-play-state: running;\
-\}\
-\
-@keyframes platterSpin \{\
-  from \{ transform: rotate(0); \}\
-  to \{ transform: rotate(360deg); \}\
-\}\
-\
-.turntable-label \{\
-  width: 50px;\
-  height: 50px;\
-  background: radial-gradient(circle, var(--accent-pink), #05010f);\
-  border-radius: 50%;\
-\}\
-\
-/* Player Panel */\
-.player-panel \{\
-  padding: 14px;\
-  background: rgba(21,12,35,0.8);\
-  border-radius: 14px;\
-  border: 1px solid rgba(255,255,255,0.08);\
-\}\
-\
-.timeline-bar \{\
-  width: 100%;\
-  height: 5px;\
-  background: rgba(255,255,255,0.15);\
-  border-radius: 20px;\
-  overflow: hidden;\
-  margin-top: 8px;\
-\}\
-\
-.timeline-progress \{\
-  width: 0%;\
-  height: 100%;\
-  background: linear-gradient(90deg, var(--accent-pink), var(--accent-gold));\
-\}\
-\
-.player-controls \{\
-  display: flex;\
-  gap: 8px;\
-  margin-top: 10px;\
-\}\
-\
-.player-eq \{\
-  display: flex;\
-  gap: 4px;\
-  height: 16px;\
-  margin-top: 10px;\
-\}\
-\
-.eq-bar \{\
-  flex: 1;\
-  background: linear-gradient(var(--accent-gold), var(--accent-pink));\
-  border-radius: 20px;\
-  transform-origin: bottom;\
-  transform: scaleY(0.2);\
-  opacity: 0.8;\
-\}\
-\
-.player-eq.playing .eq-bar \{\
-  animation: eqPulse 0.6s infinite ease-in-out;\
-\}\
-\
-@keyframes eqPulse \{\
-  0% \{ transform: scaleY(0.2); \}\
-  50% \{ transform: scaleY(1); \}\
-  100% \{ transform: scaleY(0.2); \}\
-\}\
-\
-/* =========================================================\
-   BAR BOT \'97 "Digital Tablet" UI\
-   ========================================================= */\
-.bartender-card \{\
-  padding: 20px;\
-  background: rgba(20, 14, 28, 0.85);\
-  border-radius: 14px;\
-  border: 1px solid rgba(255,255,255,0.1);\
-  box-shadow: 0 10px 30px rgba(0,0,0,0.35);\
-\}\
-\
-.bartender-messages \{\
-  max-height: 260px;\
-  overflow-y: auto;\
-  padding: 10px;\
-  margin-bottom: 12px;\
-  background: rgba(255,255,255,0.05);\
-  border-radius: 10px;\
-\}\
-\
-#bartenderInput \{\
-  width: 100%;\
-  padding: 8px;\
-  border-radius: 10px;\
-  background: rgba(255,255,255,0.05);\
-  color: white;\
-  border: 1px solid rgba(255,255,255,0.15);\
-\}\
-\
-#bartenderSubmit \{\
-  width: 100%;\
-  margin-top: 10px;\
-  padding: 10px;\
-  border-radius: 14px;\
-  border: none;\
-  background: linear-gradient(90deg, var(--accent-pink), var(--accent-gold));\
-  font-weight: bold;\
-  cursor: pointer;\
-\}\
-\
-/* =========================================================\
-   FOOTER\
-   ========================================================= */\
-.ccc-footer \{\
-  padding: 20px;\
-  text-align: center;\
-  background: #09020f;\
-  color: var(--text-muted);\
-\}\
-\
-.footer-links a \{\
-  margin: 0 8px;\
-  color: var(--accent-gold);\
-\}\
-\
-/* =========================================================\
-   RESPONSIVE\
-   ========================================================= */\
-@media (max-width: 900px) \{\
-  .bar-counter \{\
-    grid-template-columns: 1fr;\
-  \}\
-\
-  .bar-tv-frame \{\
-    width: 300px;\
-  \}\
-\
-  .album-art \{\
-    height: 180px;\
-  \}\
-\}\
-\
-@media (max-width: 600px) \{\
-  .hero-title \{ font-size: 1.6rem; \}\
-\
-  .light-orb \{ width: 28px; height: 28px; \}\
-\
-  .vinyl-item \{ min-width: 130px; \}\
-\
-  .bar-tv-frame \{ width: 260px; \}\
-\
-  .turntable-platter \{ width: 150px; height: 150px; \}\
-\}\
+
+/* -----------------------------------------------------------
+   ROOT VARIABLES & THEME SYSTEM
+----------------------------------------------------------- */
+:root {
+  --bg-deep: #05010f;
+  --bg-panel: #0b0718;
+
+  --accent-pink-1: #ff1493;
+  --accent-pink-2: #c71585;
+
+  --accent-gold-1: #ffd700;
+  --accent-gold-2: #ffb700;
+
+  --accent-plat-1: #c0c0c0;
+  --accent-plat-2: #e8e8e8;
+
+  --text-primary: #f8f5ff;
+  --text-muted: #a69ac4;
+
+  --border-subtle: rgba(255,255,255,0.09);
+  --shadow-soft: 0 18px 45px rgba(0,0,0,0.7);
+
+  --radius-lg: 22px;
+  --radius-xl: 32px;
+
+  /* spectrum analyzer variables */
+  --eq-bar-color-1: var(--accent-pink-1);
+  --eq-bar-color-2: var(--accent-gold-1);
+}
+
+
+/* -----------------------------------------------------------
+   THEME BACKGROUNDS
+----------------------------------------------------------- */
+body.theme-base {
+  background: radial-gradient(circle at top, #ff1493 0, #351058 40%, #05010f 100%);
+}
+
+body.theme-gold {
+  background: radial-gradient(circle at top, #ffcf40 0, #5a3602 40%, #06030a 100%);
+}
+
+body.theme-platinum {
+  background: radial-gradient(circle at top, #e0ecff 0, #283552 40%, #02010b 100%);
+}
+
+
+/* Transition all elements that need soft color shifts */
+body,
+.bar-backwall,
+.bar-counter,
+.album-art,
+.turntable,
+.bartender-card,
+.bar-tv-frame {
+  transition:
+    background 0.6s ease,
+    border-color 0.6s ease,
+    box-shadow 0.6s ease,
+    filter 0.6s ease;
+}
+
+
+/* ========================================================================
+   GLOBAL RESET
+========================================================================= */
+*,
+*:before,
+*:after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+
+/* ========================================================================
+   STICKY HEADER
+========================================================================= */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -22px);
+  width: 100%;
+  max-width: 1180px;
+  padding: 10px 16px;
+  background: rgba(5,1,15,0.92);
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 50;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.top-nav.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 10px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ccc-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border-radius: 50%;
+  box-shadow: 0 0 9px rgba(255,20,147,0.7);
+}
+
+body.theme-gold .ccc-logo {
+  box-shadow: 0 0 7px rgba(255,215,0,0.9);
+}
+
+body.theme-platinum .ccc-logo {
+  box-shadow: 0 0 7px rgba(214,226,255,0.9);
+}
+
+.brand-title {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.brand-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.brand-subtitle-animated {
+  display: block;
+  background: linear-gradient(
+    120deg,
+    var(--accent-pink-1),
+    var(--accent-gold-1),
+    var(--accent-plat-2)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: subtitleGlow 5.5s ease-in-out infinite alternate;
+}
+
+@keyframes subtitleGlow {
+  0% { opacity: 0.82; text-shadow: 0 0 6px rgba(255,20,147,0.5); }
+  50% { opacity: 1; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+  100% { opacity: 0.9; text-shadow: 0 0 8px rgba(192,208,255,0.5); }
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-link {
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.04);
+  font-size: 0.78rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+
+/* ========================================================================
+   MOBILE NAV
+========================================================================= */
+.mobile-nav-button {
+  display: none;
+  background: rgba(255,255,255,0.1);
+  padding: 6px 12px;
+  font-size: 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.3);
+  cursor: pointer;
+}
+
+.mobile-nav-drawer {
+  position: fixed;
+  bottom: -260px;
+  left: 0;
+  right: 0;
+  background: rgba(5,2,15,0.98);
+  border-radius: 18px 18px 0 0;
+  padding: 14px;
+  transition: transform 0.4s ease;
+  transform: translateY(100%);
+  z-index: 100;
+}
+
+.mobile-nav-drawer.open { transform: translateY(0); }
+
+.mobile-nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 99;
+}
+.mobile-nav-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-nav-item {
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: #fff;
+  margin-bottom: 6px;
+  text-decoration: none;
+}
+
+
+/* ========================================================================
+   HERO SECTION
+========================================================================= */
+.ccc-hero {
+  min-height: 92vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 50px 16px;
+  text-align: center;
+}
+
+.hero-inner {
+  max-width: 620px;
+  animation: heroFade 1s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@keyframes heroFade {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-logo {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 25px rgba(0,0,0,0.95));
+}
+
+.hero-title {
+  margin: 14px 0 0;
+  font-size: 2rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.scroll-arrow {
+  font-size: 1.4rem;
+  animation: arrowBounce 1.5s infinite ease-in-out;
+}
+
+@keyframes arrowBounce {
+  0%,100% { transform: translateY(0); opacity: 0.8; }
+  50%    { transform: translateY(6px); opacity: 1; }
+}
+
+
+/* ========================================================================
+   BAR BACKWALL — MAIN ENVIRONMENT
+========================================================================= */
+.bar-backwall {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 50px 20px 80px;
+  background: linear-gradient(180deg, #0e0818, #05010f);
+  position: relative;
+  border-radius: 24px;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.7);
+}
+
+/* ---------------------------
+   Pendant Lights
+--------------------------- */
+.bar-lights {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.light-orb {
+  width: 22px;
+  height: 22px;
+  background: radial-gradient(circle at 40% 30%, #ffe6e6, #ffb3b3);
+  border-radius: 50%;
+  box-shadow:
+    0 0 10px rgba(255,255,255,0.9),
+    0 0 20px rgba(255,20,147,0.6);
+  transition: filter 0.5s ease;
+}
+
+body.theme-gold .light-orb {
+  box-shadow: 
+    0 0 10px rgba(255,245,180,0.9),
+    0 0 20px rgba(255,215,0,0.6);
+}
+
+body.theme-platinum .light-orb {
+  box-shadow:
+    0 0 10px rgba(200,220,255,0.9),
+    0 0 20px rgba(180,200,255,0.6);
+}
+
+
+/* ---------------------------
+   VINYL SHELF
+--------------------------- */
+.vinyl-shelf-wrapper {
+  margin-bottom: 40px;
+}
+
+.section-title {
+  font-size: 1.3rem;
+  margin-bottom: 12px;
+  letter-spacing: 0.08em;
+}
+
+.vinyl-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.vinyl-item {
+  min-width: 150px;
+  max-width: 170px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 8px;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  transition: transform 0.2s ease;
+  color: #fff; /* NEW: readable vinyl text */
+}
+
+.vinyl-item:hover {
+  transform: translateY(-3px);
+}
+
+.vinyl-item.is-active {
+  border-color: rgba(255,215,0,0.8);
+  box-shadow: 0 0 10px rgba(255,215,0,0.4);
+}
+
+.vinyl-spine {
+  writing-mode: vertical-rl;
+  font-size: 0.76rem;
+  letter-spacing: 0.14em;
+  color: #fff;
+}
+
+.vinyl-face h3 {
+  margin: 0 0 2px;
+  font-size: 0.9rem;
+}
+
+.vinyl-face p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+
+/* ========================================================================
+   CRT TV (Mounted in Backwall)
+========================================================================= */
+.bar-tv-mounted {
+  margin-top: 40px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.bar-tv-frame {
+  width: 340px; /* SMALL CRT SIZE */
+  background: #1a120c;
+  padding: 12px;
+  border-radius: 14px;
+  border: 2px solid rgba(0,0,0,0.6);
+  box-shadow:
+    0 6px 22px rgba(0,0,0,0.8),
+    inset 0 0 12px rgba(0,0,0,0.6);
+  position: relative;
+}
+
+.bar-tv-aspect {
+  position: relative;
+  width: 100%;
+  padding-top: 75%; /* 4:3 ratio */
+  background: #000;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.bar-tv-screen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* -----------------------------------------------------------
+   CRT STATIC OVERLAY (Base64 embedded WebM)
+----------------------------------------------------------- */
+.bar-tv-static {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.25;
+  background-size: cover;
+  mix-blend-mode: screen;
+
+  background-image: url('data:video/webm;base64,GkX...'); /* shortened in this preview */
+}
+
+
+/* Flash when changing channels */
+.bar-tv-frame.flash {
+  filter: brightness(1.7);
+  transition: filter 0.15s ease-out;
+}
+
+.bar-tv-controls {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.bar-tv-controls button {
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: #fff;
+  cursor: pointer;
+}
+
+
+
+/* ========================================================================
+   BAR COUNTERTOP
+========================================================================= */
+.bar-counter {
+  width: 100%;
+  max-width: 1500px;
+  padding: 40px 20px;
+  margin: 0 auto;
+  margin-top: -20px;
+  background: linear-gradient(#1a141f, #0a0512);
+  border-radius: 24px;
+  box-shadow: inset 0 0 25px rgba(0,0,0,0.7);
+  display: flex;
+  gap: 40px;
+}
+
+.counter-left,
+.counter-right {
+  flex: 1;
+}
+
+
+/* ========================================================================
+   LISTENING ROOM
+========================================================================= */
+.album-art-wrapper {
+  background: rgba(255,255,255,0.06);
+  padding: 12px;
+  border-radius: 20px;
+}
+
+.album-art {
+  height: 220px;
+  border-radius: 16px;
+  background: linear-gradient(140deg, #ff1493, #351058);
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s ease;
+}
+
+.album-art:hover {
+  transform: rotateY(180deg);
+}
+
+.album-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.album-face-back {
+  transform: rotateY(180deg);
+  padding: 20px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.album-logo {
+  position: absolute;
+  inset: 6%;
+  width: 88%;
+  height: 88%;
+  object-fit: contain;
+}
+
+/* Turntable */
+.turntable {
+  margin-top: 18px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Platter */
+.turntable-platter {
+  width: 180px;
+  height: 180px;
+  background: conic-gradient(from 210deg, #25202f, #0e0c18, #25202f);
+  border-radius: 50%;
+  border: 10px solid #05010f;
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,0.06),
+    0 10px 22px rgba(0,0,0,0.85);
+  transition: filter 0.4s ease;
+  animation: spin 18s linear infinite paused;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.turntable-platter.playing {
+  animation-play-state: running;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Label */
+.turntable-label {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at top, var(--accent-pink-1), #0c0316);
+  box-shadow: 0 0 12px rgba(255,20,147,0.7);
+}
+
+body.theme-gold .turntable-label {
+  background: radial-gradient(circle at top, var(--accent-gold-1), #0c0316);
+}
+
+body.theme-platinum .turntable-label {
+  background: radial-gradient(circle at top, var(--accent-plat-2), #0c0316);
+}
+
+
+/* Needle Arm */
+.tonearm {
+  position: absolute;
+  right: -40px;
+  top: 30px;
+  width: 100px;
+  height: 12px;
+  background: linear-gradient(140deg, #ddd, #777);
+  border-radius: 6px;
+  transform-origin: left center;
+  transform: rotate(-25deg);
+  transition: transform 0.6s ease;
+}
+
+.tonearm.engaged {
+  transform: rotate(0deg);
+}
+
+
+/* ========================================================================
+   PLAYER PANEL
+========================================================================= */
+.player-panel {
+  margin-top: 20px;
+  padding: 14px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 14px;
+}
+
+.player-controls {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.player-controls button {
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+#volume-slider {
+  margin-left: auto;
+}
+
+
+.timeline {
+  margin-top: 8px;
+}
+
+.timeline-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+}
+
+.timeline-progress {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--eq-bar-color-1), var(--eq-bar-color-2));
+  border-radius: inherit;
+}
+
+
+/* Spectrum EQ Bars */
+.player-eq {
+  margin-top: 12px;
+  height: 32px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.eq-bar {
+  flex: 1;
+  background: linear-gradient(180deg, var(--eq-bar-color-2), var(--eq-bar-color-1));
+  height: 10%;
+  border-radius: 4px;
+  transition: height 0.08s ease-out;
+}
+
+
+/* ========================================================================
+   BAR BOT (AI)
+========================================================================= */
+.bartender-card {
+  padding: 16px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 16px;
+}
+
+.bartender-messages {
+  height: 240px;
+  background: rgba(5,5,18,0.9);
+  border-radius: 12px;
+  padding: 12px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+
+.bartender-message {
+  margin-bottom: 10px;
+  padding: 10px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+
+.bartender-message-bot {
+  background: rgba(255,255,255,0.12);
+}
+
+#bartenderForm textarea {
+  width: 100%;
+  height: 70px;
+  border-radius: 10px;
+  padding: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+}
+
+#bartenderForm button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(120deg, var(--accent-pink-1), var(--accent-gold-1));
+  color: #05010f;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+/* ========================================================================
+   GUESTBOOK
+========================================================================= */
+.bar-guestbook {
+  width: 100%;
+  max-width: 1200px;
+  margin: 60px auto 40px;
+  padding: 20px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+}
+
+.guestbook-list {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.guest-note {
+  padding: 12px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  position: relative;
+}
+
+.guest-note::before {
+  content: "📌";
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  font-size: 1.2rem;
+}
+
+#guestbookForm input,
+#guestbookForm textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px;
+  color: #fff;
+}
+
+#guestSubmit {
+  padding: 10px;
+  background: linear-gradient(120deg, var(--accent-pink-1), var(--accent-gold-1));
+  border-radius: 12px;
+  border: none;
+  color: #05010f;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+/* ========================================================================
+   FOOTER
+========================================================================= */
+.ccc-footer {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.footer-links a {
+  margin: 0 10px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.footer-now {
+  margin-bottom: 8px;
+}
+
+
+/* ========================================================================
+   RESPONSIVE LAYOUT BREAKPOINTS
+========================================================================= */
+
+/* Tablets */
+@media(max-width: 1024px) {
+  .bar-counter {
+    flex-direction: column;
+  }
+}
+
+/* Phones */
+@media(max-width: 768px) {
+  .desktop-only { display: none; }
+  .mobile-nav-button { display: block; }
+
+  .bar-counter {
+    padding: 20px 12px;
+  }
+
+  .turntable-platter {
+    width: 150px;
+    height: 150px;
+  }
+
+  /* Simplified mobile vinyl animation handled in JS */
+}
+
+/* Small phones */
+@media(max-width: 480px) {
+  .hero-logo { width: 110px; height: 110px; }
+  .turntable-platter { width: 130px; height: 130px; }
 }
