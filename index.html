@@ -1,242 +1,274 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2822
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crypto Cocktail Club – Virtual Bar Experience</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
 
-\f0\fs24 \cf0 <!DOCTYPE html>\
-<html lang="en">\
-<head>\
-  <meta charset="UTF-8" />\
-  <title>Crypto Cocktail Club \'96 Virtual Bar Experience</title>\
-  <meta name="viewport" content="width=device-width, initial-scale=1" />\
-  <link rel="stylesheet" href="styles.css" />\
-</head>\
-\
-<body class="theme-base">\
-\
-  <!-- ===========================\
-       STICKY HEADER\
-  ============================ -->\
-  <header class="top-nav" id="stickyNav">\
-    <div class="brand">\
-      <img src="BASE_TRANSPARENT.PNG" alt="CCC Logo" class="ccc-logo" />\
-      <div class="brand-text">\
-        <span class="brand-title">Crypto Cocktail Club</span>\
-        <span class="brand-subtitle brand-subtitle-animated">Virtual Bar Experience</span>\
-      </div>\
-    </div>\
-\
-    <nav class="nav-links desktop-only">\
-      <button class="nav-link" type="button" data-scroll-target="vinylShelf">Vinyl Shelf</button>\
-      <a href="https://cryptococktailclub.com" target="_blank" rel="noopener noreferrer" class="nav-link nav-icon-link">\
-        \uc0\u55357 \u56516 \
-      </a>\
-    </nav>\
-\
-    <button class="mobile-nav-button" id="mobileNavButton">\uc0\u9776 </button>\
-  </header>\
-\
-  <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>\
-  <nav class="mobile-nav-drawer" id="mobileNavDrawer">\
-    <button class="mobile-nav-close" id="mobileNavClose">\uc0\u10005 </button>\
-    <button class="mobile-nav-item" data-scroll-target="vinylShelf">Vinyl Shelf</button>\
-    <a href="https://cryptococktailclub.com" target="_blank" class="mobile-nav-item">Litepaper</a>\
-  </nav>\
-\
-\
-  <!-- =============================\
-       HERO CARD\
-  ============================== -->\
-  <section class="ccc-hero">\
-    <div class="hero-inner">\
-      <img src="BASE_TRANSPARENT.PNG" alt="CCC Logo" class="hero-logo" />\
-      <h1 class="hero-title">Crypto Cocktail Club</h1>\
-      <p class="hero-subtitle">Virtual Bar Experience</p>\
-    </div>\
-    <div class="hero-scroll-indicator"><span class="scroll-arrow">\uc0\u8675 </span></div>\
-  </section>\
-\
-\
-  <!-- ============================================\
-       BAR BACKWALL (VINYL SHELF + TV + LIGHTS)\
-  ============================================= -->\
-  <section class="bar-backwall" id="vinylShelf">\
-\
-    <!-- Pendant Lights -->\
-    <div class="bar-lights">\
-      <span class="light-orb"></span>\
-      <span class="light-orb"></span>\
-      <span class="light-orb"></span>\
-      <span class="light-orb"></span>\
-      <span class="light-orb"></span>\
-    </div>\
-\
-    <!-- Vinyl Shelf -->\
-    <div class="vinyl-shelf-wrapper">\
-      <div class="vinyl-row" id="vinylRow">\
-\
-        <button class="vinyl-item is-active" data-track-index="0">\
-          <div class="vinyl-spine">VOL. 01</div>\
-          <div class="vinyl-face"><h3>Analog Neon</h3><p>Toby\'92s Mix</p></div>\
-        </button>\
-\
-        <button class="vinyl-item" data-track-index="1">\
-          <div class="vinyl-spine">VOL. 02</div>\
-          <div class="vinyl-face"><h3>Gold Hour Spritz</h3><p>Summer Mix</p></div>\
-        </button>\
-\
-        <button class="vinyl-item" data-track-index="2">\
-          <div class="vinyl-spine">VOL. 03</div>\
-          <div class="vinyl-face"><h3>Midnight Chrome</h3><p>Kartell Tribute</p></div>\
-        </button>\
-\
-        <button class="vinyl-item" data-track-index="3">\
-          <div class="vinyl-spine">VOL. 04</div>\
-          <div class="vinyl-face"><h3>Poolside Mirage</h3><p>Solomun Boiler Room</p></div>\
-        </button>\
-\
-        <button class="vinyl-item" data-track-index="4">\
-          <div class="vinyl-spine">VOL. 05</div>\
-          <div class="vinyl-face"><h3>Khruangbin Live</h3><p>Pitchfork</p></div>\
-        </button>\
-\
-        <button class="vinyl-item" data-track-index="5">\
-          <div class="vinyl-spine">VOL. 06</div>\
-          <div class="vinyl-face"><h3>Succession Beats</h3><p>Late-Night</p></div>\
-        </button>\
-\
-      </div>\
-    </div>\
-\
-    <!-- Mounted TV -->\
-    <div class="bar-tv-mounted">\
-      <div class="bar-tv-frame">\
-        <div class="bar-tv-inner">\
-          <div class="bar-tv-aspect">\
-            <video\
-              id="barTvVideo"\
-              class="bar-tv-screen"\
-              src="https://visionary-beignet-7d270e.netlify.app/video/bar_tape_01.mp4"\
-              muted autoplay loop playsinline\
-            ></video>\
-          </div>\
-        </div>\
-\
-        <!-- TV Controls -->\
-        <div class="bar-tv-controls">\
-          <button class="tv-btn" id="barTvChannelBtn">CH+</button>\
-          <button class="tv-btn" id="barTvPlayBtn">\uc0\u9208 </button>\
-          <button class="tv-btn" id="barTvMuteBtn">Sound Off</button>\
-        </div>\
-      </div>\
-    </div>\
-\
-  </section>\
-\
-\
-\
-  <!-- ============================================\
-       COUNTER SECTION (LISTENING ROOM + BAR BOT)\
-  ============================================= -->\
-  <section class="bar-counter">\
-\
-    <!-- Listening Room -->\
-    <div class="counter-left">\
-      <div class="listening-room">\
-\
-        <div class="album-art-wrapper">\
-          <div class="album-art" id="albumArt">\
-            <div class="album-face">\
-              <img src="BASE_TRANSPARENT.PNG" class="album-logo" />\
-            </div>\
-            <div class="album-face album-face-back">\
-              <h3>Crypto Cocktail Club</h3>\
-              <p>Vinyl-forward sound \'b7 IRL + URL bar culture</p>\
-            </div>\
-          </div>\
-        </div>\
-\
-        <div class="turntable">\
-          <div class="turntable-platter" id="turntablePlatter">\
-            <div class="turntable-label"></div>\
-          </div>\
-        </div>\
-\
-        <div class="player-panel">\
-          <h3 id="track-title">Toby\'92s Mix</h3>\
-          <p id="track-artist">Toby</p>\
-\
-          <div class="timeline">\
-            <div class="timeline-bar" id="timeline-bar">\
-              <div class="timeline-progress" id="timeline-progress"></div>\
-            </div>\
-            <div class="timeline-meta">\
-              <span id="time-current">0:00</span>\
-              <span id="time-remaining">-00:00</span>\
-            </div>\
-          </div>\
-\
-          <div class="player-controls">\
-            <button id="prev-btn">\uc0\u9664 \u9664 </button>\
-            <button id="play-btn">Play</button>\
-            <button id="next-btn">\uc0\u9654 \u9654 </button>\
-            <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.8" />\
-          </div>\
-\
-          <div class="player-eq" id="playerEq">\
-            <span class="eq-bar"></span>\
-            <span class="eq-bar"></span>\
-            <span class="eq-bar"></span>\
-            <span class="eq-bar"></span>\
-          </div>\
-        </div>\
-\
-      </div>\
-    </div>\
-\
-    <!-- Bar Bot -->\
-    <div class="counter-right">\
-      <div class="bartender-card">\
-        <h2>Bar Bot</h2>\
-        <p>Ask for a cocktail spec, riff, or ingredient-based idea.</p>\
-\
-        <div class="bartender-messages" id="bartenderMessages">\
-          <div class="bartender-message bartender-message-bot">\
-            <strong>Bar Bot:</strong> What are you in the mood for tonight?\
-          </div>\
-        </div>\
-\
-        <form id="bartenderForm">\
-          <textarea id="bartenderInput" placeholder="Ask Bar Bot\'85"></textarea>\
-          <button id="bartenderSubmit">Ask</button>\
-        </form>\
-      </div>\
-    </div>\
-\
-  </section>\
-\
-\
-\
-  <!-- ===========================\
-       FOOTER\
-  ============================ -->\
-  <footer class="ccc-footer">\
-    <div class="footer-now">\
-      Now Playing: <span id="dockTrack">Toby\'92s Mix \'97 Toby</span>\
-    </div>\
-\
-    <div class="footer-links">\
-      <a href="https://x.com/Cocktail2Crypto" target="_blank">X</a>\
-      <a href="https://discord.gg/6N6H8nnv" target="_blank">Discord</a>\
-    </div>\
-  </footer>\
-\
-\
-  <audio id="bar-audio"></audio>\
-  <script src="script.js"></script>\
-\
-</body>\
-</html>\
-}
+<body class="theme-base">
+
+  <!-- ===========================
+       STICKY HEADER
+  ============================ -->
+  <header class="top-nav" id="stickyNav">
+    <div class="brand">
+      <img src="BASE_TRANSPARENT.PNG" alt="CCC Logo" class="ccc-logo" />
+      <div class="brand-text">
+        <span class="brand-title">Crypto Cocktail Club</span>
+        <span class="brand-subtitle brand-subtitle-animated">Virtual Bar Experience</span>
+      </div>
+    </div>
+
+    <nav class="nav-links desktop-only">
+      <button class="nav-link" data-scroll="vinylShelf">Vinyl</button>
+      <button class="nav-link" data-scroll="listeningRoom">Listening Room</button>
+      <button class="nav-link" data-scroll="barBot">Bar Bot</button>
+      <a href="https://cryptococktailclub.com" 
+         target="_blank" rel="noopener noreferrer" 
+         class="nav-link">Litepaper</a>
+    </nav>
+
+    <button class="mobile-nav-button" id="mobileNavButton">☰</button>
+  </header>
+
+  <!-- Mobile drawer -->
+  <div id="mobileBackdrop" class="mobile-nav-backdrop"></div>
+  <nav id="mobileDrawer" class="mobile-nav-drawer">
+    <button id="mobileClose" class="mobile-nav-close">✕</button>
+    <button class="mobile-nav-item" data-scroll="vinylShelf">Vinyl Shelf</button>
+    <button class="mobile-nav-item" data-scroll="listeningRoom">Listening Room</button>
+    <button class="mobile-nav-item" data-scroll="barBot">Bar Bot</button>
+    <a href="https://cryptococktailclub.com" target="_blank" class="mobile-nav-item">Litepaper</a>
+  </nav>
+
+
+  <!-- ===========================
+       HERO SECTION
+  ============================ -->
+  <section class="ccc-hero">
+    <div class="hero-inner">
+      <img src="BASE_TRANSPARENT.PNG" class="hero-logo" alt="CCC Logo" />
+      <h1 class="hero-title">Crypto Cocktail Club</h1>
+      <p class="hero-subtitle">Virtual Bar Experience</p>
+    </div>
+    <div class="hero-scroll-indicator">
+      <span class="scroll-arrow">⇣</span>
+    </div>
+  </section>
+
+
+  <!-- ======================================================
+       IMMERSIVE BAR BACKWALL
+       Pendant Lights + Vinyl Shelf + CRT TV
+  ======================================================= -->
+  <section class="bar-backwall" id="vinylShelf">
+
+    <!-- Pendant Light Row -->
+    <div class="bar-lights">
+      <span class="light-orb"></span>
+      <span class="light-orb"></span>
+      <span class="light-orb"></span>
+      <span class="light-orb"></span>
+      <span class="light-orb"></span>
+    </div>
+
+    <!-- Vinyl Shelf -->
+    <div class="vinyl-shelf-wrapper">
+      <h2 class="section-title">Vinyl Shelf</h2>
+      <div class="vinyl-row" id="vinylRow">
+      
+        <button class="vinyl-item is-active" data-track-index="0">
+          <div class="vinyl-spine">VOL. 01</div>
+          <div class="vinyl-face"><h3>Analog Neon</h3><p>Toby’s Mix</p></div>
+        </button>
+
+        <button class="vinyl-item" data-track-index="1">
+          <div class="vinyl-spine">VOL. 02</div>
+          <div class="vinyl-face"><h3>Gold Hour Spritz</h3><p>Summer Mix</p></div>
+        </button>
+
+        <button class="vinyl-item" data-track-index="2">
+          <div class="vinyl-spine">VOL. 03</div>
+          <div class="vinyl-face"><h3>Midnight Chrome</h3><p>Kartell Tribute</p></div>
+        </button>
+
+        <button class="vinyl-item" data-track-index="3">
+          <div class="vinyl-spine">VOL. 04</div>
+          <div class="vinyl-face"><h3>Poolside Mirage</h3><p>Solomun Boiler Room</p></div>
+        </button>
+
+        <button class="vinyl-item" data-track-index="4">
+          <div class="vinyl-spine">VOL. 05</div>
+          <div class="vinyl-face"><h3>Khruangbin Live</h3><p>Pitchfork</p></div>
+        </button>
+
+        <button class="vinyl-item" data-track-index="5">
+          <div class="vinyl-spine">VOL. 06</div>
+          <div class="vinyl-face"><h3>Succession Beats</h3><p>Late Night</p></div>
+        </button>
+
+      </div>
+    </div>
+
+
+    <!-- Mounted CRT TV -->
+    <div class="bar-tv-mounted">
+      <div class="bar-tv-frame">
+        <div class="bar-tv-aspect">
+          <video 
+            id="barTvVideo"
+            class="bar-tv-screen"
+            src="https://visionary-beignet-7d270e.netlify.app/video/bar_tape_01.mp4"
+            muted autoplay loop playsinline>
+          </video>
+
+          <!-- CRT Static Layer -->
+          <div class="bar-tv-static"></div>
+        </div>
+
+        <!-- TV Controls -->
+        <div class="bar-tv-controls">
+          <button id="barTvChannelBtn">CH+</button>
+          <button id="barTvPlayBtn">⏸</button>
+          <button id="barTvMuteBtn">Sound Off</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+
+
+  <!-- ======================================================
+       COUNTERTOP SECTION
+       - Listening Room (Left)
+       - Bar Bot (Right)
+  ======================================================= -->
+  <section class="bar-counter">
+
+    <!-- Listening Room -->
+    <div class="counter-left" id="listeningRoom">
+
+      <h2 class="section-title">Listening Room</h2>
+
+      <!-- Album Art -->
+      <div class="album-art-wrapper">
+        <div class="album-art" id="albumArt">
+          <div class="album-face">
+            <img src="BASE_TRANSPARENT.PNG" alt="" class="album-logo" />
+          </div>
+          <div class="album-face album-face-back">
+            <h3>Crypto Cocktail Club</h3>
+            <p>Vinyl-forward sound · IRL + URL bar culture</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Turntable -->
+      <div class="turntable">
+        <div class="turntable-platter" id="turntablePlatter">
+          <div class="turntable-label"></div>
+        </div>
+
+        <!-- Needle -->
+        <div class="tonearm" id="tonearm"></div>
+      </div>
+
+      <!-- Player Panel -->
+      <div class="player-panel">
+        <h3 id="track-title">Toby’s Mix</h3>
+        <p id="track-artist">Toby</p>
+
+        <div class="timeline">
+          <div class="timeline-bar" id="timeline-bar">
+            <div class="timeline-progress" id="timeline-progress"></div>
+          </div>
+          <div class="timeline-meta">
+            <span id="time-current">0:00</span>
+            <span id="time-remaining">-00:00</span>
+          </div>
+        </div>
+
+        <div class="player-controls">
+          <button id="prev-btn">◀◀</button>
+          <button id="play-btn">Play</button>
+          <button id="next-btn">▶▶</button>
+          <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.8">
+        </div>
+
+        <div class="player-eq" id="playerEq">
+          <span class="eq-bar"></span>
+          <span class="eq-bar"></span>
+          <span class="eq-bar"></span>
+          <span class="eq-bar"></span>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- Bar Bot -->
+    <div class="counter-right" id="barBot">
+
+      <h2 class="section-title">Bar Bot</h2>
+
+      <div class="bartender-card">
+
+        <div class="bartender-messages" id="bartenderMessages">
+          <div class="bartender-message bartender-message-bot">
+            <strong>Bar Bot:</strong> What are you in the mood for tonight?
+          </div>
+        </div>
+
+        <form id="bartenderForm">
+          <textarea id="bartenderInput" placeholder="Ask Bar Bot a question…"></textarea>
+          <button id="bartenderSubmit">Ask</button>
+        </form>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ======================================================
+       CCC GUESTBOOK
+  ======================================================= -->
+  <section class="bar-guestbook" id="guestbook">
+    <h2 class="section-title">CCC Guestbook</h2>
+    <div class="guestbook-list" id="guestbookList"></div>
+
+    <form id="guestbookForm">
+      <input type="text" id="guestName" placeholder="Your name" maxlength="40">
+      <textarea id="guestNote" placeholder="Leave a note for the bar…" maxlength="200"></textarea>
+      <button id="guestSubmit">Post Note</button>
+    </form>
+  </section>
+
+
+
+  <!-- ===========================
+       FOOTER
+  ============================ -->
+  <footer class="ccc-footer">
+
+    <div class="footer-now">
+      Now Playing: <span id="dockTrack">Toby’s Mix — Toby</span>
+    </div>
+
+    <div class="footer-links">
+      <a href="https://x.com/Cocktail2Crypto" target="_blank">X</a>
+      <a href="https://discord.gg/6N6H8nnv" target="_blank">Discord</a>
+    </div>
+
+  </footer>
+
+
+  <audio id="bar-audio"></audio>
+  <script src="script.js"></script>
+</body>
+</html>
