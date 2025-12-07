@@ -1,172 +1,265 @@
-// ========== AUDIO PLAYER (Vinyl Shelf + Listening Room) ==========
+/* ======================================================
+   GLOBAL ELEMENT HELPERS
+   ====================================================== */
+const qs = (s) => document.querySelector(s);
+const qsa = (s) => document.querySelectorAll(s);
 
-const tracks = [
+/* ======================================================
+   FLOATING NAV ON SCROLL
+   ====================================================== */
+const topNav = qs(".top-nav");
+
+window.addEventListener("scroll", () => {
+  if (window.scrollY > window.innerHeight * 0.65) {
+    topNav.classList.add("visible");
+  } else {
+    topNav.classList.remove("visible");
+  }
+});
+
+/* ======================================================
+   VINYL SHELF → LISTENING ROOM
+   ====================================================== */
+
+// --- Vinyl Data ---
+// You can extend this easily.
+const albums = [
   {
-    title: "Toby’s Mix",
-    artist: "Toby",
-    durationLabel: "58:24",
-    file: "https://visionary-beignet-7d270e.netlify.app/audio/tobys-mix.mp3"
+    id: "album1",
+    title: "NYC Loft Classics",
+    artist: "Crypto Cocktail Club",
+    track: "Loft Intro",
+    duration: 198,
+    cover: "https://visionary-beignet-7d270e.netlify.app/album1.png",
+    audio: "https://visionary-beignet-7d270e.netlify.app/audio1.mp3",
   },
   {
-    title: "Gold Hour Spritz",
-    artist: "Toby",
-    durationLabel: "42:14",
-    file: "https://visionary-beignet-7d270e.netlify.app/audio/gold-hour-spritz.mp3"
-  },
-  {
-    title: "Midnight Chrome",
-    artist: "Kartell",
-    durationLabel: "55:01",
-    file: "https://visionary-beignet-7d270e.netlify.app/audio/midnight-chrome.mp3"
-  },
-  {
-    title: "Poolside Mirage",
-    artist: "Solomun",
-    durationLabel: "50:43",
-    file: "https://visionary-beignet-7d270e.netlify.app/audio/poolside-mirage.mp3"
-  },
-  {
-    title: "Khruangbin Live",
-    artist: "Khruangbin",
-    durationLabel: "49:02",
-    file: "https://visionary-beignet-7d270e.netlify.app/audio/khruangbin-live.mp3"
-  },
-  {
-    title: "Succession Beats",
-    artist: "Jsco Music",
-    durationLabel: "45:18",
-    file: "https://visionary-beignet-7d270e.netlify.app/audio/succession-beats.mp3"
+    id: "album2",
+    title: "Midnight Pour",
+    artist: "CCC Hi-Fi",
+    track: "Stirred Not Shaken",
+    duration: 214,
+    cover: "https://visionary-beignet-7d270e.netlify.app/album2.png",
+    audio: "https://visionary-beignet-7d270e.netlify.app/audio2.mp3",
   }
 ];
 
-let currentTrack = 0;
+let currentAlbum = null;
+
+const vinylItems = qsa(".vinyl-item");
+const albumArt = qs(".album-art");
+const albumLogo = qs(".album-logo");
+const platter = qs(".turntable-platter");
+const eqBars = qsa(".eq-bar");
+const trackTitle = qs("#track-title");
+const trackArtist = qs("#track-artist");
+const trackDurationLabel = qs(".track-duration");
+const timelineProgress = qs(".timeline-progress");
+const audio = new Audio();
 let isPlaying = false;
-const audio = document.getElementById("bar-audio");
+let timelineInterval = null;
 
-function loadTrack(index) {
-  const track = tracks[index];
-  document.getElementById("track-title").textContent = track.title;
-  document.getElementById("track-artist").textContent = track.artist;
-  document.getElementById("track-duration").textContent = track.durationLabel;
-  document.getElementById("dockTrack").textContent = `${track.title} — ${track.artist}`;
-  audio.src = track.file;
-}
-
-function playTrack() {
-  audio.play();
-  isPlaying = true;
-  document.getElementById("play-btn").textContent = "Pause";
-  document.getElementById("playerEq").classList.add("is-playing");
-  document.getElementById("albumArt").classList.add("glow-active");
-}
-
-function pauseTrack() {
-  audio.pause();
-  isPlaying = false;
-  document.getElementById("play-btn").textContent = "Play";
-  document.getElementById("playerEq").classList.remove("is-playing");
-  document.getElementById("albumArt").classList.remove("glow-active");
-}
-
-document.getElementById("play-btn").addEventListener("click", () => {
-  isPlaying ? pauseTrack() : playTrack();
-});
-
-document.getElementById("prev-btn").addEventListener("click", () => {
-  currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
-  loadTrack(currentTrack);
-  playTrack();
-});
-
-document.getElementById("next-btn").addEventListener("click", () => {
-  currentTrack = (currentTrack + 1) % tracks.length;
-  loadTrack(currentTrack);
-  playTrack();
-});
-
-document.getElementById("volume-slider").addEventListener("input", (e) => {
-  audio.volume = parseFloat(e.target.value);
-});
-
-document.querySelectorAll(".vinyl-item").forEach((item) => {
+/* ======================================================
+   SELECT VINYL
+   ====================================================== */
+vinylItems.forEach((item) => {
   item.addEventListener("click", () => {
-    document.querySelectorAll(".vinyl-item").forEach((el) => el.classList.remove("is-active"));
+    const albumId = item.dataset.album;
+    const album = albums.find((a) => a.id === albumId);
+    if (!album) return;
+
+    // Activate UI
+    vinylItems.forEach((v) => v.classList.remove("is-active"));
     item.classList.add("is-active");
-    currentTrack = parseInt(item.dataset.trackIndex);
-    loadTrack(currentTrack);
-    playTrack();
+
+    // Set album
+    currentAlbum = album;
+
+    // Set cover art
+    albumLogo.src = album.cover;
+
+    // Vinyl landing animation
+    albumArt.style.animation = "vinylLand 0.8s ease-out";
+
+    setTimeout(() => {
+      albumArt.style.animation = "";
+    }, 900);
+
+    // Load audio
+    audio.src = album.audio;
+    audio.currentTime = 0;
+
+    // Update labels
+    trackTitle.textContent = album.title;
+    trackArtist.textContent = album.artist;
+    trackDurationLabel.textContent = formatTime(album.duration);
+
+    // Auto-play new selection
+    startPlayback();
   });
 });
 
-audio.addEventListener("timeupdate", () => {
-  const progress = (audio.currentTime / audio.duration) * 100;
-  document.getElementById("timeline-progress").style.width = progress + "%";
-  document.getElementById("time-current").textContent = formatTime(audio.currentTime);
-  document.getElementById("time-remaining").textContent = "-" + formatTime(audio.duration - audio.currentTime);
+/* ======================================================
+   PLAYER CONTROLS
+   ====================================================== */
+qs(".play-btn").addEventListener("click", () => {
+  if (!currentAlbum) return;
+  isPlaying ? pausePlayback() : startPlayback();
 });
 
-function formatTime(sec) {
-  const minutes = Math.floor(sec / 60);
-  const seconds = Math.floor(sec % 60).toString().padStart(2, "0");
-  return `${minutes}:${seconds}`;
+qs("#volume-slider").addEventListener("input", (e) => {
+  audio.volume = e.target.value;
+});
+
+/* ======================================================
+   PLAYBACK FUNCTIONS
+   ====================================================== */
+function startPlayback() {
+  isPlaying = true;
+  audio.play();
+
+  platter.classList.add("is-playing");
+  qs(".player-eq").classList.add("is-playing");
+
+  if (timelineInterval) clearInterval(timelineInterval);
+  timelineInterval = setInterval(updateTimeline, 200);
 }
 
-loadTrack(currentTrack);
+function pausePlayback() {
+  isPlaying = false;
+  audio.pause();
 
-// ========== BAR TV (Video) ==========
+  platter.classList.remove("is-playing");
+  qs(".player-eq").classList.remove("is-playing");
 
-const tvChannels = [
-  {
-    src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_01.mp4",
-    title: "Bar Tape 01"
-  },
-  {
-    src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_02.mp4",
-    title: "Bar Tape 02"
-  },
-  {
-    src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_03.mp4",
-    title: "Bar Tape 03"
-  },
-  {
-    src: "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_04.mp4",
-    title: "Bar Tape 04"
-  }
+  if (timelineInterval) clearInterval(timelineInterval);
+}
+
+function updateTimeline() {
+  if (!currentAlbum) return;
+
+  const pct = (audio.currentTime / currentAlbum.duration) * 100;
+  timelineProgress.style.width = pct + "%";
+
+  if (pct >= 100) pausePlayback();
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+/* ======================================================
+   BAR BOT — AI BARTENDER
+   ====================================================== */
+const bartenderMessages = qs(".bartender-messages");
+const bartenderInput = qs(".bartender-input");
+const bartenderForm = qs(".bartender-form");
+
+bartenderForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const userText = bartenderInput.value.trim();
+  if (!userText) return;
+
+  addBartenderMessage("user", userText);
+  bartenderInput.value = "";
+
+  addTypingIndicator();
+
+  // Call Netlify function
+  const res = await fetch("/.netlify/functions/ccc-bartender", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      question: userText,
+      recipes: [] // You can add filtered Milk & Honey data here
+    })
+  });
+
+  removeTypingIndicator();
+
+  const data = await res.json();
+  addBartenderMessage("bot", data.answer || "I’m here behind the bar if you need anything.");
+});
+
+function addBartenderMessage(who, text) {
+  const div = document.createElement("div");
+  div.className = "bartender-message";
+
+  div.innerHTML = `
+    <div class="bartender-avatar"></div>
+    <div class="bartender-text">${text.replace(/\n/g, "<br>")}</div>
+  `;
+
+  bartenderMessages.appendChild(div);
+  bartenderMessages.scrollTop = bartenderMessages.scrollHeight;
+}
+
+function addTypingIndicator() {
+  const div = document.createElement("div");
+  div.className = "bartender-message typing";
+  div.innerHTML = `
+    <div class="bartender-avatar"></div>
+    <div class="bartender-text"><em>typing...</em></div>
+  `;
+  bartenderMessages.appendChild(div);
+}
+
+function removeTypingIndicator() {
+  const typingNode = qs(".bartender-message.typing");
+  if (typingNode) typingNode.remove();
+}
+
+/* ======================================================
+   BAR TV — VIDEO PLAYER (4×3)
+   ====================================================== */
+const barTV = qs(".bar-tv-aspect video");
+const btnPlay = qs("#tv-play");
+const btnMute = qs("#tv-mute");
+const btnChannel = qs("#tv-channel");
+
+let channels = [
+  "https://visionary-beignet-7d270e.netlify.app/bar1.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/bar2.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/bar3.mp4"
 ];
 
 let currentChannel = 0;
-const videoEl = document.getElementById("barTvVideo");
-const muteBtn = document.getElementById("barTvMuteBtn");
 
-function loadChannel(index) {
-  const channel = tvChannels[index];
-  videoEl.src = channel.src;
-  document.getElementById("barTvTitle").textContent = channel.title;
-  videoEl.play();
-}
-
-document.getElementById("barTvChannelBtn").addEventListener("click", () => {
-  currentChannel = (currentChannel + 1) % tvChannels.length;
-  loadChannel(currentChannel);
-});
-
-document.getElementById("barTvPlayBtn").addEventListener("click", () => {
-  if (videoEl.paused) {
-    videoEl.play();
-    document.getElementById("barTvPlayBtn").textContent = "⏸";
+btnPlay.addEventListener("click", () => {
+  if (barTV.paused) {
+    barTV.play();
+    btnPlay.textContent = "Pause";
   } else {
-    videoEl.pause();
-    document.getElementById("barTvPlayBtn").textContent = "▶";
+    barTV.pause();
+    btnPlay.textContent = "Play";
   }
 });
 
-muteBtn.addEventListener("click", () => {
-  videoEl.muted = !videoEl.muted;
-  muteBtn.textContent = videoEl.muted ? "Sound: Off" : "Sound: On";
+btnMute.addEventListener("click", () => {
+  barTV.muted = !barTV.muted;
+  btnMute.textContent = barTV.muted ? "Unmute" : "Mute";
 });
 
-document.getElementById("barTvVolume").addEventListener("input", (e) => {
-  videoEl.volume = parseFloat(e.target.value);
+btnChannel.addEventListener("click", () => {
+  currentChannel = (currentChannel + 1) % channels.length;
+  barTV.src = channels[currentChannel];
+  barTV.play();
+  btnPlay.textContent = "Pause";
 });
 
-loadChannel(currentChannel);
+/* ======================================================
+   THEME SWITCHING (Listening Room)
+   ====================================================== */
+qsa(".theme-pill").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    qsa(".theme-pill").forEach((b) => b.classList.remove("is-active"));
+    btn.classList.add("is-active");
+
+    const theme = btn.dataset.theme;
+    document.body.className = "";
+    document.body.classList.add(`theme-${theme}`);
+  });
+});
