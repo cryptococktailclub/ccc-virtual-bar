@@ -2,536 +2,208 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Crypto Cocktail Club – Virtual Listening Bar</title>
+  <title>Crypto Cocktail Club – Virtual Bar Experience</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body class="theme-base">
-  <div class="app-bg">
-    <!-- Top nav -->
-    <header class="top-nav">
-      <div class="brand">
-        <img src="BASE_TRANSPARENT.PNG" alt="Crypto Cocktail Club" class="ccc-logo" />
-        <div class="brand-text">
-          <span class="brand-title">Crypto Cocktail Club</span>
-          <span class="brand-subtitle">Virtual Listening Bar</span>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="hero-inner">
+      <img src="BASE_TRANSPARENT.PNG" alt="CCC Logo" class="hero-logo" />
+      <h1 class="hero-title">Crypto Cocktail Club</h1>
+      <h2 class="hero-subtitle">Virtual Bar Experience</h2>
+      <p class="hero-tagline">Welcome in. Drop a record and stay awhile.</p>
+    </div>
+  </section>
+
+  <!-- FLOATING HEADER (appears on scroll) -->
+  <header class="top-nav" id="topNav">
+    <div class="brand">
+      <img src="BASE_TRANSPARENT.PNG" class="ccc-logo" />
+      <span class="brand-title">Crypto Cocktail Club</span>
+    </div>
+
+    <nav class="nav-right">
+      <a href="#listening-room" class="nav-link">Listening Room</a>
+      <a href="https://cryptococktailclub.com" class="nav-link" target="_blank">Litepaper</a>
+    </nav>
+  </header>
+
+
+
+  <!-- MAIN FLOW STACK -->
+
+  <!-- VINYL SHELF -->
+  <section class="section card" id="vinyl-shelf">
+    <h2 class="section-title">Vinyl Shelf</h2>
+    <p class="section-subtitle">Tap a record to drop it onto the deck.</p>
+
+    <div class="vinyl-row" id="vinylRow">
+
+      <button class="vinyl-item is-active" data-track-index="0">
+        <span class="vinyl-title">Analog Neon</span>
+        <span class="vinyl-note">Toby’s Mix</span>
+      </button>
+
+      <button class="vinyl-item" data-track-index="1">
+        <span class="vinyl-title">Gold Hour Spritz</span>
+        <span class="vinyl-note">Summer Mix</span>
+      </button>
+
+      <button class="vinyl-item" data-track-index="2">
+        <span class="vinyl-title">Midnight Chrome</span>
+        <span class="vinyl-note">Kartell Tribute</span>
+      </button>
+
+      <button class="vinyl-item" data-track-index="3">
+        <span class="vinyl-title">Poolside Mirage</span>
+        <span class="vinyl-note">Solomun Boiler Room</span>
+      </button>
+
+      <button class="vinyl-item" data-track-index="4">
+        <span class="vinyl-title">Khruangbin Live</span>
+        <span class="vinyl-note">Pitchfork Live</span>
+      </button>
+
+      <button class="vinyl-item" data-track-index="5">
+        <span class="vinyl-title">Succession Beats</span>
+        <span class="vinyl-note">Jsco Late-Night</span>
+      </button>
+
+    </div>
+  </section>
+
+
+
+  <!-- LISTENING ROOM -->
+  <section class="section card" id="listening-room">
+    <h2 class="section-title">Listening Room</h2>
+    <p class="section-subtitle">Warm vinyl. Chrome neon. Choose your pour.</p>
+
+    <div class="theme-toggle">
+      <button class="theme-pill is-active" data-theme="base">Base</button>
+      <button class="theme-pill" data-theme="gold">Gold</button>
+      <button class="theme-pill" data-theme="platinum">Platinum</button>
+    </div>
+
+    <!-- Album + Turntable -->
+    <div class="listening-flex">
+      <div class="album-art-wrapper">
+        <div class="album-art" id="albumArt">
+          <img src="BASE_TRANSPARENT.PNG" class="album-logo" />
         </div>
       </div>
 
-      <nav class="nav-links">
-        <button class="nav-link is-active" type="button">Listening Room</button>
-        <a
-          class="nav-link"
-          href="https://cryptococktailclub.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Litepaper
-        </a>
-      </nav>
-    </header>
-
-    <!-- Two-column layout: L = Bar TV + AI Bartender, R = Vinyl + Listening + Requests -->
-    <main class="layout">
-      <!-- LEFT COLUMN: Bar TV + AI Bartender -->
-      <section class="left-column">
-        <!-- Bar TV -->
-        <section class="card video-archive-card">
-          <div class="section-header compact">
-            <h2>Bar TV Archive</h2>
-            <p>80s CRT, cocktail tapes from the CCC vault.</p>
-          </div>
-
-          <div class="bar-tv-frame">
-            <div class="bar-tv-shell">
-              <div class="bar-tv-shell-top">
-                <div class="bar-tv-brand">CCC-Vision</div>
-                <div class="bar-tv-lights">
-                  <span class="tv-light tv-light-red"></span>
-                  <span class="tv-light tv-light-green"></span>
-                </div>
-              </div>
-
-              <div class="bar-tv-inner" id="barTvInner">
-                <div class="bar-tv-mortise">
-                  <video
-                    id="barTvVideo"
-                    class="bar-tv-screen"
-                    src="video/bar_tape_01.mp4"
-                    muted
-                    loop
-                    autoplay
-                    playsinline
-                    preload="metadata"
-                  ></video>
-                  <div class="bar-tv-overlay"></div>
-                </div>
-
-                <!-- TV volume slider (vertical tab) -->
-                <div class="bar-tv-volume-wrap">
-                  <span class="bar-tv-volume-label">VOL</span>
-                  <input
-                    type="range"
-                    id="barTvVolume"
-                    class="bar-tv-volume"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value="0.5"
-                  />
-                </div>
-
-                <!-- TV controls -->
-                <button type="button" class="bar-tv-channel-btn" id="barTvChannelBtn">
-                  CH+
-                </button>
-                <button type="button" class="bar-tv-play-btn" id="barTvPlayBtn">
-                  ⏸
-                </button>
-                <button type="button" class="bar-tv-sound-btn" id="barTvMuteBtn">
-                  Sound: Off
-                </button>
-              </div>
-
-              <div class="bar-tv-bottom">
-                <div class="bar-tv-speaker"></div>
-                <div class="bar-tv-knobs">
-                  <div class="tv-knob"></div>
-                  <div class="tv-knob small"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="video-archive-meta">
-              <div class="video-archive-title" id="barTvTitle">
-                Bar Tape 01
-              </div>
-              <div class="video-archive-label">Cocktail Tapes</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- AI BARTENDER (replaces Bar Chat) -->
-        <section class="card bartender-card">
-          <div class="section-header">
-            <h2>AI Bartender</h2>
-            <p>Ask for Milk &amp; Honey specs, riffs, or ingredient-driven ideas.</p>
-          </div>
-
-          <!-- Quick chips -->
-          <div class="bartender-quick-row">
-            <span class="bartender-quick-label">Shortcuts:</span>
-            <div class="bartender-chip-row">
-              <button class="bartender-chip" data-bartender-prompt="Recommend a refreshing gin sour.">
-                Gin · Refreshing
-              </button>
-              <button class="bartender-chip" data-bartender-prompt="Recommend a stirred whiskey drink, spirit-forward.">
-                Whiskey · Stirred
-              </button>
-              <button class="bartender-chip" data-bartender-prompt="Recommend a rum drink with lime and sugar, daiquiri family.">
-                Rum · Daiquiri
-              </button>
-              <button class="bartender-chip" data-bartender-prompt="Recommend something low-ABV and spritzy.">
-                Low-ABV
-              </button>
-            </div>
-          </div>
-
-          <!-- Results from local M&H DB -->
-          <div class="bartender-results" id="bartenderResults"></div>
-
-          <!-- Chat thread -->
-          <div class="bartender-messages" id="bartenderMessages">
-            <div class="bartender-message bartender-message-bot">
-              <div class="bartender-message-header">
-                <span class="bartender-name">CCC Bartender</span>
-                <span class="bartender-time">online · Milk &amp; Honey specs only</span>
-              </div>
-              <div class="bartender-message-body">
-                Ask for a classic by name (<em>Gold Rush, Penicillin, Paper Plane</em>), tell me your base spirit &amp; mood (<em>“gin, tart, not too sweet”</em>), or list what you have on your home bar and I’ll stay within the Milk &amp; Honey playbook.
-              </div>
-            </div>
-          </div>
-
-          <!-- Input -->
-          <form class="bartender-form" id="bartenderForm">
-            <div class="bartender-input-row">
-              <textarea
-                id="bartenderInput"
-                class="bartender-input"
-                rows="2"
-                placeholder="Ask the bartender anything… (e.g. “What’s the spec for a Gold Rush?” or “Make me a tequila sour, no egg.”)"
-              ></textarea>
-            </div>
-            <div class="bartender-footer-row">
-              <span class="bartender-hint">
-                Powered by Crypto Cocktail Club · Specs sourced from Milk &amp; Honey.
-              </span>
-              <button type="submit" class="bartender-submit-btn">
-                Ask Bartender
-              </button>
-            </div>
-          </form>
-        </section>
-      </section>
-
-      <!-- RIGHT COLUMN: Vinyl Shelf, Listening Station, Requests -->
-      <section class="right-column">
-        <!-- Vinyl Shelf -->
-        <section class="card vinyl-card">
-          <div class="section-header">
-            <h2>Vinyl Shelf</h2>
-            <p>Tap a record to drop it into the deck.</p>
-          </div>
-
-          <div class="vinyl-row" id="vinylRow">
-            <button class="vinyl-item is-active" type="button" data-track-index="0">
-              <div class="vinyl-spine">VOL. 01</div>
-              <div class="vinyl-face">
-                <h3>Analog Neon</h3>
-                <p>Toby’s Mix – bar warm-up.</p>
-              </div>
-            </button>
-
-            <button class="vinyl-item" type="button" data-track-index="1">
-              <div class="vinyl-spine">VOL. 02</div>
-              <div class="vinyl-face">
-                <h3>Gold Hour Spritz</h3>
-                <p>Summer mix for sunset pours.</p>
-              </div>
-            </button>
-
-            <button class="vinyl-item" type="button" data-track-index="2">
-              <div class="vinyl-spine">VOL. 03</div>
-              <div class="vinyl-face">
-                <h3>Midnight Chrome</h3>
-                <p>Kartell tribute – Roche Musique.</p>
-              </div>
-            </button>
-
-            <button class="vinyl-item" type="button" data-track-index="3">
-              <div class="vinyl-spine">VOL. 04</div>
-              <div class="vinyl-face">
-                <h3>Poolside Mirage</h3>
-                <p>Solomun Boiler Room, beach-synth energy.</p>
-              </div>
-            </button>
-
-            <button class="vinyl-item" type="button" data-track-index="4">
-              <div class="vinyl-spine">VOL. 05</div>
-              <div class="vinyl-face">
-                <h3>Khruangbin Live</h3>
-                <p>Pitchfork Live at Villain.</p>
-              </div>
-            </button>
-
-            <button class="vinyl-item" type="button" data-track-index="5">
-              <div class="vinyl-spine">VOL. 06</div>
-              <div class="vinyl-face">
-                <h3>Succession Beats</h3>
-                <p>Jsco Music – late night plotting.</p>
-              </div>
-            </button>
-          </div>
-        </section>
-
-        <!-- Listening Station -->
-        <section class="card listening-card">
-          <div class="section-header-main">
-            <div class="section-header">
-              <h1>Listening Station</h1>
-              <p>Slow pours, warm vinyl, chrome neon.</p>
-            </div>
-            <div class="theme-toggle" id="themeToggle">
-              <button class="theme-pill is-active" type="button" data-theme="base">Base</button>
-              <button class="theme-pill" type="button" data-theme="gold">Gold</button>
-              <button class="theme-pill" type="button" data-theme="platinum">Platinum</button>
-            </div>
-          </div>
-
-          <div class="listening-main">
-            <div class="album-and-turntable">
-              <!-- Album card -->
-              <div class="album-art-wrapper">
-                <div class="album-art" id="albumArt">
-                  <div class="album-face">
-                    <img src="BASE_TRANSPARENT.PNG" alt="Crypto Cocktail Club" class="album-logo" />
-                  </div>
-                  <div class="album-face album-face-back">
-                    <div class="card-back-copy">
-                      <h3>Crypto Cocktail Club</h3>
-                      <p>One seat at the listening bar.</p>
-                      <p>IRL + URL service, vinyl-forward sound.</p>
-                      <p class="card-back-tier">Base · Gold · Platinum</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Turntable -->
-              <div class="turntable">
-                <div class="turntable-platter" id="turntablePlatter">
-                  <div class="turntable-label"></div>
-                </div>
-                <div class="tonearm"></div>
-              </div>
-
-              <!-- Audio player -->
-              <div class="player-panel">
-                <div class="now-playing-label">Now Playing</div>
-                <div class="now-playing-info">
-                  <div>
-                    <h2 id="track-title">Toby’s Mix</h2>
-                    <p id="track-artist">Toby</p>
-                  </div>
-                  <div class="track-duration" id="track-duration">58:24</div>
-                </div>
-
-                <div class="player-timeline">
-                  <div class="timeline-bar" id="timeline-bar">
-                    <div class="timeline-progress" id="timeline-progress"></div>
-                  </div>
-                  <div class="timeline-meta">
-                    <span id="time-current">0:00</span>
-                    <span id="time-remaining">-58:24</span>
-                  </div>
-                </div>
-
-                <div class="player-controls">
-                  <button class="icon-btn" id="prev-btn" type="button">◀◀</button>
-                  <button class="play-btn" id="play-btn" type="button">Play</button>
-                  <button class="icon-btn" id="next-btn" type="button">▶▶</button>
-
-                  <div class="volume-block">
-                    <span class="volume-label">Volume</span>
-                    <input
-                      type="range"
-                      id="volume-slider"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value="0.8"
-                    />
-                  </div>
-                </div>
-
-                <div class="player-eq" id="playerEq">
-                  <span class="eq-bar eq-bar-1"></span>
-                  <span class="eq-bar eq-bar-2"></span>
-                  <span class="eq-bar eq-bar-3"></span>
-                  <span class="eq-bar eq-bar-4"></span>
-                </div>
-
-                <div class="player-footer">
-                  <p class="player-note">
-                    Tap a record from the shelf to drop it onto the deck.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Requests Queue -->
-        <section class="card requests-card">
-          <div class="section-header compact">
-            <h2>Requests Queue</h2>
-            <p>Tell the bar what you want to hear next.</p>
-          </div>
-
-          <div class="requests-list" id="requestsList"></div>
-
-          <form class="requests-form" id="requestsForm">
-            <div class="requests-row">
-              <input
-                type="text"
-                id="requestName"
-                class="requests-input requests-input-name"
-                maxlength="32"
-                placeholder="Your name"
-              />
-              <input
-                type="text"
-                id="requestTrack"
-                class="requests-input requests-input-track"
-                maxlength="80"
-                placeholder="Track / set request"
-                required
-              />
-            </div>
-
-            <div class="requests-row">
-              <textarea
-                id="requestNote"
-                class="requests-input requests-input-note"
-                rows="2"
-                maxlength="160"
-                placeholder="Optional note for the bar (mood, pairing, shout-out)..."
-              ></textarea>
-            </div>
-
-            <div class="requests-footer">
-              <span class="requests-hint">
-                Requests are saved only on this device.
-              </span>
-              <button type="submit" class="requests-submit">
-                Add to queue
-              </button>
-            </div>
-          </form>
-        </section>
-      </section>
-    </main>
-
-    <!-- MEMBERSHIP NFT SECTION -->
-    <section class="card membership-card">
-      <div class="section-header">
-        <h2>CCC Membership NFTs</h2>
-        <p>Your on-chain seat at the bar. Choose your tier and join the founding cohort.</p>
-      </div>
-
-      <div class="membership-grid">
-        <!-- Member -->
-        <article class="membership-tier membership-tier-base">
-          <div class="membership-tier-header">
-            <div>
-              <h3>Member Tier</h3>
-              <p class="membership-price">0.05 ETH / $150</p>
-            </div>
-            <span class="membership-supply">6,000 NFTs</span>
-          </div>
-
-          <ul class="membership-benefits">
-            <li>Members-only CCC Discord access</li>
-            <li>Whitelist for all future Recipe NFT drops</li>
-            <li>Governance votes on venues & recipe curation</li>
-            <li>Monthly virtual mixology sessions & cocktail tutorials</li>
-            <li>Loyalty points for engagement, redeemable for future perks</li>
-          </ul>
-
-          <p class="membership-perfect">
-            Perfect for enthusiasts who want to join the movement and own a piece of the future.
-          </p>
-        </article>
-
-        <!-- Gold -->
-        <article class="membership-tier membership-tier-gold">
-          <div class="membership-tier-header">
-            <div>
-              <h3>Gold Tier</h3>
-              <p class="membership-price">0.25 ETH / $750</p>
-            </div>
-            <span class="membership-supply">500 NFTs</span>
-          </div>
-
-          <ul class="membership-benefits">
-            <li>All Member benefits</li>
-            <li>24-hour priority mint window for Recipe NFTs</li>
-            <li>0.5% share of secondary market fees from Gold Recipe NFTs</li>
-            <li>Exclusive virtual tastings with master mixologists</li>
-            <li>Guaranteed $TIPZ utility token airdrop & limited CCC merch</li>
-          </ul>
-
-          <p class="membership-perfect">
-            Perfect for active collectors who want deeper engagement and better upside.
-          </p>
-        </article>
-
-        <!-- Platinum -->
-        <article class="membership-tier membership-tier-platinum">
-          <div class="membership-tier-header">
-            <div>
-              <h3>Platinum Tier <span class="membership-tag">Ultra-rare</span></h3>
-              <p class="membership-price">1.0 ETH / $2,500</p>
-            </div>
-            <span class="membership-supply">100 NFTs</span>
-          </div>
-
-          <ul class="membership-benefits">
-            <li>All Gold benefits</li>
-            <li>Genesis Founder status on CCC site & metadata</li>
-            <li>2× voting weight in DAO proposals</li>
-            <li>5× larger $TIPZ airdrop allocation</li>
-            <li>Guaranteed invites to CCC speakeasy openings & launch parties</li>
-            <li>1% share of platform fees from Platinum Recipe NFT secondary sales</li>
-            <li>Option to join CCC’s creative council / advisory role</li>
-          </ul>
-
-          <p class="membership-perfect">
-            Perfect for pioneers who want maximum access, influence, and long-term alignment with CCC.
-          </p>
-        </article>
-      </div>
-
-      <div class="membership-meta">
-        <div class="membership-why">
-          <h4>Why mint a CCC Membership NFT?</h4>
-          <ul>
-            <li>Real utility that bridges IRL bar culture with URL experiences.</li>
-            <li>Progressive value through royalties, revenue share & token airdrops.</li>
-            <li>Founding rights as part of the Genesis cohort shaping the protocol.</li>
-          </ul>
-        </div>
-
-        <div class="membership-details">
-          <div class="membership-detail-row">
-            <span class="membership-detail-label">Payment</span>
-            <span class="membership-detail-value">ETH, USDC, and USDT</span>
-          </div>
-          <div class="membership-detail-row">
-            <span class="membership-detail-label">Mint Window</span>
-            <span class="membership-detail-value">Targeting Q4 2025</span>
-          </div>
-
-          <a
-            href="https://cryptococktailclub.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="membership-cta"
-          >
-            Join the Genesis Waitlist
-          </a>
+      <div class="turntable">
+        <div class="turntable-platter" id="turntablePlatter">
+          <div class="turntable-label"></div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- DISCLAIMER -->
-    <section class="ccc-footer-legal">
-      © Crypto Cocktail Club. All video and audio content featured in this virtual lounge
-      is presented for community enjoyment, cultural reference, and archival appreciation only.
-      CCC does not claim ownership of any third-party recordings. All rights remain with their
-      respective creators and copyright holders. If you are a rights holder and have concerns,
-      please contact us for prompt removal.
-    </section>
+    <!-- Player Panel -->
+    <div class="player-panel">
+      <div class="now-playing-label">Now Playing</div>
 
-    <!-- FOOTER with socials + now playing -->
-    <footer class="ccc-footer-social">
-      <div class="footer-now">
-        <span class="footer-label">Now Playing</span>
-        <span class="footer-track" id="dockTrack">Toby’s Mix — Toby</span>
+      <div class="now-playing-info">
+        <div>
+          <h3 id="track-title">Toby’s Mix</h3>
+          <p id="track-artist">CCC</p>
+        </div>
+        <span id="track-duration" class="track-duration">58:24</span>
       </div>
-      <div class="footer-links">
-        <a
-          href="https://x.com/Cocktail2Crypto"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="footer-link primary"
-        >
-          Follow us on X
-        </a>
-        <a
-          href="https://discord.gg/6N6H8nnv"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="footer-link secondary"
-        >
-          Join Discord
-        </a>
-      </div>
-    </footer>
-  </div>
 
-  <audio id="bar-audio"></audio>
+      <div class="timeline-bar" id="timeline-bar">
+        <div class="timeline-progress" id="timeline-progress"></div>
+      </div>
+
+      <div class="timeline-meta">
+        <span id="time-current">0:00</span>
+        <span id="time-remaining">-58:24</span>
+      </div>
+
+      <div class="player-controls">
+        <button id="prev-btn" class="icon-btn">◀◀</button>
+        <button id="play-btn" class="play-btn">Play</button>
+        <button id="next-btn" class="icon-btn">▶▶</button>
+
+        <div class="volume-block">
+          <span class="volume-label">Volume</span>
+          <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.8" />
+        </div>
+      </div>
+
+      <div class="player-eq" id="playerEq">
+        <span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- BAR BOT -->
+  <section class="section card" id="bar-bot">
+    <h2 class="section-title">Bar Bot</h2>
+    <p class="section-subtitle">Ask for a classic, a riff, or a recipe based on what you’ve got.</p>
+
+    <div class="bartender-messages" id="bartenderMessages">
+      <div class="bartender-message bartender-bot">
+        <div class="bartender-avatar"></div>
+        <div class="bartender-text">Welcome back. What are you drinking tonight?</div>
+      </div>
+    </div>
+
+    <form id="bartenderForm" class="bartender-form">
+      <textarea id="bartenderInput" class="bartender-input" rows="2" placeholder="Ask the Bar Bot anything…"></textarea>
+      <button class="bartender-submit-btn" type="submit">Ask</button>
+    </form>
+  </section>
+
+
+
+  <!-- BAR TV -->
+  <section class="section card" id="bar-tv">
+    <h2 class="section-title">Bar TV</h2>
+    <p class="section-subtitle">Cocktail tapes from the vault.</p>
+
+    <div class="bar-tv-frame">
+      <div class="bar-tv-aspect">
+        <video
+          id="barTvVideo"
+          src="https://visionary-beignet-7d270e.netlify.app/video/bar_tape_01.mp4"
+          playsinline
+          muted
+          loop
+          autoplay
+        ></video>
+      </div>
+
+      <div class="bar-tv-controls">
+        <button id="tvChannelBtn">CH+</button>
+        <button id="tvPlayBtn">Pause</button>
+        <button id="tvMuteBtn">Sound Off</button>
+        <input type="range" id="tvVolume" min="0" max="1" step="0.05" value="0.5" />
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-now">
+      <strong>Now Playing:</strong> <span id="dockTrack">Toby’s Mix — CCC</span>
+    </div>
+
+    <div class="footer-links">
+      <a href="https://x.com/Cocktail2Crypto" target="_blank">Follow us on X</a>
+      <a href="https://discord.gg/6N6H8nnv" target="_blank">Join Discord</a>
+    </div>
+  </footer>
+
   <script src="script.js"></script>
 </body>
 </html>
