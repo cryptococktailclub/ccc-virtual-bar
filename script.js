@@ -1,265 +1,317 @@
-/* ======================================================
-   GLOBAL ELEMENT HELPERS
-   ====================================================== */
-const qs = (s) => document.querySelector(s);
-const qsa = (s) => document.querySelectorAll(s);
+/* ============================================================
+   GLOBAL TRACK DATA (MATCHING YOUR MEDIA HOST)
+   ============================================================ */
 
-/* ======================================================
-   FLOATING NAV ON SCROLL
-   ====================================================== */
-const topNav = qs(".top-nav");
-
-window.addEventListener("scroll", () => {
-  if (window.scrollY > window.innerHeight * 0.65) {
-    topNav.classList.add("visible");
-  } else {
-    topNav.classList.remove("visible");
-  }
-});
-
-/* ======================================================
-   VINYL SHELF → LISTENING ROOM
-   ====================================================== */
-
-// --- Vinyl Data ---
-// You can extend this easily.
-const albums = [
+const TRACKS = [
   {
-    id: "album1",
-    title: "NYC Loft Classics",
-    artist: "Crypto Cocktail Club",
-    track: "Loft Intro",
-    duration: 198,
-    cover: "https://visionary-beignet-7d270e.netlify.app/album1.png",
-    audio: "https://visionary-beignet-7d270e.netlify.app/audio1.mp3",
+    title: "Toby’s Mix",
+    artist: "CCC",
+    duration: "58:24",
+    src: "https://visionary-beignet-7d270e.netlify.app/audio/tobys_mix.mp3",
+    cover: "https://visionary-beignet-7d270e.netlify.app/covers/cover_base.png"
   },
   {
-    id: "album2",
-    title: "Midnight Pour",
-    artist: "CCC Hi-Fi",
-    track: "Stirred Not Shaken",
-    duration: 214,
-    cover: "https://visionary-beignet-7d270e.netlify.app/album2.png",
-    audio: "https://visionary-beignet-7d270e.netlify.app/audio2.mp3",
+    title: "Gold Hour Spritz",
+    artist: "CCC",
+    duration: "42:18",
+    src: "https://visionary-beignet-7d270e.netlify.app/audio/gold_hour.mp3",
+    cover: "https://visionary-beignet-7d270e.netlify.app/covers/cover_gold.png"
+  },
+  {
+    title: "Midnight Chrome",
+    artist: "Kartell",
+    duration: "50:03",
+    src: "https://visionary-beignet-7d270e.netlify.app/audio/midnight_chrome.mp3",
+    cover: "https://visionary-beignet-7d270e.netlify.app/covers/cover_platinum.png"
+  },
+  {
+    title: "Poolside Mirage",
+    artist: "Solomun",
+    duration: "63:54",
+    src: "https://visionary-beignet-7d270e.netlify.app/audio/poolside.mp3",
+    cover: "https://visionary-beignet-7d270e.netlify.app/covers/cover_pool.png"
+  },
+  {
+    title: "Khruangbin Live",
+    artist: "Khruangbin",
+    duration: "55:22",
+    src: "https://visionary-beignet-7d270e.netlify.app/audio/khruangbin.mp3",
+    cover: "https://visionary-beignet-7d270e.netlify.app/covers/cover_khru.png"
+  },
+  {
+    title: "Succession Beats",
+    artist: "Jsco",
+    duration: "39:40",
+    src: "https://visionary-beignet-7d270e.netlify.app/audio/succession_beats.mp3",
+    cover: "https://visionary-beignet-7d270e.netlify.app/covers/cover_succession.png"
   }
 ];
 
-let currentAlbum = null;
 
-const vinylItems = qsa(".vinyl-item");
-const albumArt = qs(".album-art");
-const albumLogo = qs(".album-logo");
-const platter = qs(".turntable-platter");
-const eqBars = qsa(".eq-bar");
-const trackTitle = qs("#track-title");
-const trackArtist = qs("#track-artist");
-const trackDurationLabel = qs(".track-duration");
-const timelineProgress = qs(".timeline-progress");
+/* ============================================================
+   ELEMENT HOOKS
+   ============================================================ */
+
+const vinylRow = document.getElementById("vinylRow");
+const albumArt = document.getElementById("albumArt");
+const turntablePlatter = document.getElementById("turntablePlatter");
+const playerEq = document.getElementById("playerEq");
+
 const audio = new Audio();
-let isPlaying = false;
-let timelineInterval = null;
+audio.volume = 0.8;
 
-/* ======================================================
-   SELECT VINYL
-   ====================================================== */
-vinylItems.forEach((item) => {
-  item.addEventListener("click", () => {
-    const albumId = item.dataset.album;
-    const album = albums.find((a) => a.id === albumId);
-    if (!album) return;
+const timelineBar = document.getElementById("timeline-bar");
+const timelineProgress = document.getElementById("timeline-progress");
 
-    // Activate UI
-    vinylItems.forEach((v) => v.classList.remove("is-active"));
-    item.classList.add("is-active");
+const trackTitle = document.getElementById("track-title");
+const trackArtist = document.getElementById("track-artist");
+const trackDuration = document.getElementById("track-duration");
+const timeCurrent = document.getElementById("time-current");
+const timeRemaining = document.getElementById("time-remaining");
+const dockTrack = document.getElementById("dockTrack");
 
-    // Set album
-    currentAlbum = album;
+const playBtn = document.getElementById("play-btn");
+const prevBtn = document.getElementById("prev-btn");
+const nextBtn = document.getElementById("next-btn");
+const volumeSlider = document.getElementById("volume-slider");
 
-    // Set cover art
-    albumLogo.src = album.cover;
+let currentTrackIndex = 0;
 
-    // Vinyl landing animation
-    albumArt.style.animation = "vinylLand 0.8s ease-out";
 
-    setTimeout(() => {
-      albumArt.style.animation = "";
-    }, 900);
+/* ============================================================
+   LOAD TRACK
+   ============================================================ */
 
-    // Load audio
-    audio.src = album.audio;
-    audio.currentTime = 0;
+function loadTrack(index) {
+  const track = TRACKS[index];
+  currentTrackIndex = index;
 
-    // Update labels
-    trackTitle.textContent = album.title;
-    trackArtist.textContent = album.artist;
-    trackDurationLabel.textContent = formatTime(album.duration);
+  audio.src = track.src;
 
-    // Auto-play new selection
-    startPlayback();
-  });
-});
+  trackTitle.textContent = track.title;
+  trackArtist.textContent = track.artist;
+  trackDuration.textContent = track.duration;
+  dockTrack.textContent = `${track.title} — ${track.artist}`;
 
-/* ======================================================
-   PLAYER CONTROLS
-   ====================================================== */
-qs(".play-btn").addEventListener("click", () => {
-  if (!currentAlbum) return;
-  isPlaying ? pausePlayback() : startPlayback();
-});
+  albumArt.innerHTML = `<img src="${track.cover}" class="album-logo" />`;
 
-qs("#volume-slider").addEventListener("input", (e) => {
-  audio.volume = e.target.value;
-});
+  document.querySelectorAll(".vinyl-item").forEach(btn =>
+    btn.classList.remove("is-active")
+  );
+  document.querySelector(`[data-track-index="${index}"]`).classList.add("is-active");
 
-/* ======================================================
-   PLAYBACK FUNCTIONS
-   ====================================================== */
-function startPlayback() {
-  isPlaying = true;
+  triggerVinylDrop();
+}
+
+function triggerVinylDrop() {
+  albumArt.style.animation = "vinylDrop 0.6s ease-out";
+  setTimeout(() => (albumArt.style.animation = ""), 700);
+}
+
+/* Vinyl drop animation injected into DOM */
+const vinylDropKeyframes = document.createElement("style");
+vinylDropKeyframes.innerHTML = `
+@keyframes vinylDrop {
+  0% { transform: translateY(-40px) scale(0.95); opacity: 0; }
+  60% { transform: translateY(6px) scale(1.03); opacity: 1; }
+  100% { transform: translateY(0) scale(1); }
+}`;
+document.head.appendChild(vinylDropKeyframes);
+
+
+/* ============================================================
+   PLAYBACK CONTROLS
+   ============================================================ */
+
+function playTrack() {
   audio.play();
-
-  platter.classList.add("is-playing");
-  qs(".player-eq").classList.add("is-playing");
-
-  if (timelineInterval) clearInterval(timelineInterval);
-  timelineInterval = setInterval(updateTimeline, 200);
+  playBtn.textContent = "Pause";
+  turntablePlatter.classList.add("is-playing");
+  playerEq.classList.add("is-playing");
 }
 
-function pausePlayback() {
-  isPlaying = false;
+function pauseTrack() {
   audio.pause();
-
-  platter.classList.remove("is-playing");
-  qs(".player-eq").classList.remove("is-playing");
-
-  if (timelineInterval) clearInterval(timelineInterval);
+  playBtn.textContent = "Play";
+  turntablePlatter.classList.remove("is-playing");
+  playerEq.classList.remove("is-playing");
 }
 
-function updateTimeline() {
-  if (!currentAlbum) return;
+playBtn.addEventListener("click", () => {
+  audio.paused ? playTrack() : pauseTrack();
+});
 
-  const pct = (audio.currentTime / currentAlbum.duration) * 100;
-  timelineProgress.style.width = pct + "%";
+prevBtn.addEventListener("click", () => {
+  let i = currentTrackIndex - 1;
+  if (i < 0) i = TRACKS.length - 1;
+  loadTrack(i);
+  playTrack();
+});
 
-  if (pct >= 100) pausePlayback();
-}
+nextBtn.addEventListener("click", () => {
+  let i = (currentTrackIndex + 1) % TRACKS.length;
+  loadTrack(i);
+  playTrack();
+});
 
+volumeSlider.addEventListener("input", () => {
+  audio.volume = volumeSlider.value;
+});
+
+/* Timeline update */
+audio.addEventListener("timeupdate", () => {
+  const progress = (audio.currentTime / audio.duration) * 100;
+  timelineProgress.style.width = `${progress}%`;
+
+  timeCurrent.textContent = formatTime(audio.currentTime);
+  timeRemaining.textContent = `-${formatTime(audio.duration - audio.currentTime)}`;
+});
+
+/* Timeline click-to-scrub */
+timelineBar.addEventListener("click", (e) => {
+  const rect = timelineBar.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+  audio.currentTime = percent * audio.duration;
+});
+
+/* Time formatting helper */
 function formatTime(sec) {
   const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60).toString().padStart(2, "0");
+  const s = Math.floor(sec % 60)
+    .toString()
+    .padStart(2, "0");
   return `${m}:${s}`;
 }
 
-/* ======================================================
-   BAR BOT — AI BARTENDER
-   ====================================================== */
-const bartenderMessages = qs(".bartender-messages");
-const bartenderInput = qs(".bartender-input");
-const bartenderForm = qs(".bartender-form");
 
-bartenderForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+/* ============================================================
+   VINYL SHELF INTERACTION
+   ============================================================ */
 
-  const userText = bartenderInput.value.trim();
-  if (!userText) return;
+vinylRow.addEventListener("click", (e) => {
+  const btn = e.target.closest(".vinyl-item");
+  if (!btn) return;
 
-  addBartenderMessage("user", userText);
-  bartenderInput.value = "";
-
-  addTypingIndicator();
-
-  // Call Netlify function
-  const res = await fetch("/.netlify/functions/ccc-bartender", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      question: userText,
-      recipes: [] // You can add filtered Milk & Honey data here
-    })
-  });
-
-  removeTypingIndicator();
-
-  const data = await res.json();
-  addBartenderMessage("bot", data.answer || "I’m here behind the bar if you need anything.");
+  const index = Number(btn.dataset.trackIndex);
+  loadTrack(index);
+  playTrack();
 });
 
-function addBartenderMessage(who, text) {
-  const div = document.createElement("div");
-  div.className = "bartender-message";
 
-  div.innerHTML = `
-    <div class="bartender-avatar"></div>
-    <div class="bartender-text">${text.replace(/\n/g, "<br>")}</div>
-  `;
+/* ============================================================
+   THEME SWITCHING
+   ============================================================ */
 
-  bartenderMessages.appendChild(div);
-  bartenderMessages.scrollTop = bartenderMessages.scrollHeight;
-}
+document.querySelectorAll(".theme-pill").forEach(btn =>
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".theme-pill").forEach(b => b.classList.remove("is-active"));
+    btn.classList.add("is-active");
 
-function addTypingIndicator() {
-  const div = document.createElement("div");
-  div.className = "bartender-message typing";
-  div.innerHTML = `
-    <div class="bartender-avatar"></div>
-    <div class="bartender-text"><em>typing...</em></div>
-  `;
-  bartenderMessages.appendChild(div);
-}
+    document.body.className = `theme-${btn.dataset.theme}`;
+  })
+);
 
-function removeTypingIndicator() {
-  const typingNode = qs(".bartender-message.typing");
-  if (typingNode) typingNode.remove();
-}
 
-/* ======================================================
-   BAR TV — VIDEO PLAYER (4×3)
-   ====================================================== */
-const barTV = qs(".bar-tv-aspect video");
-const btnPlay = qs("#tv-play");
-const btnMute = qs("#tv-mute");
-const btnChannel = qs("#tv-channel");
+/* ============================================================
+   FLOATING HEADER
+   ============================================================ */
 
-let channels = [
-  "https://visionary-beignet-7d270e.netlify.app/bar1.mp4",
-  "https://visionary-beignet-7d270e.netlify.app/bar2.mp4",
-  "https://visionary-beignet-7d270e.netlify.app/bar3.mp4"
+const topNav = document.getElementById("topNav");
+window.addEventListener("scroll", () => {
+  if (window.scrollY > 200) topNav.classList.add("visible");
+  else topNav.classList.remove("visible");
+});
+
+
+/* ============================================================
+   BAR TV CONTROLS
+   ============================================================ */
+
+const tvVideo = document.getElementById("barTvVideo");
+const tvChannelBtn = document.getElementById("tvChannelBtn");
+const tvPlayBtn = document.getElementById("tvPlayBtn");
+const tvMuteBtn = document.getElementById("tvMuteBtn");
+const tvVolume = document.getElementById("tvVolume");
+
+const TV_CHANNELS = [
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_01.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_02.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_03.mp4"
 ];
 
 let currentChannel = 0;
 
-btnPlay.addEventListener("click", () => {
-  if (barTV.paused) {
-    barTV.play();
-    btnPlay.textContent = "Pause";
+tvChannelBtn.addEventListener("click", () => {
+  currentChannel = (currentChannel + 1) % TV_CHANNELS.length;
+  tvVideo.src = TV_CHANNELS[currentChannel];
+  tvVideo.play();
+});
+
+tvPlayBtn.addEventListener("click", () => {
+  if (tvVideo.paused) {
+    tvVideo.play();
+    tvPlayBtn.textContent = "Pause";
   } else {
-    barTV.pause();
-    btnPlay.textContent = "Play";
+    tvVideo.pause();
+    tvPlayBtn.textContent = "Play";
   }
 });
 
-btnMute.addEventListener("click", () => {
-  barTV.muted = !barTV.muted;
-  btnMute.textContent = barTV.muted ? "Unmute" : "Mute";
+tvMuteBtn.addEventListener("click", () => {
+  tvVideo.muted = !tvVideo.muted;
+  tvMuteBtn.textContent = tvVideo.muted ? "Sound On" : "Sound Off";
 });
 
-btnChannel.addEventListener("click", () => {
-  currentChannel = (currentChannel + 1) % channels.length;
-  barTV.src = channels[currentChannel];
-  barTV.play();
-  btnPlay.textContent = "Pause";
+tvVolume.addEventListener("input", () => {
+  tvVideo.volume = tvVolume.value;
+  if (tvVideo.volume > 0) tvVideo.muted = false;
 });
 
-/* ======================================================
-   THEME SWITCHING (Listening Room)
-   ====================================================== */
-qsa(".theme-pill").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    qsa(".theme-pill").forEach((b) => b.classList.remove("is-active"));
-    btn.classList.add("is-active");
 
-    const theme = btn.dataset.theme;
-    document.body.className = "";
-    document.body.classList.add(`theme-${theme}`);
+/* ============================================================
+   BAR BOT API
+   ============================================================ */
+
+const bartenderForm = document.getElementById("bartenderForm");
+const bartenderInput = document.getElementById("bartenderInput");
+const bartenderMessages = document.getElementById("bartenderMessages");
+
+function addBotMessage(text) {
+  bartenderMessages.innerHTML += `
+    <div class="bartender-message">
+      <div class="bartender-avatar"></div>
+      <div class="bartender-text">${text}</div>
+    </div>`;
+  bartenderMessages.scrollTop = bartenderMessages.scrollHeight;
+}
+
+bartenderForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const message = bartenderInput.value.trim();
+  if (!message) return;
+
+  bartenderMessages.innerHTML += `
+    <div class="bartender-message">
+      <div class="bartender-text">${message}</div>
+    </div>`;
+  bartenderMessages.scrollTop = bartenderMessages.scrollHeight;
+
+  bartenderInput.value = "";
+
+  addBotMessage("Mixing that up…");
+
+  const res = await fetch("/.netlify/functions/ccc-bartender", {
+    method: "POST",
+    body: JSON.stringify({ question: message, recipes: [] })
   });
+
+  const data = await res.json();
+  addBotMessage(data.answer || "I couldn't find a match for that.");
 });
+
+
+/* ============================================================
+   INITIAL LOAD
+   ============================================================ */
+
+loadTrack(0);
