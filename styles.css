@@ -1,11 +1,9 @@
 /* ==========================================================
    Crypto Cocktail Club – Virtual Bar Experience
-   styles.css (mobile-first, one-column, immersive)
-   ========================================================== */
+   styles.css – single column, mobile-first
+========================================================== */
 
-/* -----------------------------
-   RESET + GLOBAL
------------------------------ */
+/* ---------- RESET ---------- */
 
 *,
 *::before,
@@ -27,7 +25,8 @@ body {
   overflow-x: hidden;
 }
 
-/* Main content width */
+/* Layout width */
+
 .section,
 .footer {
   max-width: 1120px;
@@ -35,7 +34,8 @@ body {
   padding: 0 16px;
 }
 
-/* Root theme accents */
+/* ---------- THEME TOKENS ---------- */
+
 :root {
   --accent-neon-pink: #ff1493;
   --accent-neon-pink-soft: #c71585;
@@ -50,7 +50,6 @@ body {
   --text-muted: #a59ac7;
 }
 
-/* Backgrounds per theme */
 body.theme-base {
   background: radial-gradient(circle at top, #321031 0, #05010f 45%, #020008 100%);
 }
@@ -63,7 +62,6 @@ body.theme-platinum {
   background: radial-gradient(circle at top, #101624 0, #03030a 45%, #010107 100%);
 }
 
-/* Smooth transitions */
 body,
 .card,
 .hero,
@@ -79,9 +77,7 @@ body,
     color 0.6s ease;
 }
 
-/* -----------------------------
-   HERO
------------------------------ */
+/* ---------- HERO ---------- */
 
 .hero {
   min-height: 85vh;
@@ -183,9 +179,7 @@ body,
   max-width: 360px;
 }
 
-/* -----------------------------
-   FLOATING HEADER
------------------------------ */
+/* ---------- FLOATING HEADER ---------- */
 
 .top-nav {
   position: fixed;
@@ -276,9 +270,7 @@ body.theme-platinum .ccc-logo {
   transform: translateY(-1px);
 }
 
-/* -----------------------------
-   CARDS / SECTIONS
------------------------------ */
+/* ---------- CARDS ---------- */
 
 .section {
   margin-bottom: 20px;
@@ -304,9 +296,7 @@ body.theme-platinum .ccc-logo {
   color: var(--text-muted);
 }
 
-/* -----------------------------
-   VINYL SHELF
------------------------------ */
+/* ---------- VINYL SHELF ---------- */
 
 .vinyl-row {
   display: flex;
@@ -356,9 +346,7 @@ body.theme-platinum .ccc-logo {
   color: var(--text-muted);
 }
 
-/* -----------------------------
-   LISTENING ROOM
------------------------------ */
+/* ---------- LISTENING ROOM ---------- */
 
 .theme-toggle {
   display: inline-flex;
@@ -387,7 +375,6 @@ body.theme-platinum .ccc-logo {
   font-weight: 600;
 }
 
-/* Album + Turntable layout */
 .listening-flex {
   display: flex;
   flex-direction: column;
@@ -395,6 +382,7 @@ body.theme-platinum .ccc-logo {
 }
 
 /* Album art */
+
 .album-art-wrapper {
   border-radius: 22px;
   padding: 10px;
@@ -421,7 +409,6 @@ body.theme-platinum .album-art-wrapper {
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.9);
 }
 
-/* Theme backgrounds */
 body.theme-gold .album-art {
   background: linear-gradient(140deg, #3a2100, #ffb700 25%, #ffd700 55%, #3a2100 95%);
 }
@@ -439,6 +426,7 @@ body.theme-platinum .album-art {
 }
 
 /* Turntable */
+
 .turntable {
   padding: 14px;
   border-radius: 20px;
@@ -497,6 +485,7 @@ body.theme-platinum .turntable-label {
 }
 
 /* Player panel */
+
 .player-panel {
   margin-top: 12px;
   padding: 12px;
@@ -620,6 +609,7 @@ body.theme-platinum .turntable-label {
 }
 
 /* EQ bars */
+
 .player-eq {
   margin-top: 6px;
   display: flex;
@@ -653,9 +643,7 @@ body.theme-platinum .turntable-label {
   }
 }
 
-/* -----------------------------
-   BAR BOT
------------------------------ */
+/* ---------- BAR BOT ---------- */
 
 #bar-bot {
   margin-top: 4px;
@@ -742,14 +730,13 @@ body.theme-platinum .bartender-bot .bartender-avatar {
   cursor: pointer;
 }
 
+/* typing indicator text */
 .typing {
   font-size: 0.78rem;
   color: var(--text-muted);
 }
 
-/* -----------------------------
-   BAR TV
------------------------------ */
+/* ---------- BAR TV ---------- */
 
 .bar-tv-frame {
   margin-top: 8px;
@@ -765,7 +752,7 @@ body.theme-platinum .bartender-bot .bartender-avatar {
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  padding-top: 75%; /* 4:3 */
+  padding-top: 75%; /* 4:3 aspect */
   border-radius: 12px;
   overflow: hidden;
   background: #000;
@@ -806,9 +793,7 @@ body.theme-platinum .bartender-bot .bartender-avatar {
   flex: 1;
 }
 
-/* -----------------------------
-   FOOTER
------------------------------ */
+/* ---------- FOOTER ---------- */
 
 .footer {
   padding: 14px 16px 24px;
@@ -847,11 +832,8 @@ body.theme-platinum .bartender-bot .bartender-avatar {
   color: #05010f;
 }
 
-/* -----------------------------
-   RESPONSIVE
------------------------------ */
+/* ---------- RESPONSIVE ---------- */
 
-/* Larger screens – widen listening flex */
 @media (min-width: 768px) {
   .hero {
     min-height: 90vh;
@@ -871,7 +853,6 @@ body.theme-platinum .bartender-bot .bartender-avatar {
   }
 }
 
-/* Medium / desktop */
 @media (min-width: 1024px) {
   .hero-title {
     font-size: 2.1rem;
@@ -880,13 +861,8 @@ body.theme-platinum .bartender-bot .bartender-avatar {
   .card {
     padding: 20px 20px 18px;
   }
-
-  .vinyl-row {
-    padding-right: 6px;
-  }
 }
 
-/* Small phones */
 @media (max-width: 480px) {
   .hero-logo {
     width: 120px;
