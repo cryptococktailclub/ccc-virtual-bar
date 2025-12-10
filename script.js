@@ -140,7 +140,7 @@ function initThemeToggle() {
 }
 
 // ==========================
-// AUDIO PLAYER + VINYL SHELF
+// AUDIO PLAYER + VINYL SHELF (FULLY FIXED)
 // ==========================
 
 function initAudioPlayer() {
@@ -150,6 +150,7 @@ function initAudioPlayer() {
   const platter = document.getElementById("turntablePlatter");
   const eq = document.getElementById("playerEq");
   const tonearm = document.getElementById("tonearm");
+
   const trackTitleEl = document.getElementById("track-title");
   const trackArtistEl = document.getElementById("track-artist");
   const trackDurationEl = document.getElementById("track-duration");
@@ -157,176 +158,139 @@ function initAudioPlayer() {
   const timelineProgress = document.getElementById("timeline-progress");
   const timeCurrent = document.getElementById("time-current");
   const timeRemaining = document.getElementById("time-remaining");
+
   const prevBtn = document.getElementById("prev-btn");
   const playBtn = document.getElementById("play-btn");
   const nextBtn = document.getElementById("next-btn");
   const volumeSlider = document.getElementById("volume-slider");
   const dockTrack = document.getElementById("dockTrack");
 
-  // If any core elements are missing, bail out for audio only
-  if (!vinylRow || !trackTitleEl || !timelineBar || !playBtn) {
-    console.warn("CCC: Audio player not fully wired (missing core elements).");
+  if (!vinylRow || !playBtn || !timelineBar) {
+    console.warn("CCC: Audio player not fully wired.");
     return;
   }
 
- let currentIndex = 0;
-const audio = new Audio();
-audio.preload = "metadata";
+  let currentIndex = 0;
+  const audio = new Audio();
+  audio.preload = "metadata";
 
-function setPlayingVisual(isPlaying) {
-  if (platter) platter.classList.toggle("is-playing", isPlaying);
-  if (eq) eq.classList.toggle("is-playing", isPlaying);
-  if (albumArt) albumArt.classList.toggle("glow-active", isPlaying);
-  if (tonearm) tonearm.classList.toggle("is-engaged", isPlaying);
-}
-
-function loadTrack(index, autoPlay = false) {
-  if (!AUDIO_TRACKS[index]) {
-    console.warn("CCC: Invalid track index", index);
-    return;
+  // Visual updates
+  function setPlayingVisual(isPlaying) {
+    platter?.classList.toggle("is-playing", isPlaying);
+    eq?.classList.toggle("is-playing", isPlaying);
+    albumArt?.classList.toggle("glow-active", isPlaying);
+    tonearm?.classList.toggle("is-engaged", isPlaying);
   }
-  currentIndex = index;
-  const track = AUDIO_TRACKS[index];
 
-  audio.src = track.src;
-  audio.currentTime = 0;
+  // Load a track
+  function loadTrack(index, autoPlay = false) {
+    if (!AUDIO_TRACKS[index]) return;
 
-  if (trackTitleEl) trackTitleEl.textContent = track.title;
-  if (trackArtistEl) trackArtistEl.textContent = track.artist;
-  if (trackDurationEl) trackDurationEl.textContent = track.durationText || "--:--";
-  if (timeCurrent) timeCurrent.textContent = "0:00";
-  if (timeRemaining) {
-    timeRemaining.textContent = track.durationText ? `-${track.durationText}` : "-0:00";
-  }
-  if (timelineProgress) timelineProgress.style.width = "0%";
-  if (dockTrack) dockTrack.textContent = `${track.title} — ${track.artist}`;
+    currentIndex = index;
+    const track = AUDIO_TRACKS[index];
 
-  // Active vinyl highlight + subtle drop
-  const vinylItems = vinylRow.querySelectorAll(".vinyl-item");
-  vinylItems.forEach((btn, idx) => {
-    btn.classList.toggle("is-active", idx === index);
-    if (idx === index) {
-      btn.style.animation = "vinylLand 0.35s ease-out";
-      setTimeout(() => {
-        btn.style.animation = "";
-      }, 400);
-    }
-  });
+    audio.src = track.src;
+    audio.currentTime = 0;
 
-  if (autoPlay) {
-    audio
-      .play()
-      .then(() => {
-        playBtn.textContent = "Pause";
-        setPlayingVisual(true);
-      })
-      .catch((err) => {
-        console.warn("CCC: Audio play blocked or failed", err);
-        setPlayingVisual(false);
-      });
-  } else {
-    playBtn.textContent = "Play";
-    setPlayingVisual(false);
-  }
-}
+    trackTitleEl.textContent = track.title;
+    trackArtistEl.textContent = track.artist;
+    trackDurationEl.textContent = track.durationText;
+    timeCurrent.textContent = "0:00";
+    timeRemaining.textContent = `-${track.durationText}`;
+    timelineProgress.style.width = "0%";
 
+    dockTrack.textContent = `${track.title} — ${track.artist}`;
+
+    // highlight vinyl
+    vinylRow.querySelectorAll(".vinyl-item").forEach((btn, idx) => {
+      btn.classList.toggle("is-active", idx === index);
+      if (idx === index) {
+        btn.style.animation = "vinylLand 0.35s ease-out";
+        setTimeout(() => (btn.style.animation = ""), 400);
+      }
+    });
 
     if (autoPlay) {
-      audio
-        .play()
+      audio.play()
         .then(() => {
           playBtn.textContent = "Pause";
-          if (platter) platter.classList.add("is-playing");
-          if (eq) eq.classList.add("is-playing");
-          if (albumArt) albumArt.classList.add("glow-active");
+          setPlayingVisual(true);
         })
-        .catch((err) => {
-          console.warn("CCC: Audio play blocked or failed", err);
+        .catch(err => {
+          console.warn("CCC: play blocked", err);
+          setPlayingVisual(false);
         });
     } else {
       playBtn.textContent = "Play";
-      if (platter) platter.classList.remove("is-playing");
-      if (eq) eq.classList.remove("is-playing");
-      if (albumArt) albumArt.classList.remove("glow-active");
+      setPlayingVisual(false);
     }
   }
 
-  // initial
+  // Initialize
   loadTrack(0, false);
 
-  // vinyl click
+  // Vinyl click
   vinylRow.querySelectorAll(".vinyl-item").forEach((btn, idx) => {
-    btn.addEventListener("click", () => {
-      loadTrack(idx, true);
-    });
+    btn.addEventListener("click", () => loadTrack(idx, true));
   });
 
-  // controls
+  // Play / Pause
   playBtn.addEventListener("click", () => {
-  if (audio.paused) {
-    audio
-      .play()
-      .then(() => {
-        playBtn.textContent = "Pause";
-        setPlayingVisual(true);
-      })
-      .catch((err) => {
-        console.warn("CCC: Audio play blocked or failed", err);
-        setPlayingVisual(false);
-      });
-  } else {
-    audio.pause();
-    playBtn.textContent = "Play";
-    setPlayingVisual(false);
-  }
-});
+    if (audio.paused) {
+      audio.play()
+        .then(() => {
+          playBtn.textContent = "Pause";
+          setPlayingVisual(true);
+        })
+        .catch(err => console.warn("CCC: play blocked", err));
+    } else {
+      audio.pause();
+      playBtn.textContent = "Play";
+      setPlayingVisual(false);
+    }
+  });
 
-  if (prevBtn) {
-    prevBtn.addEventListener("click", () => {
-      const nextIndex = (currentIndex - 1 + AUDIO_TRACKS.length) % AUDIO_TRACKS.length;
-      loadTrack(nextIndex, true);
-    });
-  }
+  // Prev / Next
+  prevBtn?.addEventListener("click", () => {
+    loadTrack((currentIndex - 1 + AUDIO_TRACKS.length) % AUDIO_TRACKS.length, true);
+  });
 
-  if (nextBtn) {
-    nextBtn.addEventListener("click", () => {
-      const nextIndex = (currentIndex + 1) % AUDIO_TRACKS.length;
-      loadTrack(nextIndex, true);
-    });
-  }
+  nextBtn?.addEventListener("click", () => {
+    loadTrack((currentIndex + 1) % AUDIO_TRACKS.length, true);
+  });
 
+  // Volume
   if (volumeSlider) {
+    audio.volume = parseFloat(volumeSlider.value);
     volumeSlider.addEventListener("input", () => {
       audio.volume = parseFloat(volumeSlider.value);
     });
-    audio.volume = parseFloat(volumeSlider.value);
   }
 
-  // timeline + time update
+  // Timeline sync
   audio.addEventListener("timeupdate", () => {
-    if (!audio.duration || !isFinite(audio.duration)) return;
+    if (!audio.duration) return;
 
     const pct = (audio.currentTime / audio.duration) * 100;
-    if (timelineProgress) timelineProgress.style.width = `${pct}%`;
-    if (timeCurrent) timeCurrent.textContent = formatTime(audio.currentTime);
-    if (timeRemaining) timeRemaining.textContent = `-${formatTime(audio.duration - audio.currentTime)}`;
+    timelineProgress.style.width = `${pct}%`;
+    timeCurrent.textContent = formatTime(audio.currentTime);
+    timeRemaining.textContent = `-${formatTime(audio.duration - audio.currentTime)}`;
   });
 
-  // seek
-  timelineBar.addEventListener("click", (e) => {
-    if (!audio.duration || !isFinite(audio.duration)) return;
+  // Seek
+  timelineBar.addEventListener("click", e => {
+    if (!audio.duration) return;
     const rect = timelineBar.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const pct = clickX / rect.width;
+    const pct = (e.clientX - rect.left) / rect.width;
     audio.currentTime = pct * audio.duration;
   });
 
-  // autoplay next
+  // Autoplay next
   audio.addEventListener("ended", () => {
-    const nextIndex = (currentIndex + 1) % AUDIO_TRACKS.length;
-    loadTrack(nextIndex, true);
+    loadTrack((currentIndex + 1) % AUDIO_TRACKS.length, true);
   });
 }
+
 
 // ==========================
 // BAR TV
