@@ -149,6 +149,7 @@ function initAudioPlayer() {
   const albumArt = document.getElementById("albumArt");
   const platter = document.getElementById("turntablePlatter");
   const eq = document.getElementById("playerEq");
+  const tonearm = document.getElementById("tonearm");
   const trackTitleEl = document.getElementById("track-title");
   const trackArtistEl = document.getElementById("track-artist");
   const trackDurationEl = document.getElementById("track-duration");
@@ -168,41 +169,67 @@ function initAudioPlayer() {
     return;
   }
 
-  let currentIndex = 0;
-  const audio = new Audio();
-  audio.preload = "metadata";
+ let currentIndex = 0;
+const audio = new Audio();
+audio.preload = "metadata";
 
-  function loadTrack(index, autoPlay = false) {
-    if (!AUDIO_TRACKS[index]) {
-      console.warn("CCC: Invalid track index", index);
-      return;
+function setPlayingVisual(isPlaying) {
+  if (platter) platter.classList.toggle("is-playing", isPlaying);
+  if (eq) eq.classList.toggle("is-playing", isPlaying);
+  if (albumArt) albumArt.classList.toggle("glow-active", isPlaying);
+  if (tonearm) tonearm.classList.toggle("is-engaged", isPlaying);
+}
+
+function loadTrack(index, autoPlay = false) {
+  if (!AUDIO_TRACKS[index]) {
+    console.warn("CCC: Invalid track index", index);
+    return;
+  }
+  currentIndex = index;
+  const track = AUDIO_TRACKS[index];
+
+  audio.src = track.src;
+  audio.currentTime = 0;
+
+  if (trackTitleEl) trackTitleEl.textContent = track.title;
+  if (trackArtistEl) trackArtistEl.textContent = track.artist;
+  if (trackDurationEl) trackDurationEl.textContent = track.durationText || "--:--";
+  if (timeCurrent) timeCurrent.textContent = "0:00";
+  if (timeRemaining) {
+    timeRemaining.textContent = track.durationText ? `-${track.durationText}` : "-0:00";
+  }
+  if (timelineProgress) timelineProgress.style.width = "0%";
+  if (dockTrack) dockTrack.textContent = `${track.title} — ${track.artist}`;
+
+  // Active vinyl highlight + subtle drop
+  const vinylItems = vinylRow.querySelectorAll(".vinyl-item");
+  vinylItems.forEach((btn, idx) => {
+    btn.classList.toggle("is-active", idx === index);
+    if (idx === index) {
+      btn.style.animation = "vinylLand 0.35s ease-out";
+      setTimeout(() => {
+        btn.style.animation = "";
+      }, 400);
     }
-    currentIndex = index;
-    const track = AUDIO_TRACKS[index];
+  });
 
-    audio.src = track.src;
-    audio.currentTime = 0;
+  if (autoPlay) {
+    audio
+      .play()
+      .then(() => {
+        playBtn.textContent = "Pause";
+        setPlayingVisual(true);
+      })
+      .catch((err) => {
+        console.warn("CCC: Audio play blocked or failed", err);
+        setPlayingVisual(false);
+      });
+  } else {
+    playBtn.textContent = "Play";
+    setPlayingVisual(false);
+  }
+}
 
-    if (trackTitleEl) trackTitleEl.textContent = track.title;
-    if (trackArtistEl) trackArtistEl.textContent = track.artist;
-    if (trackDurationEl) trackDurationEl.textContent = track.durationText || "--:--";
-    if (timeCurrent) timeCurrent.textContent = "0:00";
-    if (timeRemaining) timeRemaining.textContent = track.durationText ? `-${track.durationText}` : "-0:00";
-    if (timelineProgress) timelineProgress.style.width = "0%";
-    if (dockTrack) dockTrack.textContent = `${track.title} — ${track.artist}`;
-
-    // active vinyl highlight
-    const vinylItems = vinylRow.querySelectorAll(".vinyl-item");
-    vinylItems.forEach((btn, idx) => {
-      btn.classList.toggle("is-active", idx === index);
-      if (idx === index) {
-        // Simple drop animation
-        btn.style.animation = "vinylLand 0.35s ease-out";
-        setTimeout(() => {
-          btn.style.animation = "";
-        }, 400);
-      }
-    });
 
     if (autoPlay) {
       audio
@@ -236,26 +263,23 @@ function initAudioPlayer() {
 
   // controls
   playBtn.addEventListener("click", () => {
-    if (audio.paused) {
-      audio
-        .play()
-        .then(() => {
-          playBtn.textContent = "Pause";
-          if (platter) platter.classList.add("is-playing");
-          if (eq) eq.classList.add("is-playing");
-          if (albumArt) albumArt.classList.add("glow-active");
-        })
-        .catch((err) => {
-          console.warn("CCC: Audio play blocked or failed", err);
-        });
-    } else {
-      audio.pause();
-      playBtn.textContent = "Play";
-      if (platter) platter.classList.remove("is-playing");
-      if (eq) eq.classList.remove("is-playing");
-      if (albumArt) albumArt.classList.remove("glow-active");
-    }
-  });
+  if (audio.paused) {
+    audio
+      .play()
+      .then(() => {
+        playBtn.textContent = "Pause";
+        setPlayingVisual(true);
+      })
+      .catch((err) => {
+        console.warn("CCC: Audio play blocked or failed", err);
+        setPlayingVisual(false);
+      });
+  } else {
+    audio.pause();
+    playBtn.textContent = "Play";
+    setPlayingVisual(false);
+  }
+});
 
   if (prevBtn) {
     prevBtn.addEventListener("click", () => {
