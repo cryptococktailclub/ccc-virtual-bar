@@ -1,10 +1,11 @@
+// script.js – Crypto Cocktail Club Virtual Bar Experience
+
 // ==========================
 // MEDIA CONFIG
 // ==========================
 
 const MEDIA_BASE = "https://visionary-beignet-7d270e.netlify.app";
 
-// Make sure these paths match the real files in visionary-beignet-7d270e
 const AUDIO_TRACKS = [
   {
     title: "Analog Neon",
@@ -26,30 +27,29 @@ const AUDIO_TRACKS = [
   },
   {
     title: "Poolside Mirage",
-    artist: "Solomun",
+    artist: "Solomun`,
     durationText: "60:00",
     src: `${MEDIA_BASE}/audio/Solomun Boiler Room DJ Set.mp3`,
   },
   {
     title: "Khruangbin Live",
-    artist: "Khruangbin",
+    artist: "Khruangbin`,
     durationText: "60:00",
     src: `${MEDIA_BASE}/audio/Khruangbin at Villain _ Pitchfork Live.mp3`,
   },
   {
     title: "Succession Beats",
-    artist: "Jsco Music",
+    artist: "Jsco Music`,
     durationText: "60:00",
     src: `${MEDIA_BASE}/audio/Succession Beats - Jsco Music .mp3`,
   },
   {
     title: "Plant Shop Throwbacks",
-    artist: "Lotso / Plant Bass",
+    artist: "Lotso / Plant Bass`,
     durationText: "60:00",
     src: `${MEDIA_BASE}/audio/Love Song Edits & Throwbacks at Plant Shop  Lotso - Plant Bass.mp3`,
   },
 ];
-
 
 const VIDEO_SOURCES = [
   `${MEDIA_BASE}/video/bar_tape_01.mp4`,
@@ -112,7 +112,7 @@ function initFloatingHeader() {
 }
 
 // ==========================
-// THEME TOGGLE (Base / Gold / Platinum)
+// THEME TOGGLE
 // ==========================
 
 function initThemeToggle() {
@@ -142,8 +142,7 @@ function initAudioPlayer() {
   const albumArt = document.getElementById("albumArt");
   const platter = document.getElementById("turntablePlatter");
   const eq = document.getElementById("playerEq");
-  const tonearm = document.getElementById("tonearm"); // for needle animation
-  const turntable = document.querySelector(".turntable"); // for "speaker drop" feel
+  const centerLabel = document.querySelector(".turntable-label"); // for ball drop
 
   const trackTitleEl = document.getElementById("track-title");
   const trackArtistEl = document.getElementById("track-artist");
@@ -152,15 +151,20 @@ function initAudioPlayer() {
   const timelineProgress = document.getElementById("timeline-progress");
   const timeCurrent = document.getElementById("time-current");
   const timeRemaining = document.getElementById("time-remaining");
-
   const prevBtn = document.getElementById("prev-btn");
   const playBtn = document.getElementById("play-btn");
   const nextBtn = document.getElementById("next-btn");
   const volumeSlider = document.getElementById("volume-slider");
   const dockTrack = document.getElementById("dockTrack");
 
-  if (!vinylRow || !playBtn || !timelineBar) {
-    console.warn("CCC: Audio player not fully wired – missing core elements.");
+  if (
+    !vinylRow ||
+    !trackTitleEl ||
+    !timelineBar ||
+    !timelineProgress ||
+    !playBtn
+  ) {
+    console.warn("CCC: Audio player not fully wired (missing core elements).");
     return;
   }
 
@@ -168,52 +172,70 @@ function initAudioPlayer() {
   const audio = new Audio();
   audio.preload = "metadata";
 
-  // Visual state for playing
+  // Visual state for playing / paused
   function setPlayingVisual(isPlaying) {
     if (platter) platter.classList.toggle("is-playing", isPlaying);
     if (eq) eq.classList.toggle("is-playing", isPlaying);
     if (albumArt) albumArt.classList.toggle("glow-active", isPlaying);
-    if (tonearm) tonearm.classList.toggle("is-engaged", isPlaying);
-    if (turntable) turntable.classList.toggle("speaker-drop-active", isPlaying);
   }
 
+  // Ball-drop label animation when a new record is selected
+  function triggerLabelDrop() {
+    if (!centerLabel) return;
+    centerLabel.classList.remove("label-drop");
+    // force reflow to restart animation
+    // eslint-disable-next-line no-unused-expressions
+    centerLabel.offsetWidth;
+    centerLabel.classList.add("label-drop");
+  }
+
+  // Load a track and optionally autoplay
   function loadTrack(index, autoPlay = false) {
-    const track = AUDIO_TRACKS[index];
-    if (!track) {
+    if (!AUDIO_TRACKS[index]) {
       console.warn("CCC: Invalid track index", index);
       return;
     }
 
     currentIndex = index;
+    const track = AUDIO_TRACKS[index];
+
     audio.src = track.src;
     audio.currentTime = 0;
 
-    if (trackTitleEl) trackTitleEl.textContent = track.title;
-    if (trackArtistEl) trackArtistEl.textContent = track.artist;
-    if (trackDurationEl) trackDurationEl.textContent = track.durationText || "--:--";
-    if (timeCurrent) timeCurrent.textContent = "0:00";
-    if (timeRemaining) {
-      timeRemaining.textContent = track.durationText ? `-${track.durationText}` : "-0:00";
-    }
-    if (timelineProgress) timelineProgress.style.width = "0%";
-    if (dockTrack) dockTrack.textContent = `${track.title} — ${track.artist}`;
+    trackTitleEl.textContent = track.title;
+    trackArtistEl.textContent = track.artist;
+    trackDurationEl.textContent = track.durationText || "--:--";
 
-    // Vinyl highlight + tiny drop animation
-    vinylRow.querySelectorAll(".vinyl-item").forEach((btn, idx) => {
+    timeCurrent.textContent = "0:00";
+    timeRemaining.textContent = track.durationText
+      ? `-${track.durationText}`
+      : "-0:00";
+    timelineProgress.style.width = "0%";
+
+    if (dockTrack) {
+      dockTrack.textContent = `${track.title} — ${track.artist}`;
+    }
+
+    // Vinyl highlight + subtle shelf animation
+    const vinylItems = vinylRow.querySelectorAll(".vinyl-item");
+    vinylItems.forEach((btn, idx) => {
       btn.classList.toggle("is-active", idx === index);
       if (idx === index) {
         btn.style.animation = "vinylLand 0.35s ease-out";
         setTimeout(() => {
           btn.style.animation = "";
-        }, 400);
+        }, 360);
       }
     });
+
+    // Center label "ball drop"
+    triggerLabelDrop();
 
     if (autoPlay) {
       audio
         .play()
         .then(() => {
-          if (playBtn) playBtn.textContent = "Pause";
+          playBtn.textContent = "Pause";
           setPlayingVisual(true);
         })
         .catch((err) => {
@@ -221,22 +243,22 @@ function initAudioPlayer() {
           setPlayingVisual(false);
         });
     } else {
-      if (playBtn) playBtn.textContent = "Play";
+      playBtn.textContent = "Play";
       setPlayingVisual(false);
     }
   }
 
-  // Initial track
+  // Initial load (no autoplay)
   loadTrack(0, false);
 
-  // Click vinyl to load + play
+  // Vinyl selection
   vinylRow.querySelectorAll(".vinyl-item").forEach((btn, idx) => {
     btn.addEventListener("click", () => {
       loadTrack(idx, true);
     });
   });
 
-  // Play / pause
+  // Play / Pause control
   playBtn.addEventListener("click", () => {
     if (audio.paused) {
       audio
@@ -256,14 +278,14 @@ function initAudioPlayer() {
     }
   });
 
-  // Prev / next
+  // Prev / Next
   if (prevBtn) {
     prevBtn.addEventListener("click", () => {
-      const nextIndex = (currentIndex - 1 + AUDIO_TRACKS.length) % AUDIO_TRACKS.length;
+      const nextIndex =
+        (currentIndex - 1 + AUDIO_TRACKS.length) % AUDIO_TRACKS.length;
       loadTrack(nextIndex, true);
     });
   }
-
   if (nextBtn) {
     nextBtn.addEventListener("click", () => {
       const nextIndex = (currentIndex + 1) % AUDIO_TRACKS.length;
@@ -284,16 +306,18 @@ function initAudioPlayer() {
     if (!audio.duration || !isFinite(audio.duration)) return;
 
     const pct = (audio.currentTime / audio.duration) * 100;
-    if (timelineProgress) timelineProgress.style.width = `${pct}%`;
-    if (timeCurrent) timeCurrent.textContent = formatTime(audio.currentTime);
-    if (timeRemaining) {
-      timeRemaining.textContent = `-${formatTime(audio.duration - audio.currentTime)}`;
-    }
+    timelineProgress.style.width = `${pct}%`;
+
+    timeCurrent.textContent = formatTime(audio.currentTime);
+    timeRemaining.textContent = `-${formatTime(
+      audio.duration - audio.currentTime
+    )}`;
   });
 
   // Seek
   timelineBar.addEventListener("click", (e) => {
     if (!audio.duration || !isFinite(audio.duration)) return;
+
     const rect = timelineBar.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const pct = clickX / rect.width;
@@ -318,31 +342,27 @@ function initBarTV() {
   const muteBtn = document.getElementById("tvMuteBtn");
   const volSlider = document.getElementById("tvVolume");
   const tvAspect = document.querySelector(".bar-tv-aspect");
-  
+
   if (!videoEl) {
     console.warn("CCC: Bar TV video element missing.");
     return;
   }
 
-   function triggerTvGlitch() {      // <<– NEW
+  let currentChannel = 0;
+
+  function triggerTvGlitch() {
     if (!tvAspect) return;
     tvAspect.classList.add("tv-glitch");
     setTimeout(() => {
       tvAspect.classList.remove("tv-glitch");
     }, 220);
   }
-  
-  // Make sure video behaves inside a 4:3 CSS frame
-  videoEl.style.objectFit = "cover";
-
-  let currentChannel = 0;
 
   function loadChannel(index, autoPlay = true) {
     if (!VIDEO_SOURCES[index]) {
       console.warn("CCC: Invalid video index", index);
       return;
     }
-
     currentChannel = index;
     videoEl.src = VIDEO_SOURCES[index];
     videoEl.load();
@@ -363,6 +383,7 @@ function initBarTV() {
   // Initial channel
   loadChannel(0, true);
 
+  // Channel button
   if (chBtn) {
     chBtn.addEventListener("click", () => {
       const nextIndex = (currentChannel + 1) % VIDEO_SOURCES.length;
@@ -371,6 +392,7 @@ function initBarTV() {
     });
   }
 
+  // Play / Pause
   if (playBtn) {
     playBtn.addEventListener("click", () => {
       if (videoEl.paused) {
@@ -389,6 +411,7 @@ function initBarTV() {
     });
   }
 
+  // Mute toggle
   if (muteBtn) {
     muteBtn.addEventListener("click", () => {
       videoEl.muted = !videoEl.muted;
@@ -396,13 +419,13 @@ function initBarTV() {
     });
   }
 
+  // Volume slider
   if (volSlider) {
     videoEl.volume = parseFloat(volSlider.value);
     volSlider.addEventListener("input", () => {
       const vol = parseFloat(volSlider.value);
       videoEl.volume = vol;
 
-      // If the user moves volume above 0, unmute
       if (vol > 0 && videoEl.muted) {
         videoEl.muted = false;
         if (muteBtn) muteBtn.textContent = "Sound On";
@@ -421,13 +444,15 @@ function initBarBot() {
   const inputEl = document.getElementById("bartenderInput");
 
   if (!messagesEl || !formEl || !inputEl) {
-    console.warn("CCC: Bar Bot elements missing; skipping AI bartender wiring.");
+    console.warn("CCC: Bar Bot DOM not present.");
     return;
   }
 
   function appendMessage(content, fromBot = false) {
     const row = document.createElement("div");
-    row.className = `bartender-message ${fromBot ? "bartender-bot" : "bartender-user"}`;
+    row.className = `bartender-message ${
+      fromBot ? "bartender-bot" : "bartender-user"
+    }`;
 
     if (fromBot) {
       const avatar = document.createElement("div");
@@ -448,7 +473,8 @@ function initBarBot() {
 
   function showTyping() {
     typingEl = document.createElement("div");
-    typingEl.className = "bartender-message bartender-bot bartender-typing";
+    typingEl.className =
+      "bartender-message bartender-bot bartender-typing";
     typingEl.innerHTML =
       '<div class="bartender-avatar"></div><div class="bartender-text">…</div>';
     messagesEl.appendChild(typingEl);
@@ -474,10 +500,12 @@ function initBarBot() {
     try {
       const res = await fetch(BARTENDER_FUNCTION_PATH, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           question,
-          recipes: [], // (optional) you can send a subset of M&H recipes here
+          recipes: [],
         }),
       });
 
@@ -485,12 +513,17 @@ function initBarBot() {
 
       if (!res.ok) {
         console.error("CCC Bar Bot HTTP error:", res.status, await res.text());
-        appendMessage("Bar Bot is temporarily offline. Try again shortly.", true);
+        appendMessage(
+          "Bar Bot is temporarily offline. Try again shortly.",
+          true
+        );
         return;
       }
 
       const data = await res.json();
-      const answer = data.answer || "I couldn't reach the back bar AI right now.";
+      const answer =
+        data.answer ||
+        "I couldn't reach the back bar AI right now. Please try again.";
       appendMessage(answer, true);
     } catch (err) {
       hideTyping();
