@@ -1057,3 +1057,71 @@ body.theme-platinum .turntable-label {
   flex: 1 1 auto;
   max-width: 140px;
 }
+/* Turntable spinning */
+.turntable-platter {
+  /* your existing platter styling plus: */
+  animation: platter-spin 18s linear infinite;
+  animation-play-state: paused;
+}
+
+.turntable-platter.is-playing {
+  animation-play-state: running;
+}
+
+@keyframes platter-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Tonearm (needle) */
+.tonearm {
+  position: absolute;
+  right: 18px;
+  top: 36px;
+  width: 80px;
+  height: 8px;
+  border-radius: 4px;
+  background: #c9c9d5;
+  transform-origin: 8px 4px;
+  transform: rotate(18deg);
+  transition: transform 0.45s ease;
+}
+.tonearm::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  top: -4px;
+  width: 14px;
+  height: 18px;
+  border-radius: 6px;
+  background: #eeeeff;
+}
+.tonearm.is-engaged {
+  transform: rotate(-6deg);
+}
+
+/* “Speaker drop” – subtle lift when music plays */
+.turntable.speaker-drop-active {
+  transform: translateY(2px);
+  transition: transform 0.25s ease;
+}
+
+/* Bar TV 4:3 frame */
+.bar-tv-aspect {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding-top: 75%; /* 4:3 */
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+.bar-tv-aspect video,
+#barTvVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
