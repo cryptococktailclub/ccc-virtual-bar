@@ -184,6 +184,15 @@ body,
   color: #f2e9ff;
   max-width: 360px;
 }
+/* Keep HERO title on one line (no wrapping on mobile) */
+.hero-title {
+  white-space: nowrap;        /* Prevent wrapping */
+  font-size: clamp(1.2rem, 4vw, 2rem);  /* Scales gracefully */
+  line-height: 1.1;
+}
+.hero-inner {
+  overflow: visible;          /* Prevent clipping when text is wider */
+}
 
 /* -----------------------------
    FLOATING HEADER
