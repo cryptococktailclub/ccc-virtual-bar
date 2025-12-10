@@ -42,7 +42,14 @@ const AUDIO_TRACKS = [
     durationText: "60:00",
     src: `${MEDIA_BASE}/audio/Succession Beats - Jsco Music .mp3`,
   },
+  {
+    title: "Plant Shop Throwbacks",
+    artist: "Lotso / Plant Bass",
+    durationText: "60:00",
+    src: `${MEDIA_BASE}/audio/Love Song Edits & Throwbacks at Plant Shop  Lotso - Plant Bass.mp3`,
+  },
 ];
+
 
 const VIDEO_SOURCES = [
   `${MEDIA_BASE}/video/bar_tape_01.mp4`,
