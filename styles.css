@@ -1352,3 +1352,24 @@ body.theme-platinum .bar-tv-frame {
     border-radius: 14px;
   }
 }
+/* Turntable center label drop animation */
+
+.turntable-label {
+  transition: transform 0.15s ease-out;
+}
+
+.turntable-label.label-drop {
+  animation: labelDrop 0.35s ease-out;
+}
+
+@keyframes labelDrop {
+  0% {
+    transform: translateY(-18px) scale(1.08);
+  }
+  55% {
+    transform: translateY(6px) scale(0.96);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
