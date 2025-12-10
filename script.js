@@ -317,12 +317,21 @@ function initBarTV() {
   const playBtn = document.getElementById("tvPlayBtn");
   const muteBtn = document.getElementById("tvMuteBtn");
   const volSlider = document.getElementById("tvVolume");
-
+  const tvAspect = document.querySelector(".bar-tv-aspect");
+  
   if (!videoEl) {
     console.warn("CCC: Bar TV video element missing.");
     return;
   }
 
+   function triggerTvGlitch() {      // <<– NEW
+    if (!tvAspect) return;
+    tvAspect.classList.add("tv-glitch");
+    setTimeout(() => {
+      tvAspect.classList.remove("tv-glitch");
+    }, 220);
+  }
+  
   // Make sure video behaves inside a 4:3 CSS frame
   videoEl.style.objectFit = "cover";
 
