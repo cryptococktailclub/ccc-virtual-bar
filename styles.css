@@ -224,6 +224,40 @@ body,
   align-items: center;
   gap: 8px;
 }
+/* Prevent mobile header text from wrapping */
+.brand {
+  white-space: nowrap;        /* Prevents wrapping entirely */
+  flex-shrink: 0;             /* Stops container from shrinking too small */
+}
+
+.brand-title {
+  white-space: nowrap;        /* Keep the text on one line */
+  font-size: 0.88rem;
+}
+
+.top-nav {
+  display: flex;
+  flex-wrap: nowrap;          /* Prevents line breaks inside the header */
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* On mobile, allow nav-right to compact without pushing brand to two lines */
+.nav-right {
+  flex-shrink: 1;
+  min-width: 0;               /* Allows nav items to shrink instead of brand */
+}
+
+.nav-right .nav-link {
+  white-space: nowrap;
+  font-size: 0.75rem;
+  padding: 6px 10px;
+}
+
+/* Ensure the header icon also doesn’t shrink too much */
+.ccc-logo {
+  flex-shrink: 0;
+}
 
 .ccc-logo {
   width: 30px;
