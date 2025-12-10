@@ -367,6 +367,7 @@ function initBarTV() {
     chBtn.addEventListener("click", () => {
       const nextIndex = (currentChannel + 1) % VIDEO_SOURCES.length;
       loadChannel(nextIndex, true);
+      triggerTvGlitch();
     });
   }
 
