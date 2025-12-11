@@ -423,11 +423,9 @@ function initBarTV() {
   }
 }
 
-
 // ==========================
 // BAR BOT (AI BARTENDER)
 // ==========================
-
 function initBarBot() {
   const messagesEl = document.getElementById("bartenderMessages");
   const formEl = document.getElementById("bartenderForm");
@@ -439,9 +437,154 @@ function initBarBot() {
     return;
   }
 
+  // --------------------------
+  // Guided preference wizard
+  // --------------------------
+  const shellEl = messagesEl.parentElement; // expected .bartender-shell
+  const wizardState = {
+    style: null,
+    ice: null,
+    spirit: null,
+  };
+  let wizardSubmitBtn = null;
+
+  if (shellEl) {
+    const wizard = document.createElement("div");
+    wizard.className = "bartender-wizard";
+
+    function makeQuestion(labelText) {
+      const wrap = document.createElement("div");
+      wrap.className = "wizard-question";
+
+      const label = document.createElement("span");
+      label.className = "wizard-label";
+      label.textContent = labelText;
+
+      const options = document.createElement("div");
+      options.className = "wizard-options";
+
+      wrap.appendChild(label);
+      wrap.appendChild(options);
+      return { wrap, options };
+    }
+
+    function makePill(groupKey, displayText) {
+      const pill = document.createElement("button");
+      pill.type = "button";
+      pill.className = "wizard-pill";
+      pill.textContent = displayText;
+      pill.dataset.group = groupKey;
+
+      pill.addEventListener("click", () => {
+        // Update state
+        wizardState[groupKey] = displayText;
+
+        // Clear selection in this group
+        const siblings = pill.parentElement.querySelectorAll(
+          `.wizard-pill[data-group="${groupKey}"]`
+        );
+        siblings.forEach((btn) => btn.classList.remove("is-selected"));
+
+        // Mark this one
+        pill.classList.add("is-selected");
+
+        updateWizardSubmit();
+      });
+
+      return pill;
+    }
+
+    function updateWizardSubmit() {
+      if (!wizardSubmitBtn) return;
+      const ready =
+        !!wizardState.style && !!wizardState.ice && !!wizardState.spirit;
+      wizardSubmitBtn.disabled = !ready;
+    }
+
+    // Q1: Style
+    const q1 = makeQuestion(
+      "1. Style · Light & refreshing or spirit-forward?"
+    );
+    q1.options.appendChild(
+      makePill(
+        "style",
+        "Light & refreshing (shaken with juice)"
+      )
+    );
+    q1.options.appendChild(
+      makePill(
+        "style",
+        "Spirit-forward (stirred & strong)"
+      )
+    );
+    wizard.appendChild(q1.wrap);
+
+    // Q2: Ice
+    const q2 = makeQuestion("2. Ice · With ice or served up?");
+    q2.options.appendChild(makePill("ice", "With ice"));
+    q2.options.appendChild(makePill("ice", "No ice (served up)"));
+    wizard.appendChild(q2.wrap);
+
+    // Q3: Base spirit
+    const q3 = makeQuestion("3. Spirit preference");
+    ["Rum", "Gin", "Bourbon", "Tequila"].forEach((spirit) => {
+      q3.options.appendChild(makePill("spirit", spirit));
+    });
+    wizard.appendChild(q3.wrap);
+
+    // Submit row
+    const submitRow = document.createElement("div");
+    submitRow.className = "wizard-submit-row";
+
+    wizardSubmitBtn = document.createElement("button");
+    wizardSubmitBtn.type = "button";
+    wizardSubmitBtn.className = "wizard-submit-btn";
+    wizardSubmitBtn.textContent = "Get 3 suggestions";
+    wizardSubmitBtn.disabled = true;
+
+    submitRow.appendChild(wizardSubmitBtn);
+    wizard.appendChild(submitRow);
+
+    // Insert wizard above chat thread
+    shellEl.insertBefore(wizard, messagesEl);
+
+    // When wizard is submitted, we generate a structured question string
+    wizardSubmitBtn.addEventListener("click", () => {
+      if (!wizardState.style || !wizardState.ice || !wizardState.spirit) {
+        return;
+      }
+
+      const prefsLine = `${wizardState.style} · ${wizardState.ice} · ${wizardState.spirit}`;
+
+      // This is both the visible "user message" and the instruction
+      const question = `
+Here are my preferences:
+- Style: ${wizardState.style}
+- Ice: ${wizardState.ice}
+- Base spirit: ${wizardState.spirit}
+
+Using only Milk & Honey recipes, recommend exactly 3 cocktails that best match this profile and return them in your structured JSON format (recipes array, warnings, summary).
+`.trim();
+
+      // Show a short, human-friendly line in the thread
+      appendMessage(`Preferences: ${prefsLine}`, false);
+
+      // Submit the detailed question via the normal form flow
+      inputEl.value = question;
+      formEl.dispatchEvent(
+        new Event("submit", { cancelable: true, bubbles: true })
+      );
+    });
+  }
+
+  // --------------------------
+  // Chat helpers (existing behaviour)
+  // --------------------------
   function appendMessage(content, fromBot = false) {
     const row = document.createElement("div");
-    row.className = `bartender-message ${fromBot ? "bartender-bot" : "bartender-user"}`;
+    row.className = `bartender-message ${
+      fromBot ? "bartender-bot" : "bartender-user"
+    }`;
 
     if (fromBot) {
       const avatar = document.createElement("div");
@@ -476,27 +619,36 @@ function initBarBot() {
     typingEl = null;
   }
 
+  // --------------------------
+  // Submit handler (reused by wizard + free text)
+  // --------------------------
   formEl.addEventListener("submit", async (e) => {
     e.preventDefault();
     const question = inputEl.value.trim();
     if (!question) return;
 
-    // Clear any previous warnings if you want, but keep previous recipes
-    appendMessage(question, false);
+    // If the message didn’t come from the wizard we still want it in the thread
+    if (!question.startsWith("Here are my preferences:")) {
+      appendMessage(question, false);
+    }
+
     inputEl.value = "";
     showTyping();
 
     try {
-      const res = await fetch(BARTENDER_FUNCTION_PATH || "/.netlify/functions/ccc-bartender", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question,
-          recipes: [], // server will fall back to full Milk & Honey DB
-        }),
-      });
+      const res = await fetch(
+        BARTENDER_FUNCTION_PATH || "/.netlify/functions/ccc-bartender",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question,
+            recipes: [], // server uses Milk & Honey DB
+          }),
+        }
+      );
 
       hideTyping();
 
@@ -509,7 +661,7 @@ function initBarBot() {
       const data = await res.json();
       let structured = data.structured || null;
 
-      // Fallback: try to parse data.answer if structured is missing
+      // Fallback: some responses embed JSON in answer
       if (!structured && typeof data.answer === "string") {
         try {
           structured = JSON.parse(data.answer);
@@ -518,28 +670,31 @@ function initBarBot() {
         }
       }
 
-      // Render recipe cards from structured JSON
+      // Render 3-rec list + full specs into recipe cards panel
       renderRecipeCards(structured);
 
-      // Also summarize in the chat thread
+      // Short summary into chat
       if (structured && structured.summary) {
         appendMessage(structured.summary, true);
       } else if (data.answer) {
-        // fallback: if we somehow got plain text
         appendMessage(data.answer, true);
       } else {
-        appendMessage("I had trouble formatting that recipe. Try asking in a slightly different way.", true);
+        appendMessage(
+          "I had trouble formatting that recipe. Try asking in a slightly different way.",
+          true
+        );
       }
     } catch (err) {
       hideTyping();
       console.error("CCC Bar Bot error:", err);
       appendMessage(
-        "I couldn’t reach the back bar AI right now. Please check the Netlify function and OpenAI key.",
+        "I couldn’t reach the back bar AI right now. Please check the Netlify function and API key.",
         true
       );
     }
   });
 }
+
 // ==========================
 // RENDER RECIPE CARDS
 // ==========================
