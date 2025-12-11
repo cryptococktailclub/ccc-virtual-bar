@@ -427,20 +427,58 @@ function initBarTV() {
 // BAR BOT (AI BARTENDER)
 // ==========================
 function initBarBot() {
-  const messagesEl = document.getElementById("bartenderMessages");
-  const formEl = document.getElementById("bartenderForm");
-  const inputEl = document.getElementById("bartenderInput");
-  const recipePanel = document.getElementById("bartenderRecipePanel");
-  const wizardEl = document.getElementById("bartenderWizard");
-  const wizardSubmit = document.getElementById("bartenderWizardSubmit");
+  // Try IDs first, then fall back to class-based selectors
+  const barBotSection =
+    document.getElementById("bar-bot") ||
+    document.querySelector("#bar-bot, .bar-bot, [data-role='bar-bot']");
 
+  let messagesEl =
+    document.getElementById("bartenderMessages") ||
+    document.querySelector(".bartender-messages");
+
+  const formEl =
+    document.getElementById("bartenderForm") ||
+    document.querySelector(".bartender-form");
+
+  const inputEl =
+    document.getElementById("bartenderInput") ||
+    document.querySelector(".bartender-input");
+
+  const recipePanel =
+    document.getElementById("bartenderRecipePanel") ||
+    document.querySelector(".bartender-recipes");
+
+  const wizardEl =
+    document.getElementById("bartenderWizard") ||
+    document.querySelector(".bartender-wizard");
+
+  // If we have a Bar Bot section but no messages container, create one
+  if (!messagesEl && barBotSection) {
+    messagesEl = document.createElement("div");
+    messagesEl.id = "bartenderMessages";
+    messagesEl.className = "bartender-messages";
+
+    // Insert before the form if the form is a direct child; otherwise at top of section
+    if (formEl && formEl.parentNode === barBotSection) {
+      barBotSection.insertBefore(messagesEl, formEl);
+    } else {
+      barBotSection.insertBefore(messagesEl, barBotSection.firstChild || null);
+    }
+  }
+
+  // If we still don’t have a messages container OR we’re missing the form/input,
+  // it’s safer to bail than throw an error.
   if (!messagesEl || !formEl || !inputEl) {
-    console.warn("CCC: Bar Bot elements missing; skipping AI bartender wiring.");
+    console.warn("CCC: Bar Bot – required elements missing, skipping wiring.");
     return;
   }
 
-  // ---- Basic chat helpers ----
+  // -----------------------------
+  // Chat transcript helpers
+  // -----------------------------
   function appendMessage(content, fromBot = false) {
+    if (!messagesEl) return;
+
     const row = document.createElement("div");
     row.className = `bartender-message ${fromBot ? "bartender-bot" : "bartender-user"}`;
 
@@ -460,7 +498,9 @@ function initBarBot() {
   }
 
   let typingEl = null;
+
   function showTyping() {
+    if (!messagesEl) return;
     typingEl = document.createElement("div");
     typingEl.className = "bartender-message bartender-bot bartender-typing";
     typingEl.innerHTML =
@@ -477,19 +517,170 @@ function initBarBot() {
     typingEl = null;
   }
 
-  // ---- Core call to Netlify function ----
-  async function callBartender(question) {
+  // -----------------------------
+  // Preference wizard state
+  // -----------------------------
+  const wizardState = {
+    style: null,   // "light-refreshing" | "spirit-forward"
+    ice: null,     // "ice" | "no-ice"
+    spirits: [],   // ["gin", "mezcal", ...]
+    lowAbv: [],    // ["sherry", "vermouth", "amaro"]
+  };
+
+  function updateWizardPillSelection(groupSelector, value, multi = false, stateKey) {
+    if (!wizardEl) return;
+    const group = wizardEl.querySelector(groupSelector);
+    if (!group) return;
+
+    const pills = group.querySelectorAll("[data-value]");
+    pills.forEach((pill) => {
+      const v = pill.getAttribute("data-value");
+      if (!multi) {
+        pill.classList.toggle("is-selected", v === value);
+      } else {
+        pill.classList.toggle("is-selected", wizardState[stateKey].includes(v));
+      }
+    });
+  }
+
+  if (wizardEl) {
+    // Q1: STYLE (Light/Refreshing vs Spirit Forward)
+    wizardEl.querySelectorAll("[data-wizard-style]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const value = btn.getAttribute("data-value");
+        wizardState.style = value;
+        updateWizardPillSelection("[data-wizard-style-group]", value, false, "style");
+        maybeEnableWizardSubmit();
+      });
+    });
+
+    // Q2: ICE or NO ICE
+    wizardEl.querySelectorAll("[data-wizard-ice]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const value = btn.getAttribute("data-value");
+        wizardState.ice = value;
+        updateWizardPillSelection("[data-wizard-ice-group]", value, false, "ice");
+        maybeEnableWizardSubmit();
+      });
+    });
+
+    // Q3: SPIRITS (multi-select)
+    wizardEl.querySelectorAll("[data-wizard-spirit]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const value = btn.getAttribute("data-value");
+        const idx = wizardState.spirits.indexOf(value);
+        if (idx === -1) {
+          wizardState.spirits.push(value);
+        } else {
+          wizardState.spirits.splice(idx, 1);
+        }
+        updateWizardPillSelection("[data-wizard-spirit-group]", value, true, "spirits");
+        maybeEnableWizardSubmit();
+      });
+    });
+
+    // Q4: LOW ABV (multi-select)
+    wizardEl.querySelectorAll("[data-wizard-lowabv]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const value = btn.getAttribute("data-value");
+        const idx = wizardState.lowAbv.indexOf(value);
+        if (idx === -1) {
+          wizardState.lowAbv.push(value);
+        } else {
+          wizardState.lowAbv.splice(idx, 1);
+        }
+        updateWizardPillSelection("[data-wizard-lowabv-group]", value, true, "lowAbv");
+        maybeEnableWizardSubmit();
+      });
+    });
+  }
+
+  const wizardSubmitBtn =
+    wizardEl &&
+    (wizardEl.querySelector("[data-wizard-submit]") ||
+      wizardEl.querySelector("#bartenderWizardSubmit"));
+
+  function maybeEnableWizardSubmit() {
+    if (!wizardSubmitBtn) return;
+    const ready =
+      wizardState.style &&
+      wizardState.ice &&
+      wizardState.spirits.length > 0;
+    wizardSubmitBtn.disabled = !ready;
+  }
+
+  if (wizardSubmitBtn) {
+    wizardSubmitBtn.addEventListener("click", async () => {
+      if (!wizardState.style || !wizardState.ice || wizardState.spirits.length === 0) return;
+
+      showTyping();
+      try {
+        const res = await fetch(BARTENDER_FUNCTION_PATH || "/.netlify/functions/ccc-bartender", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: null,
+            preferences: wizardState,
+            recipes: [],
+          }),
+        });
+
+        hideTyping();
+
+        if (!res.ok) {
+          appendMessage("Bar Bot is temporarily offline. Try again shortly.", true);
+          console.error("CCC Bar Bot (wizard) HTTP error:", res.status, await res.text());
+          return;
+        }
+
+        const data = await res.json();
+        let structured = data.structured || null;
+
+        if (!structured && typeof data.answer === "string") {
+          try {
+            structured = JSON.parse(data.answer);
+          } catch (err) {
+            console.warn("CCC Bar Bot: could not parse JSON answer from wizard:", err);
+          }
+        }
+
+        if (structured && structured.summary) {
+          appendMessage(structured.summary, true);
+        }
+
+        if (typeof renderRecipeCards === "function") {
+          renderRecipeCards(structured);
+        }
+      } catch (err) {
+        hideTyping();
+        console.error("CCC Bar Bot (wizard) error:", err);
+        appendMessage(
+          "I couldn’t reach the back bar AI right now. Please check the Netlify function and OpenAI key.",
+          true
+        );
+      }
+    });
+  }
+
+  // -----------------------------
+  // Free-text chat submit
+  // -----------------------------
+  formEl.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const question = inputEl.value.trim();
+    if (!question) return;
+
+    appendMessage(question, false);
+    inputEl.value = "";
     showTyping();
 
     try {
       const res = await fetch(BARTENDER_FUNCTION_PATH || "/.netlify/functions/ccc-bartender", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // We pass an empty subset; server has the full M&H DB
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question,
+          preferences: wizardState,
           recipes: [],
         }),
       });
@@ -505,7 +696,6 @@ function initBarBot() {
       const data = await res.json();
       let structured = data.structured || null;
 
-      // Fallback: try parse if the model sent raw JSON in answer
       if (!structured && typeof data.answer === "string") {
         try {
           structured = JSON.parse(data.answer);
@@ -514,101 +704,29 @@ function initBarBot() {
         }
       }
 
-      // Render recipe cards
-      if (typeof renderRecipeCards === "function") {
-        renderRecipeCards(structured);
-      } else if (recipePanel) {
-        // safety: clear if structured missing
-        recipePanel.innerHTML = "";
-      }
-
-      // Also summarize in chat
       if (structured && structured.summary) {
         appendMessage(structured.summary, true);
       } else if (data.answer) {
         appendMessage(data.answer, true);
       } else {
         appendMessage(
-          "I had trouble formatting that recipe. Try asking in a slightly different way, or tweak your wizard choices.",
+          "I had trouble formatting that recipe. Try asking in a slightly different way.",
           true
         );
+      }
+
+      if (typeof renderRecipeCards === "function") {
+        renderRecipeCards(structured);
       }
     } catch (err) {
       hideTyping();
       console.error("CCC Bar Bot error:", err);
       appendMessage(
-        "I couldn’t reach the back bar AI right now. Please check the Netlify function and API key.",
+        "I couldn’t reach the back bar AI right now. Please check the Netlify function and OpenAI key.",
         true
       );
     }
-  }
-
-  // ---- Free-text form submit ----
-  formEl.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const question = inputEl.value.trim();
-    if (!question) return;
-
-    appendMessage(question, false);
-    inputEl.value = "";
-    callBartender(question);
   });
-
-  // ---- Wizard wiring ----
-  if (wizardEl && wizardSubmit) {
-    const state = {
-      style: null,
-      icePreference: null,
-      spirit: null,
-    };
-
-    // Click-to-select options
-    wizardEl.querySelectorAll(".wizard-options").forEach((groupEl) => {
-      const key = groupEl.dataset.wizardKey;
-      if (!key) return;
-
-      groupEl.querySelectorAll(".wizard-option").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const value = btn.dataset.value;
-          if (!value) return;
-
-          // Clear selection within this group (or sub-group)
-          groupEl.querySelectorAll(".wizard-option").forEach((b) => {
-            b.classList.toggle("is-selected", b === btn);
-          });
-
-          state[key] = value;
-        });
-      });
-    });
-
-    wizardSubmit.addEventListener("click", () => {
-      const { style, icePreference, spirit } = state;
-
-      if (!style || !icePreference || !spirit) {
-        appendMessage(
-          "Pick a style, ice preference, and base spirit first so I can narrow it down.",
-          true
-        );
-        return;
-      }
-
-      // Display what the guest chose in the chat
-      appendMessage(
-        `Style: <strong>${style}</strong> · <strong>${icePreference}</strong> · <strong>${spirit}</strong>. ` +
-          `Recommend 3 Milk &amp; Honey cocktails that fit this brief.`,
-        false
-      );
-
-      // Encode the wizard choices in the question string,
-      // exactly as the backend SYSTEM_PROMPT expects.
-      const wizardQuestion =
-        `Wizard selection | style: ${style} | icePreference: ${icePreference} | spirit: ${spirit}. ` +
-        `Recommend 3 Milk & Honey cocktails that fit this profile and return them in the structured JSON format.`;
-
-      callBartender(wizardQuestion);
-    });
-  }
 }
 
 // ==========================
