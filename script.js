@@ -317,28 +317,18 @@ function initBarTV() {
   const playBtn = document.getElementById("tvPlayBtn");
   const muteBtn = document.getElementById("tvMuteBtn");
   const volSlider = document.getElementById("tvVolume");
-  const tvAspect = document.querySelector(".bar-tv-aspect");
-  
+  const rewindBtn = document.getElementById("tvRewindBtn");
+  const forwardBtn = document.getElementById("tvForwardBtn");
+
   if (!videoEl) {
     console.warn("CCC: Bar TV video element missing.");
     return;
   }
 
-   function triggerTvGlitch() {      // <<– NEW
-    if (!tvAspect) return;
-    tvAspect.classList.add("tv-glitch");
-    setTimeout(() => {
-      tvAspect.classList.remove("tv-glitch");
-    }, 220);
-  }
-  
-  // Make sure video behaves inside a 4:3 CSS frame
-  videoEl.style.objectFit = "cover";
-
   let currentChannel = 0;
 
   function loadChannel(index, autoPlay = true) {
-    if (!VIDEO_SOURCES[index]) {
+    if (!VIDEO_SOURCES || !VIDEO_SOURCES[index]) {
       console.warn("CCC: Invalid video index", index);
       return;
     }
@@ -363,14 +353,16 @@ function initBarTV() {
   // Initial channel
   loadChannel(0, true);
 
+  // Channel change
   if (chBtn) {
     chBtn.addEventListener("click", () => {
+      if (!VIDEO_SOURCES || !VIDEO_SOURCES.length) return;
       const nextIndex = (currentChannel + 1) % VIDEO_SOURCES.length;
       loadChannel(nextIndex, true);
-      triggerTvGlitch();
     });
   }
 
+  // Play / Pause
   if (playBtn) {
     playBtn.addEventListener("click", () => {
       if (videoEl.paused) {
@@ -389,6 +381,7 @@ function initBarTV() {
     });
   }
 
+  // Mute toggle
   if (muteBtn) {
     muteBtn.addEventListener("click", () => {
       videoEl.muted = !videoEl.muted;
@@ -396,20 +389,40 @@ function initBarTV() {
     });
   }
 
+  // Volume slider
   if (volSlider) {
     videoEl.volume = parseFloat(volSlider.value);
     volSlider.addEventListener("input", () => {
       const vol = parseFloat(volSlider.value);
       videoEl.volume = vol;
 
-      // If the user moves volume above 0, unmute
+      // If user raises volume from 0, unmute
       if (vol > 0 && videoEl.muted) {
         videoEl.muted = false;
         if (muteBtn) muteBtn.textContent = "Sound On";
       }
     });
   }
+
+  // NEW: Rewind 10 seconds
+  if (rewindBtn) {
+    rewindBtn.addEventListener("click", () => {
+      if (!isFinite(videoEl.duration)) return;
+      const target = Math.max(0, videoEl.currentTime - 10);
+      videoEl.currentTime = target;
+    });
+  }
+
+  // NEW: Fast-forward 10 seconds
+  if (forwardBtn) {
+    forwardBtn.addEventListener("click", () => {
+      if (!isFinite(videoEl.duration)) return;
+      const target = Math.min(videoEl.duration, videoEl.currentTime + 10);
+      videoEl.currentTime = target;
+    });
+  }
 }
+
 
 // ==========================
 // BAR BOT (AI BARTENDER)
