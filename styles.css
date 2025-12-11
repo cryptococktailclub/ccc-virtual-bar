@@ -899,7 +899,35 @@ body.theme-platinum .bartender-bot .bartender-avatar {
     max-width: 95%;
     padding: 6px 10px;
   }
+@media (max-width: 768px) {
+  /* ...your existing mobile styles... */
 
+  /* Let control rows wrap nicely on small screens */
+  .player-controls,
+  .bar-tv-controls {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  /* Audio player volume slider */
+  #volume-slider {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 6px;
+  }
+
+  .volume-block {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  /* Bar TV volume slider */
+  #tvVolume {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 6px;
+  }
+}
   .hero-logo {
     width: 120px;
     height: 120px;
