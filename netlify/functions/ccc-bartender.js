@@ -1,6 +1,5 @@
 // netlify/functions/ccc-bartender.js
-
-const MILK_HONEY_RECIPES = require("netlify/functions/recipes"); // <-- make sure this path/name is correct
+const MILK_HONEY_RECIPES = require("./recipes"); // <-- correct import
 
 const SYSTEM_PROMPT = `
 You are the house bartender for Crypto Cocktail Club (“Bar Bot”), trained on the Milk & Honey cocktail canon.
