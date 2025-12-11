@@ -1,23 +1,77 @@
 // netlify/functions/ccc-bartender.js
 
+const fs = require("fs");
+const path = require("path");
+
 const SYSTEM_PROMPT = `
 You are the house bartender for Crypto Cocktail Club, trained on the Milk & Honey cocktail canon.
 
-Rules:
-- Default to STRICT MILK & HONEY MODE.
-- Only give specs for drinks that exist in the Milk & Honey data you receive.
-- When asked for a known cocktail: give exact specs (amounts in oz), glass, ice, method, and garnish.
-- When user asks for variations or creative riffs: you may invent, but stay in the spirit of Milk & Honey (balanced, thoughtful, no gimmicks).
-- When user lists ingredients: suggest 1–3 cocktails from the supplied data that fit, and explain why.
-- Do NOT hallucinate specs for drinks not present in the supplied recipe list. If you’re not sure, say so.
-- Measurements: always in oz (e.g. 2 oz, ¾ oz).
-- Format responses as:
-  1) Short description
-  2) Full spec (bulleted)
-  3) Brief notes (when useful).
+Core rules:
+- STRICT MILK & HONEY MODE.
+- Only give full specs for drinks that appear in the recipe data provided.
+- If a requested drink is NOT in the data, say so clearly and suggest nearby (similar) Milk & Honey drinks that ARE in the data.
+- All measurements in oz (e.g. 2 oz, 3/4 oz, 1/2 oz). Use fractions, not decimals, when natural.
+- Always specify: glass, ice, method, and garnish.
+- When user lists ingredients or gives a vibe, suggest 1–3 cocktails from the data and explain why.
+- No made-up specs. Never invent a classic that isn't present in the list.
+- If you adapt or riff, clearly label it as “House riff” and still keep it in the Milk & Honey style (balanced, no gimmicks).
+
+Response format:
+1) Short one-sentence description
+2) Full spec as a bulleted list:
+   - Spirit & modifiers (with oz)
+   - Citrus / sugar (with oz)
+   - Glass, ice, method
+   - Garnish
+3) Brief notes section (when useful: build, tweaks, or subs)
 `;
 
-exports.handler = async (event, context) => {
+// --------------------------
+// Load recipes at cold start
+// --------------------------
+
+let RECIPES = [];
+
+try {
+  const recipesPath = path.join(__dirname, "recipes.json");
+  const raw = fs.readFileSync(recipesPath, "utf8");
+  const parsed = JSON.parse(raw);
+
+  if (Array.isArray(parsed)) {
+    RECIPES = parsed;
+  } else if (Array.isArray(parsed.recipes)) {
+    RECIPES = parsed.recipes;
+  } else {
+    console.error("ccc-bartender: recipes.json not in expected format");
+  }
+
+  console.log(`ccc-bartender: loaded ${RECIPES.length} recipes`);
+} catch (err) {
+  console.error("ccc-bartender: failed to load recipes.json", err);
+}
+
+// Build a compact text context from recipe objects
+function buildRecipeContext(recipes) {
+  return recipes
+    .map((r) => {
+      const ing = (r.ingredients || [])
+        .map((i) => `${i.amount} ${i.ingredient}`)
+        .join(", ");
+
+      return [
+        `Name: ${r.name || ""}`,
+        `Category: ${r.category || ""}`,
+        `Glass: ${r.glass || ""}`,
+        `Method: ${r.method || ""}`,
+        `Ingredients: ${ing}`,
+        `Ice: ${r.ice || "-"}`,
+        `Garnish: ${r.garnish || "-"}`,
+      ].join("\n");
+    })
+    .join("\n---\n");
+}
+
+exports.handler = async (event) => {
   // Only allow POST
   if (event.httpMethod !== "POST") {
     return {
@@ -42,28 +96,28 @@ exports.handler = async (event, context) => {
   }
 
   const question = body.question || "";
-  const recipes = Array.isArray(body.recipes) ? body.recipes : [];
 
-  // Build compact recipe context from the subset sent by the browser
-  const recipeContext = recipes
-    .map((r) => {
-      const ing = (r.ingredients || [])
-        .map((i) => `${i.amount} ${i.ingredient}`)
-        .join(", ");
-      return `Name: ${r.name}
-Base/Category: ${r.category || ""} · Glass: ${r.glass || ""} · Method: ${r.method || ""}
-Ingredients: ${ing}
-Ice: ${r.ice || "-"} · Garnish: ${r.garnish || "-"}
-`;
-    })
-    .join("\n---\n");
+  // If the client sends a subset, use it; otherwise use full M&H DB
+  let recipesForContext = [];
+  if (Array.isArray(body.recipes) && body.recipes.length) {
+    recipesForContext = body.recipes;
+  } else {
+    recipesForContext = RECIPES;
+  }
+
+  // (Optional) clamp to a reasonable size if your JSON is huge
+  const MAX_RECIPES = 180;
+  const trimmed = recipesForContext.slice(0, MAX_RECIPES);
+
+  const recipeContext = buildRecipeContext(trimmed);
 
   const messages = [
     { role: "system", content: SYSTEM_PROMPT },
     {
       role: "user",
       content:
-        `Here is a subset of Milk & Honey recipes you may rely on:\n\n` +
+        `You have access to the following Milk & Honey recipes. ` +
+        `You MUST treat this as the source of truth for specs.\n\n` +
         recipeContext +
         `\n\nUser question: ${question}`,
     },
@@ -79,7 +133,7 @@ Ice: ${r.ice || "-"} · Garnish: ${r.garnish || "-"}
       body: JSON.stringify({
         model: "gpt-4.1-mini",
         messages,
-        temperature: 0.7,
+        temperature: 0.4, // lower temp for more deterministic specs
       }),
     });
 
