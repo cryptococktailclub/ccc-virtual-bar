@@ -930,7 +930,38 @@ body.theme-platinum .recipe-tag-pill {
   border: 1px solid rgba(255, 196, 0, 0.35);
   color: #ffe8a6;
 }
+/* Actions row under recipe card (copy button) */
+.recipe-actions {
+  margin-top: 6px;
+  display: flex;
+  justify-content: flex-end;
+}
 
+/* Copy spec button */
+.recipe-copy-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(120deg, var(--accent-neon-pink), var(--accent-gold-1));
+  color: #05010f;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.recipe-copy-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.8);
+}
+
+.recipe-copy-btn.is-copied {
+  opacity: 0.85;
+}
 /* -----------------------------
    BAR TV
 ----------------------------- */
