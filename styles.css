@@ -761,6 +761,175 @@ body.theme-platinum .bartender-bot .bartender-avatar {
   color: #05010f;
   cursor: pointer;
 }
+/* =========================
+   BAR BOT – RECIPE CARDS
+   ========================= */
+
+.recipe-panel {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Individual card */
+.recipe-card {
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.04), rgba(5, 5, 18, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.7);
+  font-size: 0.78rem;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr);
+  gap: 10px;
+}
+
+/* Stack on mobile */
+@media (max-width: 768px) {
+  .recipe-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Theme-tinted border accent */
+body.theme-base .recipe-card {
+  border-top: 2px solid var(--accent-neon-pink);
+}
+body.theme-gold .recipe-card {
+  border-top: 2px solid var(--accent-gold-1);
+}
+body.theme-platinum .recipe-card {
+  border-top: 2px solid var(--accent-plat-1);
+}
+
+/* Left column: title + ingredients */
+.recipe-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recipe-header-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.recipe-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.recipe-tag-pill {
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+
+/* Theme gradient pill */
+body.theme-base .recipe-tag-pill {
+  background: linear-gradient(120deg, var(--accent-neon-pink), var(--accent-neon-pink-soft));
+  color: #05010f;
+}
+body.theme-gold .recipe-tag-pill {
+  background: linear-gradient(120deg, var(--accent-gold-1), var(--accent-gold-2));
+  color: #05010f;
+}
+body.theme-platinum .recipe-tag-pill {
+  background: linear-gradient(120deg, var(--accent-plat-1), var(--accent-plat-2));
+  color: #05010f;
+}
+
+.recipe-summary {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* Ingredients list */
+.recipe-ingredients-title {
+  margin: 6px 0 2px;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--text-muted);
+}
+
+.recipe-ingredients {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recipe-ingredients li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.recipe-ingredients-amount {
+  font-weight: 500;
+}
+
+.recipe-ingredients-ingredient {
+  flex: 1;
+  text-align: right;
+  color: #e4e1ff;
+}
+
+/* Right column: method / glass / garnish / notes */
+
+.recipe-meta {
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: rgba(6, 6, 22, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recipe-meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.76rem;
+}
+
+.recipe-meta-label {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+.recipe-meta-value {
+  text-align: right;
+}
+
+.recipe-notes {
+  margin-top: 4px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+/* Warning banner (if API returns warnings[]) */
+
+.recipe-warning {
+  margin-top: 4px;
+  border-radius: 10px;
+  padding: 6px 8px;
+  font-size: 0.72rem;
+  background: rgba(255, 196, 0, 0.07);
+  border: 1px solid rgba(255, 196, 0, 0.35);
+  color: #ffe8a6;
+}
 
 /* -----------------------------
    BAR TV
