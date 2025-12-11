@@ -432,6 +432,7 @@ function initBarBot() {
   const messagesEl = document.getElementById("bartenderMessages");
   const formEl = document.getElementById("bartenderForm");
   const inputEl = document.getElementById("bartenderInput");
+  const recipePanel = document.getElementById("bartenderRecipePanel");
 
   if (!messagesEl || !formEl || !inputEl) {
     console.warn("CCC: Bar Bot elements missing; skipping AI bartender wiring.");
@@ -458,12 +459,12 @@ function initBarBot() {
   }
 
   let typingEl = null;
-
   function showTyping() {
     typingEl = document.createElement("div");
     typingEl.className = "bartender-message bartender-bot bartender-typing";
     typingEl.innerHTML =
-      '<div class="bartender-avatar"></div><div class="bartender-text">…</div>';
+      '<div class="bartender-avatar"></div>' +
+      '<div class="bartender-text"><span>.</span><span>.</span><span>.</span></div>';
     messagesEl.appendChild(typingEl);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
@@ -480,36 +481,60 @@ function initBarBot() {
     const question = inputEl.value.trim();
     if (!question) return;
 
+    // Clear any previous warnings if you want, but keep previous recipes
     appendMessage(question, false);
     inputEl.value = "";
     showTyping();
 
     try {
-      const res = await fetch(BARTENDER_FUNCTION_PATH, {
+      const res = await fetch(BARTENDER_FUNCTION_PATH || "/.netlify/functions/ccc-bartender", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           question,
-          recipes: [], // (optional) you can send a subset of M&H recipes here
+          recipes: [], // server will fall back to full Milk & Honey DB
         }),
       });
 
       hideTyping();
 
       if (!res.ok) {
-        console.error("CCC Bar Bot HTTP error:", res.status, await res.text());
         appendMessage("Bar Bot is temporarily offline. Try again shortly.", true);
+        console.error("CCC Bar Bot HTTP error:", res.status, await res.text());
         return;
       }
 
       const data = await res.json();
-      const answer = data.answer || "I couldn't reach the back bar AI right now.";
-      appendMessage(answer, true);
+      let structured = data.structured || null;
+
+      // Fallback: try to parse data.answer if structured is missing
+      if (!structured && typeof data.answer === "string") {
+        try {
+          structured = JSON.parse(data.answer);
+        } catch (err) {
+          console.warn("CCC Bar Bot: could not parse JSON answer:", err);
+        }
+      }
+
+      // Render recipe cards from structured JSON
+      renderRecipeCards(structured);
+
+      // Also summarize in the chat thread
+      if (structured && structured.summary) {
+        appendMessage(structured.summary, true);
+      } else if (data.answer) {
+        // fallback: if we somehow got plain text
+        appendMessage(data.answer, true);
+      } else {
+        appendMessage("I had trouble formatting that recipe. Try asking in a slightly different way.", true);
+      }
     } catch (err) {
       hideTyping();
       console.error("CCC Bar Bot error:", err);
       appendMessage(
-        "I couldn’t reach the back bar AI right now. Check the Netlify function and API key.",
+        "I couldn’t reach the back bar AI right now. Please check the Netlify function and OpenAI key.",
         true
       );
     }
