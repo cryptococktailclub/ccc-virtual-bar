@@ -762,48 +762,160 @@ body.theme-platinum .bartender-bot .bartender-avatar {
   cursor: pointer;
 }
 /* =========================
-   BAR BOT – RECIPE CARDS
+   BAR BOT / AI BARTENDER
    ========================= */
 
-.recipe-panel {
-  margin-top: 10px;
+#bar-bot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bartender-shell {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* Individual card */
-.recipe-card {
-  border-radius: 16px;
-  padding: 12px 14px;
-  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.04), rgba(5, 5, 18, 0.98));
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.7);
-  font-size: 0.78rem;
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr);
-  gap: 10px;
+/* Chat thread container */
+.bartender-messages {
+  border-radius: 14px;
+  background: rgba(3, 3, 12, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px;
+  max-height: 260px;
+  overflow-y: auto;
+  font-size: 0.8rem;
 }
 
-/* Stack on mobile */
-@media (max-width: 768px) {
-  .recipe-card {
-    grid-template-columns: 1fr;
+/* Chat bubbles */
+.bartender-message {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.bartender-avatar {
+  flex: 0 0 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: radial-gradient(circle at top, var(--accent-neon-pink), #05010f);
+  box-shadow: 0 0 8px rgba(255, 20, 147, 0.7);
+}
+
+body.theme-gold .bartender-avatar {
+  background: radial-gradient(circle at top, var(--accent-gold-1), #3a2100);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}
+body.theme-platinum .bartender-avatar {
+  background: radial-gradient(circle at top, var(--accent-plat-2), #050b1e);
+  box-shadow: 0 0 8px rgba(192, 208, 232, 0.85);
+}
+
+.bartender-text {
+  flex: 1;
+  color: #e4e1ff;
+  line-height: 1.4;
+}
+
+/* Typing indicator */
+.bartender-typing .bartender-text span {
+  display: inline-block;
+  animation: dotPulse 1s infinite ease-in-out;
+}
+.bartender-typing .bartender-text span:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.bartender-typing .bartender-text span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+@keyframes dotPulse {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-2px);
+    opacity: 1;
   }
 }
 
-/* Theme-tinted border accent */
-body.theme-base .recipe-card {
-  border-top: 2px solid var(--accent-neon-pink);
-}
-body.theme-gold .recipe-card {
-  border-top: 2px solid var(--accent-gold-1);
-}
-body.theme-platinum .recipe-card {
-  border-top: 2px solid var(--accent-plat-1);
+/* Input row */
+.bartender-form {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
 }
 
-/* Left column: title + ingredients */
+.bartender-input {
+  flex: 1;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(6, 4, 20, 0.96);
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 8px 10px;
+  resize: vertical;
+  min-height: 46px;
+}
+
+.bartender-submit-btn {
+  border-radius: 999px;
+  border: none;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(120deg, var(--accent-neon-pink), var(--accent-gold-1));
+  color: #05010f;
+  box-shadow: 0 0 14px rgba(0, 0, 0, 0.8);
+}
+
+/* =========================
+   RECIPE PANEL + CARDS
+   ========================= */
+
+.bartender-recipes {
+  border-radius: 14px;
+  background: rgba(5, 5, 18, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* If no recipes yet, keep panel small and subtle */
+.bartender-recipes:empty {
+  padding: 0;
+  border: none;
+}
+
+/* Optional warning banner */
+.recipe-warning {
+  border-radius: 10px;
+  padding: 6px 8px;
+  font-size: 0.75rem;
+  background: rgba(255, 196, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  color: #ffe9aa;
+}
+
+/* Card shell */
+.recipe-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.2fr);
+  gap: 10px;
+  border-radius: 12px;
+  padding: 10px;
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.03), rgba(6, 4, 22, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.8rem;
+}
+
+/* Left side */
 .recipe-main {
   display: flex;
   flex-direction: column;
@@ -812,85 +924,61 @@ body.theme-platinum .recipe-card {
 
 .recipe-header-row {
   display: flex;
-  align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
+  align-items: center;
 }
 
 .recipe-name {
-  font-size: 0.95rem;
   font-weight: 600;
 }
 
 .recipe-tag-pill {
+  padding: 2px 8px;
   border-radius: 999px;
-  padding: 3px 8px;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.13em;
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-muted);
-}
-
-/* Theme gradient pill */
-body.theme-base .recipe-tag-pill {
-  background: linear-gradient(120deg, var(--accent-neon-pink), var(--accent-neon-pink-soft));
-  color: #05010f;
-}
-body.theme-gold .recipe-tag-pill {
-  background: linear-gradient(120deg, var(--accent-gold-1), var(--accent-gold-2));
-  color: #05010f;
-}
-body.theme-platinum .recipe-tag-pill {
-  background: linear-gradient(120deg, var(--accent-plat-1), var(--accent-plat-2));
-  color: #05010f;
 }
 
 .recipe-summary {
   margin: 0;
-  font-size: 0.78rem;
   color: var(--text-muted);
+  font-size: 0.78rem;
 }
 
 /* Ingredients list */
 .recipe-ingredients-title {
-  margin: 6px 0 2px;
-  font-size: 0.76rem;
   text-transform: uppercase;
-  letter-spacing: 0.13em;
+  letter-spacing: 0.14em;
+  font-size: 0.68rem;
   color: var(--text-muted);
 }
 
 .recipe-ingredients {
   list-style: none;
+  margin: 2px 0 0;
   padding: 0;
-  margin: 0;
 }
 
 .recipe-ingredients li {
   display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 2px;
 }
 
 .recipe-ingredients-amount {
+  min-width: 54px;
   font-weight: 500;
 }
 
 .recipe-ingredients-ingredient {
-  flex: 1;
-  text-align: right;
-  color: #e4e1ff;
+  color: #f5f1ff;
 }
 
-/* Right column: method / glass / garnish / notes */
-
+/* Right side meta */
 .recipe-meta {
-  border-radius: 12px;
-  padding: 8px 10px;
-  background: rgba(6, 6, 22, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -899,38 +987,27 @@ body.theme-platinum .recipe-tag-pill {
 .recipe-meta-row {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  font-size: 0.76rem;
+  gap: 6px;
 }
 
 .recipe-meta-label {
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   color: var(--text-muted);
 }
 
 .recipe-meta-value {
-  text-align: right;
+  font-size: 0.78rem;
 }
 
 .recipe-notes {
-  margin-top: 4px;
-  font-size: 0.74rem;
+  margin: 4px 0 0;
+  font-size: 0.76rem;
   color: var(--text-muted);
 }
 
-/* Warning banner (if API returns warnings[]) */
-
-.recipe-warning {
-  margin-top: 4px;
-  border-radius: 10px;
-  padding: 6px 8px;
-  font-size: 0.72rem;
-  background: rgba(255, 196, 0, 0.07);
-  border: 1px solid rgba(255, 196, 0, 0.35);
-  color: #ffe8a6;
-}
-/* Actions row under recipe card (copy button) */
+/* Copy button row */
 .recipe-actions {
   margin-top: 6px;
   display: flex;
@@ -962,6 +1039,18 @@ body.theme-platinum .recipe-tag-pill {
 .recipe-copy-btn.is-copied {
   opacity: 0.85;
 }
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .bartender-messages {
+    max-height: 220px;
+  }
+
+  .recipe-card {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* -----------------------------
    BAR TV
 ----------------------------- */
