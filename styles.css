@@ -954,6 +954,112 @@ body.theme-platinum .bartender-avatar {
     grid-template-columns: 1fr;
   }
 }
+/* =========================
+   BAR BOT PREFERENCE WIZARD
+   ========================= */
+
+.bartender-wizard {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(3, 3, 18, 0.96);
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wizard-question {
+  margin-bottom: 4px;
+}
+
+.wizard-label {
+  display: block;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.wizard-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.wizard-pill {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f8f5ff;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.wizard-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.6);
+}
+
+.wizard-pill.is-selected {
+  background: linear-gradient(120deg, var(--accent-neon-pink), var(--accent-gold-1));
+  color: #05010f;
+  border-color: transparent;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.55);
+}
+
+.wizard-submit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.wizard-submit-btn {
+  border-radius: 999px;
+  border: none;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(120deg, var(--accent-neon-pink), var(--accent-gold-1));
+  color: #05010f;
+  opacity: 0.6;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.wizard-submit-btn:disabled {
+  cursor: default;
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+.wizard-submit-btn:not(:disabled) {
+  opacity: 1;
+}
+
+.wizard-submit-btn:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
+}
+
+/* Mobile tweaks */
+@media (max-width: 768px) {
+  .bartender-wizard {
+    padding: 8px;
+  }
+}
 
 /* -----------------------------
    BAR TV
