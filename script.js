@@ -1,10 +1,12 @@
+// script.js – CCC Virtual Bar Experience (refactored wizard)
+
 // ==========================
 // MEDIA CONFIG
 // ==========================
 
 const MEDIA_BASE = "https://visionary-beignet-7d270e.netlify.app";
 
-// Make sure these paths match the real files in visionary-beignet-7d270e
+// Audio tracks served from Netlify
 const AUDIO_TRACKS = [
   {
     title: "Analog Neon",
@@ -50,7 +52,7 @@ const AUDIO_TRACKS = [
   },
 ];
 
-
+// Bar TV loop tapes
 const VIDEO_SOURCES = [
   `${MEDIA_BASE}/video/bar_tape_01.mp4`,
   `${MEDIA_BASE}/video/bar_tape_02.mp4`,
@@ -142,8 +144,8 @@ function initAudioPlayer() {
   const albumArt = document.getElementById("albumArt");
   const platter = document.getElementById("turntablePlatter");
   const eq = document.getElementById("playerEq");
-  const tonearm = document.getElementById("tonearm"); // for needle animation
-  const turntable = document.querySelector(".turntable"); // for "speaker drop" feel
+  const tonearm = document.getElementById("tonearm");
+  const turntable = document.querySelector(".turntable");
 
   const trackTitleEl = document.getElementById("track-title");
   const trackArtistEl = document.getElementById("track-artist");
@@ -168,7 +170,6 @@ function initAudioPlayer() {
   const audio = new Audio();
   audio.preload = "metadata";
 
-  // Visual state for playing
   function setPlayingVisual(isPlaying) {
     if (platter) platter.classList.toggle("is-playing", isPlaying);
     if (eq) eq.classList.toggle("is-playing", isPlaying);
@@ -198,7 +199,7 @@ function initAudioPlayer() {
     if (timelineProgress) timelineProgress.style.width = "0%";
     if (dockTrack) dockTrack.textContent = `${track.title} — ${track.artist}`;
 
-    // Vinyl highlight + tiny drop animation
+    // highlight active vinyl + micro "drop"
     vinylRow.querySelectorAll(".vinyl-item").forEach((btn, idx) => {
       btn.classList.toggle("is-active", idx === index);
       if (idx === index) {
@@ -209,11 +210,19 @@ function initAudioPlayer() {
       }
     });
 
+    // label "drop" animation for feedback
+    const label = turntable ? turntable.querySelector(".turntable-label") : null;
+    if (label) {
+      label.classList.remove("label-drop");
+      void label.offsetWidth; // force reflow
+      label.classList.add("label-drop");
+    }
+
     if (autoPlay) {
       audio
         .play()
         .then(() => {
-          if (playBtn) playBtn.textContent = "Pause";
+          playBtn.textContent = "Pause";
           setPlayingVisual(true);
         })
         .catch((err) => {
@@ -221,7 +230,7 @@ function initAudioPlayer() {
           setPlayingVisual(false);
         });
     } else {
-      if (playBtn) playBtn.textContent = "Play";
+      playBtn.textContent = "Play";
       setPlayingVisual(false);
     }
   }
@@ -229,14 +238,14 @@ function initAudioPlayer() {
   // Initial track
   loadTrack(0, false);
 
-  // Click vinyl to load + play
+  // Vinyl click
   vinylRow.querySelectorAll(".vinyl-item").forEach((btn, idx) => {
     btn.addEventListener("click", () => {
       loadTrack(idx, true);
     });
   });
 
-  // Play / pause
+  // Play / Pause
   playBtn.addEventListener("click", () => {
     if (audio.paused) {
       audio
@@ -256,7 +265,7 @@ function initAudioPlayer() {
     }
   });
 
-  // Prev / next
+  // Prev / Next
   if (prevBtn) {
     prevBtn.addEventListener("click", () => {
       const nextIndex = (currentIndex - 1 + AUDIO_TRACKS.length) % AUDIO_TRACKS.length;
@@ -319,6 +328,7 @@ function initBarTV() {
   const volSlider = document.getElementById("tvVolume");
   const rewindBtn = document.getElementById("tvRewindBtn");
   const forwardBtn = document.getElementById("tvForwardBtn");
+  const tvShell = document.querySelector(".bar-tv-aspect");
 
   if (!videoEl) {
     console.warn("CCC: Bar TV video element missing.");
@@ -326,6 +336,14 @@ function initBarTV() {
   }
 
   let currentChannel = 0;
+
+  function applyGlitch() {
+    if (!tvShell) return;
+    tvShell.classList.add("tv-glitch");
+    setTimeout(() => {
+      tvShell.classList.remove("tv-glitch");
+    }, 220);
+  }
 
   function loadChannel(index, autoPlay = true) {
     if (!VIDEO_SOURCES || !VIDEO_SOURCES[index]) {
@@ -336,6 +354,7 @@ function initBarTV() {
     currentChannel = index;
     videoEl.src = VIDEO_SOURCES[index];
     videoEl.load();
+    applyGlitch();
 
     if (autoPlay) {
       const playPromise = videoEl.play();
@@ -396,7 +415,6 @@ function initBarTV() {
       const vol = parseFloat(volSlider.value);
       videoEl.volume = vol;
 
-      // If user raises volume from 0, unmute
       if (vol > 0 && videoEl.muted) {
         videoEl.muted = false;
         if (muteBtn) muteBtn.textContent = "Sound On";
@@ -404,81 +422,42 @@ function initBarTV() {
     });
   }
 
-  // NEW: Rewind 10 seconds
+  // Rewind 10 seconds
   if (rewindBtn) {
     rewindBtn.addEventListener("click", () => {
       if (!isFinite(videoEl.duration)) return;
-      const target = Math.max(0, videoEl.currentTime - 10);
-      videoEl.currentTime = target;
+      videoEl.currentTime = Math.max(0, videoEl.currentTime - 10);
     });
   }
 
-  // NEW: Fast-forward 10 seconds
+  // Fast-forward 10 seconds
   if (forwardBtn) {
     forwardBtn.addEventListener("click", () => {
       if (!isFinite(videoEl.duration)) return;
-      const target = Math.min(videoEl.duration, videoEl.currentTime + 10);
-      videoEl.currentTime = target;
+      videoEl.currentTime = Math.min(videoEl.duration, videoEl.currentTime + 10);
     });
   }
 }
 
 // ==========================
-// BAR BOT (AI BARTENDER)
+// BAR BOT (CHAT + WIZARD)
 // ==========================
+
 function initBarBot() {
-  // Try IDs first, then fall back to class-based selectors
-  const barBotSection =
-    document.getElementById("bar-bot") ||
-    document.querySelector("#bar-bot, .bar-bot, [data-role='bar-bot']");
+  const messagesEl = document.getElementById("bartenderMessages");
+  const formEl = document.getElementById("bartenderForm");
+  const inputEl = document.getElementById("bartenderInput");
+  const recipePanel = document.getElementById("bartenderRecipePanel");
+  const wizardEl = document.getElementById("bartenderWizard");
 
-  let messagesEl =
-    document.getElementById("bartenderMessages") ||
-    document.querySelector(".bartender-messages");
-
-  const formEl =
-    document.getElementById("bartenderForm") ||
-    document.querySelector(".bartender-form");
-
-  const inputEl =
-    document.getElementById("bartenderInput") ||
-    document.querySelector(".bartender-input");
-
-  const recipePanel =
-    document.getElementById("bartenderRecipePanel") ||
-    document.querySelector(".bartender-recipes");
-
-  const wizardEl =
-    document.getElementById("bartenderWizard") ||
-    document.querySelector(".bartender-wizard");
-
-  // If we have a Bar Bot section but no messages container, create one
-  if (!messagesEl && barBotSection) {
-    messagesEl = document.createElement("div");
-    messagesEl.id = "bartenderMessages";
-    messagesEl.className = "bartender-messages";
-
-    // Insert before the form if the form is a direct child; otherwise at top of section
-    if (formEl && formEl.parentNode === barBotSection) {
-      barBotSection.insertBefore(messagesEl, formEl);
-    } else {
-      barBotSection.insertBefore(messagesEl, barBotSection.firstChild || null);
-    }
-  }
-
-  // If we still don’t have a messages container OR we’re missing the form/input,
-  // it’s safer to bail than throw an error.
   if (!messagesEl || !formEl || !inputEl) {
-    console.warn("CCC: Bar Bot – required elements missing, skipping wiring.");
+    console.warn("CCC: Bar Bot elements missing; skipping AI bartender wiring.");
     return;
   }
 
-  // -----------------------------
-  // Chat transcript helpers
-  // -----------------------------
-  function appendMessage(content, fromBot = false) {
-    if (!messagesEl) return;
+  // ---- Chat helpers ----
 
+  function appendMessage(content, fromBot = false) {
     const row = document.createElement("div");
     row.className = `bartender-message ${fromBot ? "bartender-bot" : "bartender-user"}`;
 
@@ -498,9 +477,7 @@ function initBarBot() {
   }
 
   let typingEl = null;
-
   function showTyping() {
-    if (!messagesEl) return;
     typingEl = document.createElement("div");
     typingEl.className = "bartender-message bartender-bot bartender-typing";
     typingEl.innerHTML =
@@ -517,172 +494,21 @@ function initBarBot() {
     typingEl = null;
   }
 
-  // -----------------------------
-  // Preference wizard state
-  // -----------------------------
-  const wizardState = {
-    style: null,   // "light-refreshing" | "spirit-forward"
-    ice: null,     // "ice" | "no-ice"
-    spirits: [],   // ["gin", "mezcal", ...]
-    lowAbv: [],    // ["sherry", "vermouth", "amaro"]
-  };
+  // Shared API call for wizard + free-text chat
+  async function callBartenderAPI(payload, { showQuestionInChat = false } = {}) {
+    const questionText = payload.question || "";
 
-  function updateWizardPillSelection(groupSelector, value, multi = false, stateKey) {
-    if (!wizardEl) return;
-    const group = wizardEl.querySelector(groupSelector);
-    if (!group) return;
+    if (showQuestionInChat && questionText) {
+      appendMessage(questionText, false);
+    }
 
-    const pills = group.querySelectorAll("[data-value]");
-    pills.forEach((pill) => {
-      const v = pill.getAttribute("data-value");
-      if (!multi) {
-        pill.classList.toggle("is-selected", v === value);
-      } else {
-        pill.classList.toggle("is-selected", wizardState[stateKey].includes(v));
-      }
-    });
-  }
-
-  if (wizardEl) {
-    // Q1: STYLE (Light/Refreshing vs Spirit Forward)
-    wizardEl.querySelectorAll("[data-wizard-style]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const value = btn.getAttribute("data-value");
-        wizardState.style = value;
-        updateWizardPillSelection("[data-wizard-style-group]", value, false, "style");
-        maybeEnableWizardSubmit();
-      });
-    });
-
-    // Q2: ICE or NO ICE
-    wizardEl.querySelectorAll("[data-wizard-ice]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const value = btn.getAttribute("data-value");
-        wizardState.ice = value;
-        updateWizardPillSelection("[data-wizard-ice-group]", value, false, "ice");
-        maybeEnableWizardSubmit();
-      });
-    });
-
-    // Q3: SPIRITS (multi-select)
-    wizardEl.querySelectorAll("[data-wizard-spirit]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const value = btn.getAttribute("data-value");
-        const idx = wizardState.spirits.indexOf(value);
-        if (idx === -1) {
-          wizardState.spirits.push(value);
-        } else {
-          wizardState.spirits.splice(idx, 1);
-        }
-        updateWizardPillSelection("[data-wizard-spirit-group]", value, true, "spirits");
-        maybeEnableWizardSubmit();
-      });
-    });
-
-    // Q4: LOW ABV (multi-select)
-    wizardEl.querySelectorAll("[data-wizard-lowabv]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const value = btn.getAttribute("data-value");
-        const idx = wizardState.lowAbv.indexOf(value);
-        if (idx === -1) {
-          wizardState.lowAbv.push(value);
-        } else {
-          wizardState.lowAbv.splice(idx, 1);
-        }
-        updateWizardPillSelection("[data-wizard-lowabv-group]", value, true, "lowAbv");
-        maybeEnableWizardSubmit();
-      });
-    });
-  }
-
-  const wizardSubmitBtn =
-    wizardEl &&
-    (wizardEl.querySelector("[data-wizard-submit]") ||
-      wizardEl.querySelector("#bartenderWizardSubmit"));
-
-  function maybeEnableWizardSubmit() {
-    if (!wizardSubmitBtn) return;
-    const ready =
-      wizardState.style &&
-      wizardState.ice &&
-      wizardState.spirits.length > 0;
-    wizardSubmitBtn.disabled = !ready;
-  }
-
-  if (wizardSubmitBtn) {
-    wizardSubmitBtn.addEventListener("click", async () => {
-      if (!wizardState.style || !wizardState.ice || wizardState.spirits.length === 0) return;
-
-      showTyping();
-      try {
-        const res = await fetch(BARTENDER_FUNCTION_PATH || "/.netlify/functions/ccc-bartender", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            question: null,
-            preferences: wizardState,
-            recipes: [],
-          }),
-        });
-
-        hideTyping();
-
-        if (!res.ok) {
-          appendMessage("Bar Bot is temporarily offline. Try again shortly.", true);
-          console.error("CCC Bar Bot (wizard) HTTP error:", res.status, await res.text());
-          return;
-        }
-
-        const data = await res.json();
-        let structured = data.structured || null;
-
-        if (!structured && typeof data.answer === "string") {
-          try {
-            structured = JSON.parse(data.answer);
-          } catch (err) {
-            console.warn("CCC Bar Bot: could not parse JSON answer from wizard:", err);
-          }
-        }
-
-        if (structured && structured.summary) {
-          appendMessage(structured.summary, true);
-        }
-
-        if (typeof renderRecipeCards === "function") {
-          renderRecipeCards(structured);
-        }
-      } catch (err) {
-        hideTyping();
-        console.error("CCC Bar Bot (wizard) error:", err);
-        appendMessage(
-          "I couldn’t reach the back bar AI right now. Please check the Netlify function and OpenAI key.",
-          true
-        );
-      }
-    });
-  }
-
-  // -----------------------------
-  // Free-text chat submit
-  // -----------------------------
-  formEl.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const question = inputEl.value.trim();
-    if (!question) return;
-
-    appendMessage(question, false);
-    inputEl.value = "";
     showTyping();
 
     try {
       const res = await fetch(BARTENDER_FUNCTION_PATH || "/.netlify/functions/ccc-bartender", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question,
-          preferences: wizardState,
-          recipes: [],
-        }),
+        body: JSON.stringify(payload),
       });
 
       hideTyping();
@@ -696,6 +522,7 @@ function initBarBot() {
       const data = await res.json();
       let structured = data.structured || null;
 
+      // Fallback: backend sometimes returns JSON string in data.answer
       if (!structured && typeof data.answer === "string") {
         try {
           structured = JSON.parse(data.answer);
@@ -704,19 +531,18 @@ function initBarBot() {
         }
       }
 
+      // Render recipe cards if provided
+      if (structured) {
+        renderRecipeCards(structured);
+      }
+
+      // Chat summary
       if (structured && structured.summary) {
         appendMessage(structured.summary, true);
       } else if (data.answer) {
         appendMessage(data.answer, true);
       } else {
-        appendMessage(
-          "I had trouble formatting that recipe. Try asking in a slightly different way.",
-          true
-        );
-      }
-
-      if (typeof renderRecipeCards === "function") {
-        renderRecipeCards(structured);
+        appendMessage("I had trouble formatting that recipe. Try asking in a slightly different way.", true);
       }
     } catch (err) {
       hideTyping();
@@ -726,7 +552,141 @@ function initBarBot() {
         true
       );
     }
+  }
+
+  // ---- Free-text chat submit ----
+
+  formEl.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const question = inputEl.value.trim();
+    if (!question) return;
+
+    inputEl.value = "";
+
+    const payload = {
+      mode: "chat",
+      question,
+      recipes: [], // legacy field; backend can ignore or use
+    };
+
+    callBartenderAPI(payload, { showQuestionInChat: true });
   });
+
+  // ---- Wizard wiring (refactored) ----
+
+  if (wizardEl) {
+    const wizardSubmitBtn =
+      wizardEl.querySelector("[data-wizard-submit]") ||
+      wizardEl.querySelector("#wizardRecommendBtn") ||
+      wizardEl.querySelector(".wizard-submit-btn");
+
+    const wizardOptionGroups = wizardEl.querySelectorAll(".wizard-options");
+
+    // Persistent state for wizard answers
+    const wizardState = {
+      style: null,   // "light_refreshing" | "spirit_forward"
+      ice: null,     // "on_ice" | "no_ice"
+      spirits: [],   // array of strings
+    };
+
+    function updateWizardCTA() {
+      if (!wizardSubmitBtn) return;
+
+      const ready =
+        !!wizardState.style &&
+        !!wizardState.ice &&
+        Array.isArray(wizardState.spirits) &&
+        wizardState.spirits.length > 0;
+
+      wizardSubmitBtn.disabled = !ready;
+    }
+
+    function handleSingleChoice(questionKey, value, buttonEl, groupEl) {
+      const allButtons = groupEl.querySelectorAll(".wizard-option");
+      allButtons.forEach((b) => b.classList.remove("is-selected"));
+
+      buttonEl.classList.add("is-selected");
+      wizardState[questionKey] = value;
+    }
+
+    function handleMultiChoice(value, buttonEl) {
+      const idx = wizardState.spirits.indexOf(value);
+      if (idx >= 0) {
+        wizardState.spirits.splice(idx, 1);
+        buttonEl.classList.remove("is-selected");
+      } else {
+        wizardState.spirits.push(value);
+        buttonEl.classList.add("is-selected");
+      }
+    }
+
+    // Attach click handlers to all wizard-option buttons
+    wizardOptionGroups.forEach((groupEl) => {
+      const questionKey = groupEl.getAttribute("data-question");
+      if (!questionKey) return;
+
+      groupEl.querySelectorAll(".wizard-option").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const value = btn.getAttribute("data-value");
+          if (!value) return;
+
+          if (questionKey === "style" || questionKey === "ice") {
+            handleSingleChoice(questionKey, value, btn, groupEl);
+          } else if (questionKey === "spirits") {
+            handleMultiChoice(value, btn);
+          }
+
+          updateWizardCTA();
+        });
+      });
+    });
+
+    function buildWizardQuestionText() {
+      const parts = [];
+
+      if (wizardState.style === "light_refreshing") {
+        parts.push("light & refreshing, shaken with juice");
+      } else if (wizardState.style === "spirit_forward") {
+        parts.push("spirit-forward and stirred");
+      }
+
+      if (wizardState.ice === "on_ice") {
+        parts.push("served on ice");
+      } else if (wizardState.ice === "no_ice") {
+        parts.push("served up without ice");
+      }
+
+      if (wizardState.spirits.length) {
+        parts.push(`featuring: ${wizardState.spirits.join(", ")}`);
+      }
+
+      if (!parts.length) {
+        return "Recommend three cocktails based on my preferences.";
+      }
+
+      return `Recommend three cocktails that are ${parts.join(", ")}.`;
+    }
+
+    if (wizardSubmitBtn) {
+      wizardSubmitBtn.addEventListener("click", () => {
+        if (wizardSubmitBtn.disabled) return;
+
+        const questionText = buildWizardQuestionText();
+
+        const payload = {
+          mode: "wizard",
+          question: questionText,
+          wizard_preferences: { ...wizardState },
+        };
+
+        // Show the preference summary as the "user" message
+        callBartenderAPI(payload, { showQuestionInChat: true });
+      });
+    }
+
+    // Initial button state
+    updateWizardCTA();
+  }
 }
 
 // ==========================
@@ -737,16 +697,11 @@ function renderRecipeCards(structured) {
   const panel = document.getElementById("bartenderRecipePanel");
   if (!panel) return;
 
-  // Clear old cards
   panel.innerHTML = "";
-
-  if (!structured) {
-    return;
-  }
+  if (!structured) return;
 
   const { recipes, warnings, summary } = structured;
 
-  // Optional warning banner at the top (e.g. drink not found)
   if (Array.isArray(warnings) && warnings.length) {
     const warnDiv = document.createElement("div");
     warnDiv.className = "recipe-warning";
@@ -788,7 +743,6 @@ function renderRecipeCards(structured) {
       main.appendChild(summaryEl);
     }
 
-    // Ingredients
     const ingTitle = document.createElement("div");
     ingTitle.className = "recipe-ingredients-title";
     ingTitle.textContent = "Ingredients";
@@ -851,11 +805,9 @@ function renderRecipeCards(structured) {
       meta.appendChild(notesEl);
     }
 
-    // Assemble card core
     card.appendChild(main);
     card.appendChild(meta);
 
-    // ACTIONS (COPY SPEC)
     const actions = document.createElement("div");
     actions.className = "recipe-actions";
 
@@ -871,7 +823,6 @@ function renderRecipeCards(structured) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
           await navigator.clipboard.writeText(text);
         } else {
-          // Fallback for older browsers
           const temp = document.createElement("textarea");
           temp.value = text;
           document.body.appendChild(temp);
@@ -896,10 +847,10 @@ function renderRecipeCards(structured) {
     actions.appendChild(copyBtn);
     card.appendChild(actions);
 
-    // Attach full card
     panel.appendChild(card);
   });
 }
+
 // ==========================
 // BUILD PLAINTEXT SPEC FOR COPY
 // ==========================
@@ -909,20 +860,17 @@ function buildRecipeText(recipe, summary) {
 
   const lines = [];
 
-  // Name
   if (recipe.name) {
     lines.push(recipe.name.toUpperCase());
-    lines.push(""); // blank line
+    lines.push("");
   }
 
-  // Optional summary line from structured.summary, or recipe.description
   const desc = summary || recipe.description;
   if (desc) {
     lines.push(desc);
     lines.push("");
   }
 
-  // Ingredients
   lines.push("INGREDIENTS");
   if (Array.isArray(recipe.ingredients) && recipe.ingredients.length) {
     recipe.ingredients.forEach((ing) => {
@@ -935,23 +883,13 @@ function buildRecipeText(recipe, summary) {
   }
   lines.push("");
 
-  // Specs
   lines.push("SPECS");
-  if (recipe.glass) {
-    lines.push(`Glass: ${recipe.glass}`);
-  }
-  if (recipe.method) {
-    lines.push(`Method: ${recipe.method}`);
-  }
-  if (recipe.ice) {
-    lines.push(`Ice: ${recipe.ice}`);
-  }
-  if (recipe.garnish) {
-    lines.push(`Garnish: ${recipe.garnish}`);
-  }
+  if (recipe.glass) lines.push(`Glass: ${recipe.glass}`);
+  if (recipe.method) lines.push(`Method: ${recipe.method}`);
+  if (recipe.ice) lines.push(`Ice: ${recipe.ice}`);
+  if (recipe.garnish) lines.push(`Garnish: ${recipe.garnish}`);
   lines.push("");
 
-  // Notes
   if (recipe.notes) {
     lines.push("NOTES");
     lines.push(recipe.notes);
