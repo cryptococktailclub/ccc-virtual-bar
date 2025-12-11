@@ -525,12 +525,40 @@ function initBarBot() {
     q2.options.appendChild(makePill("ice", "No ice (served up)"));
     wizard.appendChild(q2.wrap);
 
-    // Q3: Base spirit
-    const q3 = makeQuestion("3. Spirit preference");
-    ["Rum", "Gin", "Bourbon", "Tequila"].forEach((spirit) => {
-      q3.options.appendChild(makePill("spirit", spirit));
-    });
-    wizard.appendChild(q3.wrap);
+    // Q3: Base spirit (grouped by style)
+const q3 = makeQuestion("3. Spirit preference (choose one)");
+
+// helper to add a group label row
+function addGroupLabel(text) {
+  const label = document.createElement("div");
+  label.className = "wizard-group-label";
+  label.textContent = text;
+  q3.options.appendChild(label);
+}
+
+// helper to add individual spirit pills
+function addSpiritPill(name) {
+  q3.options.appendChild(makePill("spirit", name));
+}
+
+/* Clear Spirits */
+addGroupLabel("Clear Spirits");
+["Vodka", "Gin", "Pisco", "Cachaça"].forEach(addSpiritPill);
+
+/* Brown Spirits */
+addGroupLabel("Brown Spirits");
+["Bourbon", "Whiskey", "Scotch", "Apple Brandy", "Cognac"].forEach(addSpiritPill);
+
+/* Agave */
+addGroupLabel("Agave");
+["Tequila", "Mezcal"].forEach(addSpiritPill);
+
+/* Low ABV */
+addGroupLabel("Low ABV");
+["Sherry", "Amaro", "Vermouth"].forEach(addSpiritPill);
+
+wizard.appendChild(q3.wrap);
+;
 
     // Submit row
     const submitRow = document.createElement("div");
