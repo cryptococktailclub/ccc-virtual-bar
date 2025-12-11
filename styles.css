@@ -1775,3 +1775,23 @@ body.theme-platinum .bar-tv-frame {
     transform: translateY(0) scale(1);
   }
 }
+/* ============================================
+   FLOATING HEADER — MATCH HERO GRADIENT
+   ============================================ */
+
+.top-nav .brand-title {
+  font-weight: 700;
+  font-size: 1.1rem; /* Keeps your two-line mobile behavior */
+  background: linear-gradient(90deg,
+    #FF1493 0%,   /* Neon pink */
+    #FFB700 50%,  /* Warm gold midpoint */
+    #FFD700 100%  /* Polished gold */
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+
+  /* Optional subtle glow to match hero */
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.35);
+}
