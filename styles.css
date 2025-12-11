@@ -842,202 +842,78 @@ body.theme-platinum .bartender-avatar {
   box-shadow: 0 0 14px rgba(255, 215, 0, 0.5);
 }
 
+/* Spirit Preference layout (wizard groups) */
 .wizard-groups {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px;
+  margin-top: 4px;
 }
 
 .wizard-group {
-  border-radius: 10px;
-  padding: 8px;
-  background: rgba(5, 5, 18, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  padding: 10px 10px 8px;
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.03), rgba(5, 5, 18, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
 .wizard-group-title {
-  font-size: 0.74rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text-muted);
-}
-
-.bartender-wizard-cta {
-  align-self: flex-start;
-  margin-top: 4px;
-}
-
-.bartender-wizard-hint {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-}
-
-/* Recipe panel = single, clean container */
-.bartender-recipe-panel {
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.recipe-warning {
-  padding: 6px 8px;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  background: rgba(255, 215, 0, 0.06);
-  border: 1px solid rgba(255, 215, 0, 0.35);
-  color: #ffeeb3;
-}
-
-/* Recipe card layout */
-.recipe-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.2fr);
-  gap: 10px;
-  border-radius: 12px;
-  padding: 10px;
-  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.03), rgba(6, 4, 22, 0.98));
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  font-size: 0.8rem;
-}
-
-/* Left side */
-.recipe-main {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.recipe-header-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 6px;
-  align-items: center;
-}
-
-.recipe-name {
-  font-weight: 600;
-}
-
-.recipe-tag-pill {
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.recipe-summary {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.78rem;
-}
-
-/* Ingredients list */
-.recipe-ingredients-title {
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Option pills inside groups */
+.wizard-group .wizard-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.wizard-option {
+  position: relative;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  color: #f8f5ff;
+  font-size: 0.76rem;
+  padding: 6px 10px;
+  cursor: pointer;
+  text-align: left;
+  min-width: 0;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.wizard-option-sub {
+  display: block;
   font-size: 0.68rem;
   color: var(--text-muted);
 }
 
-.recipe-ingredients {
-  list-style: none;
-  margin: 2px 0 0;
-  padding: 0;
+.wizard-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.7);
 }
 
-.recipe-ingredients li {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 2px;
-}
-
-.recipe-ingredients-amount {
-  min-width: 54px;
-  font-weight: 500;
-}
-
-.recipe-ingredients-ingredient {
-  color: #f5f1ff;
-}
-
-/* Right side meta */
-.recipe-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.recipe-meta-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-.recipe-meta-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-}
-
-.recipe-meta-value {
-  font-size: 0.78rem;
-}
-
-.recipe-notes {
-  margin: 4px 0 0;
-  font-size: 0.76rem;
-  color: var(--text-muted);
-}
-
-/* Copy spec action */
-.recipe-actions {
-  margin-top: 6px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.recipe-copy-btn {
-  border: none;
-  border-radius: 999px;
-  padding: 5px 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
+.wizard-option.is-selected {
   background: linear-gradient(120deg, var(--accent-neon-pink), var(--accent-gold-1));
   color: #05010f;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    opacity 0.15s ease;
+  border-color: transparent;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.5);
 }
 
-.recipe-copy-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.8);
-}
-
-.recipe-copy-btn.is-copied {
-  opacity: 0.85;
-}
-
-/* Mobile adjustments */
+/* Mobile: stack groups cleanly */
 @media (max-width: 768px) {
-  .bartender-messages {
-    max-height: 220px;
-  }
-
-  .recipe-card {
-    grid-template-columns: 1fr;
-  }
-
   .wizard-groups {
     grid-template-columns: 1fr;
   }
