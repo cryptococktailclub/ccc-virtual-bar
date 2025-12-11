@@ -874,6 +874,29 @@ body.theme-platinum .bartender-bot .bartender-avatar {
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
 }
+/* ============================
+   NOW PLAYING FOOTER GRADIENT
+   ============================ */
+
+.footer-now {
+  background: linear-gradient(90deg, #FF1493 0%, #FFD700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+}
+
+.footer-now strong {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.footer-track {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.footer-now {
+  text-shadow: 0 0 6px rgba(255, 200, 0, 0.4);
+}
 
 /* -----------------------------
    RESPONSIVE
