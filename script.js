@@ -555,7 +555,7 @@ function renderRecipeCards(structured) {
     return;
   }
 
-  const { recipes, warnings } = structured;
+  const { recipes, warnings, summary } = structured;
 
   // Optional warning banner at the top (e.g. drink not found)
   if (Array.isArray(warnings) && warnings.length) {
@@ -662,9 +662,112 @@ function renderRecipeCards(structured) {
       meta.appendChild(notesEl);
     }
 
-    // Assemble card
+    // Assemble card core
     card.appendChild(main);
     card.appendChild(meta);
+
+    // ACTIONS (COPY SPEC)
+    const actions = document.createElement("div");
+    actions.className = "recipe-actions";
+
+    const copyBtn = document.createElement("button");
+    copyBtn.type = "button";
+    copyBtn.className = "recipe-copy-btn";
+    copyBtn.textContent = "Copy spec";
+
+    copyBtn.addEventListener("click", async () => {
+      const text = buildRecipeText(r, summary);
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          // Fallback for older browsers
+          const temp = document.createElement("textarea");
+          temp.value = text;
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand("copy");
+          document.body.removeChild(temp);
+        }
+
+        const original = copyBtn.textContent;
+        copyBtn.textContent = "Copied";
+        copyBtn.classList.add("is-copied");
+        setTimeout(() => {
+          copyBtn.textContent = original;
+          copyBtn.classList.remove("is-copied");
+        }, 1500);
+      } catch (err) {
+        console.error("CCC: Failed to copy spec:", err);
+        alert("Could not copy spec to clipboard. You can select and copy manually.");
+      }
+    });
+
+    actions.appendChild(copyBtn);
+    card.appendChild(actions);
+
+    // Attach full card
     panel.appendChild(card);
   });
+}
+// ==========================
+// BUILD PLAINTEXT SPEC FOR COPY
+// ==========================
+
+function buildRecipeText(recipe, summary) {
+  if (!recipe) return "";
+
+  const lines = [];
+
+  // Name
+  if (recipe.name) {
+    lines.push(recipe.name.toUpperCase());
+    lines.push(""); // blank line
+  }
+
+  // Optional summary line from structured.summary, or recipe.description
+  const desc = summary || recipe.description;
+  if (desc) {
+    lines.push(desc);
+    lines.push("");
+  }
+
+  // Ingredients
+  lines.push("INGREDIENTS");
+  if (Array.isArray(recipe.ingredients) && recipe.ingredients.length) {
+    recipe.ingredients.forEach((ing) => {
+      const amt = ing.amount || "";
+      const name = ing.ingredient || "";
+      lines.push(`- ${amt} ${name}`.trim());
+    });
+  } else {
+    lines.push("- (no ingredients listed)");
+  }
+  lines.push("");
+
+  // Specs
+  lines.push("SPECS");
+  if (recipe.glass) {
+    lines.push(`Glass: ${recipe.glass}`);
+  }
+  if (recipe.method) {
+    lines.push(`Method: ${recipe.method}`);
+  }
+  if (recipe.ice) {
+    lines.push(`Ice: ${recipe.ice}`);
+  }
+  if (recipe.garnish) {
+    lines.push(`Garnish: ${recipe.garnish}`);
+  }
+  lines.push("");
+
+  // Notes
+  if (recipe.notes) {
+    lines.push("NOTES");
+    lines.push(recipe.notes);
+    lines.push("");
+  }
+
+  return lines.join("\n").trim();
 }
