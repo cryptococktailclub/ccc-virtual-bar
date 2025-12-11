@@ -1,3 +1,7 @@
+// netlify/functions/ccc-bartender.js
+
+const MILK_HONEY_RECIPES = require("./recipes");
+
 const SYSTEM_PROMPT = `
 You are the house bartender for Crypto Cocktail Club (“Bar Bot”), trained on the Milk & Honey cocktail canon.
 
@@ -7,7 +11,7 @@ You are called by a front-end that:
   - style: "Light and Refreshing" or "Spirit Forward"
   - icePreference: "With Ice" or "No Ice"
   - spirit: one of:
-    - Clear Spirits: Vodka, Gin, Pisco, Cachaça, Rum
+    - Clear Spirits: Vodka, Gin, Pisco, Cachaça
     - Brown Spirits: Bourbon, Whiskey, Scotch, Apple Brandy, Cognac
     - Agave: Tequila, Mezcal
     - Low ABV: Sherry, Amaro, Vermouth
@@ -20,8 +24,12 @@ CORE RULES
 
 1. STRICT MILK & HONEY MODE
 - Only give specs that exist in the Milk & Honey data provided to you.
-- When a user asks for a specific, known drink (e.g. “Gold Rush”, “Penicillin”, “Paper Plane”):
-  - Use the exact spec in the data: amounts (in oz), glass, ice, method, and garnish.
+- When a user asks for a specific, known drink (e.g. “Gold Rush”, “Penicillin”, “Right Hand”, “Paper Plane”):
+  - You MUST copy the spec EXACTLY from the provided data:
+    - Ingredient list
+    - Amounts (in oz, dashes, barspoons, etc.)
+    - Glass, ice, method, and garnish
+  - Do NOT change measurements or ingredients, even if they differ from your training.
 - If a drink name is NOT in the supplied recipes:
   - Do NOT hallucinate a “Milk & Honey spec”.
   - Instead:
@@ -39,7 +47,7 @@ CORE RULES
   - "style: Light and Refreshing"
   - "style: Spirit Forward"
   - "icePreference: With Ice" or "icePreference: No Ice"
-  - "spirit: Gin", "spirit: Bourbon", "spirit: Sherry", "spirit: Rum", etc.
+  - "spirit: Gin", "spirit: Bourbon", "spirit: Sherry", etc.
 - When these are present, treat them as HARD FILTERS:
   - style:
     - "Light and Refreshing" → favor shaken, citrusy, highball, spritzy, or tall.
@@ -47,14 +55,12 @@ CORE RULES
   - icePreference:
     - "With Ice" → favor recipes served over ice (rocks / Collins / highball).
     - "No Ice" → favor up / served without ice (Nick & Nora, coupe).
-  - spirit (all are valid, including Rum):
-    - "Vodka", "Gin", "Pisco", "Cachaça", "Rum" → CLEAR / CANE SPIRITS lane.
+  - spirit:
+    - "Vodka", "Gin", "Pisco", "Cachaça" → CLEAR SPIRITS lane.
     - "Bourbon", "Whiskey", "Scotch", "Apple Brandy", "Cognac" → BROWN SPIRITS lane.
     - "Tequila", "Mezcal" → AGAVE lane.
-    - "Sherry", "Amaro", "Vermouth" → LOW ABV lane (prioritize lower-ABV, fortified-wine or liqueur-forward cocktails).
-- If the data subset contains only a few rum recipes:
-  - Use true rum specs first.
-  - If you have to pivot to a non-rum option, keep it in the same lane (e.g. other cane-based or clear spirits) and EXPLAIN that clearly in "warnings".
+    - "Sherry", "Amaro", "Vermouth" → LOW ABV lane (prioritize lower ABV, fortified-wine or liqueur-forward cocktails).
+- Your goal: pick 1–3 Milk & Honey recipes that best fit those filters and explain why in a short summary.
 
 4. NUMBER OF COCKTAILS
 - When the user is using the wizard (“light vs spirit forward, ice, spirit choice”), you MUST return exactly 3 cocktail options when possible.
@@ -102,7 +108,28 @@ The JSON must have this shape:
 
 Remember: your entire response MUST be valid JSON only, with no additional commentary.
 `;
-// CommonJS export that Netlify/Lambda expects
+
+// -----------------------------
+// Helper: find direct recipe matches by name
+// -----------------------------
+function findNamedRecipes(question) {
+  if (!question) return [];
+
+  const q = question.toLowerCase();
+
+  // Simple: match any recipe whose name appears as a substring in the question
+  const matches = MILK_HONEY_RECIPES.filter((r) => {
+    if (!r.name) return false;
+    const name = r.name.toLowerCase();
+    return q.includes(name);
+  });
+
+  return matches;
+}
+
+// -----------------------------
+// Netlify handler
+// -----------------------------
 exports.handler = async function handler(event, context) {
   // Only allow POST
   if (event.httpMethod !== "POST") {
@@ -131,10 +158,50 @@ exports.handler = async function handler(event, context) {
   }
 
   const question = body.question || "";
-  const recipes = Array.isArray(body.recipes) ? body.recipes : [];
+  const clientSubset = Array.isArray(body.recipes) ? body.recipes : [];
 
-  // Build compact recipe context
-  const recipeContext = recipes
+  // 1) HARD LOOKUP: if question clearly references an existing drink name,
+  // return that spec exactly from MILK_HONEY_RECIPES and skip OpenAI.
+  const directMatches = findNamedRecipes(question);
+
+  if (directMatches.length === 1) {
+    const r = directMatches[0];
+
+    const payload = {
+      summary: `Here’s the Milk & Honey spec for the ${r.name}.`,
+      warnings: [],
+      recipes: [
+        {
+          name: r.name,
+          description:
+            r.description ||
+            "Straight from Milk & Honey, copied exactly: ingredients, amounts, glass, method, ice, and garnish.",
+          ingredients: r.ingredients || [],
+          glass: r.glass || "",
+          method: r.method || "",
+          ice: r.ice || "",
+          garnish: r.garnish || "",
+          notes: r.notes || "",
+        },
+      ],
+    };
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        structured: payload,
+        answer: JSON.stringify(payload),
+      }),
+    };
+  }
+
+  // 2) If multiple name matches, we still go to the model but make sure it
+  // sees all of them explicitly.
+  // Build recipe context: prefer the subset from the client; if empty, use full DB.
+  const baseRecipes =
+    clientSubset && clientSubset.length > 0 ? clientSubset : MILK_HONEY_RECIPES;
+
+  const recipeContext = baseRecipes
     .map((r) => {
       const ing = (r.ingredients || [])
         .map((i) => `${i.amount} ${i.ingredient}`)
