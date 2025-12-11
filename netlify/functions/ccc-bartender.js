@@ -7,7 +7,7 @@ You are called by a front-end that:
   - style: "Light and Refreshing" or "Spirit Forward"
   - icePreference: "With Ice" or "No Ice"
   - spirit: one of:
-    - Clear Spirits: Vodka, Gin, Pisco, Cachaça
+    - Clear Spirits: Vodka, Gin, Pisco, Cachaça, Rum
     - Brown Spirits: Bourbon, Whiskey, Scotch, Apple Brandy, Cognac
     - Agave: Tequila, Mezcal
     - Low ABV: Sherry, Amaro, Vermouth
@@ -39,7 +39,7 @@ CORE RULES
   - "style: Light and Refreshing"
   - "style: Spirit Forward"
   - "icePreference: With Ice" or "icePreference: No Ice"
-  - "spirit: Gin", "spirit: Bourbon", "spirit: Sherry", etc.
+  - "spirit: Gin", "spirit: Bourbon", "spirit: Sherry", "spirit: Rum", etc.
 - When these are present, treat them as HARD FILTERS:
   - style:
     - "Light and Refreshing" → favor shaken, citrusy, highball, spritzy, or tall.
@@ -47,12 +47,14 @@ CORE RULES
   - icePreference:
     - "With Ice" → favor recipes served over ice (rocks / Collins / highball).
     - "No Ice" → favor up / served without ice (Nick & Nora, coupe).
-  - spirit:
-    - "Vodka", "Gin", "Pisco", "Cachaça" → CLEAR SPIRITS lane.
+  - spirit (all are valid, including Rum):
+    - "Vodka", "Gin", "Pisco", "Cachaça", "Rum" → CLEAR / CANE SPIRITS lane.
     - "Bourbon", "Whiskey", "Scotch", "Apple Brandy", "Cognac" → BROWN SPIRITS lane.
     - "Tequila", "Mezcal" → AGAVE lane.
-    - "Sherry", "Amaro", "Vermouth" → LOW ABV lane (prioritize lower ABV, fortified-wine or liqueur-forward cocktails).
-- Your goal: pick 1–3 Milk & Honey recipes that best fit those filters and explain why in a short summary.
+    - "Sherry", "Amaro", "Vermouth" → LOW ABV lane (prioritize lower-ABV, fortified-wine or liqueur-forward cocktails).
+- If the data subset contains only a few rum recipes:
+  - Use true rum specs first.
+  - If you have to pivot to a non-rum option, keep it in the same lane (e.g. other cane-based or clear spirits) and EXPLAIN that clearly in "warnings".
 
 4. NUMBER OF COCKTAILS
 - When the user is using the wizard (“light vs spirit forward, ice, spirit choice”), you MUST return exactly 3 cocktail options when possible.
@@ -100,107 +102,3 @@ The JSON must have this shape:
 
 Remember: your entire response MUST be valid JSON only, with no additional commentary.
 `;
-
-exports.handler = async (event, context) => {
-  // Only allow POST
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: "Method not allowed" }),
-    };
-  }
-
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    console.error("CCC Bar Bot: Missing OPENAI_API_KEY");
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Missing OPENAI_API_KEY env var" }),
-    };
-  }
-
-  // Parse inbound body
-  let body;
-  try {
-    body = JSON.parse(event.body || "{}");
-  } catch (err) {
-    console.error("CCC Bar Bot: Failed to parse request body", err);
-    body = {};
-  }
-
-  const question = body.question || "";
-  const recipes = Array.isArray(body.recipes) ? body.recipes : [];
-
-  // Build compact recipe context from the subset sent by the browser
-  const recipeContext = recipes
-    .map((r) => {
-      const ing = (r.ingredients || [])
-        .map((i) => `${i.amount} ${i.ingredient}`)
-        .join(", ");
-      return `Name: ${r.name}
-Base/Category: ${r.category || ""} · Glass: ${r.glass || ""} · Method: ${r.method || ""}
-Ingredients: ${ing}
-Ice: ${r.ice || "-"} · Garnish: ${r.garnish || "-"}
-`;
-    })
-    .join("\n---\n");
-
-  const messages = [
-    { role: "system", content: SYSTEM_PROMPT },
-    {
-      role: "user",
-      content:
-        `Here is a subset of Milk & Honey recipes you may rely on:\n\n` +
-        recipeContext +
-        `\n\nUser question: ${question}`,
-    },
-  ];
-
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        messages,
-        temperature: 0.5,
-      }),
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("CCC Bar Bot: OpenAI error response:", text);
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: "OpenAI request failed" }),
-      };
-    }
-
-    const data = await response.json();
-    const raw = data.choices?.[0]?.message?.content || "";
-
-    let structured = null;
-    try {
-      structured = JSON.parse(raw);
-    } catch (err) {
-      console.error("CCC Bar Bot: Failed to parse model JSON:", err, "Raw content:", raw);
-    }
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        structured,
-        answer: raw, // keep raw for debugging / fallback
-      }),
-    };
-  } catch (err) {
-    console.error("CCC Bar Bot: Server error:", err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Server error" }),
-    };
-  }
-};
