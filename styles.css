@@ -832,6 +832,230 @@ body.theme-platinum .bartender-avatar {
   flex-wrap: wrap;
   gap: 6px;
 }
+/* =========================
+   BAR BOT – WIZARD CTA
+   ========================= */
+
+.wizard-submit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.wizard-submit-btn {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 6px 16px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: linear-gradient(
+    120deg,
+    var(--accent-neon-pink),
+    var(--accent-gold-1)
+  );
+  color: #05010f;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.9);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.wizard-submit-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  box-shadow: none;
+}
+
+.wizard-submit-btn:not(:disabled):hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.9);
+}
+
+/* Hint line under the wizard */
+.bartender-wizard-hint {
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+
+/* =========================
+   BAR BOT – RECIPE PANEL + CARDS
+   ========================= */
+
+.bartender-recipe-panel {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Single warning banner (e.g. “couldn’t find that spec”) */
+.recipe-warning {
+  padding: 6px 9px;
+  border-radius: 10px;
+  font-size: 0.74rem;
+  background: rgba(255, 215, 0, 0.06);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  color: #ffeeb3;
+}
+
+/* Card shell */
+.recipe-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.2fr);
+  gap: 10px;
+  padding: 10px 11px 9px;
+  border-radius: 14px;
+  background: radial-gradient(
+    circle at top left,
+    rgba(255, 255, 255, 0.04),
+    rgba(5, 5, 18, 0.98)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+/* Left side */
+.recipe-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recipe-header-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  align-items: center;
+}
+
+.recipe-name {
+  font-weight: 600;
+}
+
+.recipe-tag-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8f5ff;
+}
+
+.recipe-summary {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+/* Ingredients */
+.recipe-ingredients-title {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.recipe-ingredients {
+  list-style: none;
+  margin: 3px 0 0;
+  padding: 0;
+}
+
+.recipe-ingredients li {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.recipe-ingredients-amount {
+  min-width: 58px;
+  font-weight: 500;
+}
+
+.recipe-ingredients-ingredient {
+  color: #f5f1ff;
+}
+
+/* Right side meta */
+.recipe-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recipe-meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.recipe-meta-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+.recipe-meta-value {
+  font-size: 0.78rem;
+}
+
+.recipe-notes {
+  margin: 4px 0 0;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+/* Copy spec button row */
+.recipe-actions {
+  margin-top: 6px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.recipe-copy-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(
+    120deg,
+    var(--accent-neon-pink),
+    var(--accent-gold-1)
+  );
+  color: #05010f;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.recipe-copy-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.85);
+}
+
+.recipe-copy-btn.is-copied {
+  opacity: 0.85;
+}
+
+/* Mobile: stack card columns vertically */
+@media (max-width: 768px) {
+  .recipe-card {
+    grid-template-columns: 1fr;
+  }
+}
 
 .wizard-option {
   position: relative;
