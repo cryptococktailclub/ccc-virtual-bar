@@ -431,188 +431,18 @@ function initBarBot() {
   const formEl = document.getElementById("bartenderForm");
   const inputEl = document.getElementById("bartenderInput");
   const recipePanel = document.getElementById("bartenderRecipePanel");
+  const wizardEl = document.getElementById("bartenderWizard");
+  const wizardSubmit = document.getElementById("bartenderWizardSubmit");
 
   if (!messagesEl || !formEl || !inputEl) {
     console.warn("CCC: Bar Bot elements missing; skipping AI bartender wiring.");
     return;
   }
 
-  // --------------------------
-  // Guided preference wizard
-  // --------------------------
-  const shellEl = messagesEl.parentElement; // expected .bartender-shell
-  const wizardState = {
-    style: null,
-    ice: null,
-    spirit: null,
-  };
-  let wizardSubmitBtn = null;
-
-  if (shellEl) {
-    const wizard = document.createElement("div");
-    wizard.className = "bartender-wizard";
-
-    function makeQuestion(labelText) {
-      const wrap = document.createElement("div");
-      wrap.className = "wizard-question";
-
-      const label = document.createElement("span");
-      label.className = "wizard-label";
-      label.textContent = labelText;
-
-      const options = document.createElement("div");
-      options.className = "wizard-options";
-
-      wrap.appendChild(label);
-      wrap.appendChild(options);
-      return { wrap, options };
-    }
-
-    function makePill(groupKey, displayText) {
-      const pill = document.createElement("button");
-      pill.type = "button";
-      pill.className = "wizard-pill";
-      pill.textContent = displayText;
-      pill.dataset.group = groupKey;
-
-      pill.addEventListener("click", () => {
-        // Update state
-        wizardState[groupKey] = displayText;
-
-        // Clear selection in this group
-        const siblings = pill.parentElement.querySelectorAll(
-          `.wizard-pill[data-group="${groupKey}"]`
-        );
-        siblings.forEach((btn) => btn.classList.remove("is-selected"));
-
-        // Mark this one
-        pill.classList.add("is-selected");
-
-        updateWizardSubmit();
-      });
-
-      return pill;
-    }
-
-    function updateWizardSubmit() {
-      if (!wizardSubmitBtn) return;
-      const ready =
-        !!wizardState.style && !!wizardState.ice && !!wizardState.spirit;
-      wizardSubmitBtn.disabled = !ready;
-    }
-
-    // Q1: Style
-    const q1 = makeQuestion(
-      "1. Style · Light & refreshing or spirit-forward?"
-    );
-    q1.options.appendChild(
-      makePill(
-        "style",
-        "Light & refreshing (shaken with juice)"
-      )
-    );
-    q1.options.appendChild(
-      makePill(
-        "style",
-        "Spirit-forward (stirred & strong)"
-      )
-    );
-    wizard.appendChild(q1.wrap);
-
-    // Q2: Ice
-    const q2 = makeQuestion("2. Ice · With ice or served up?");
-    q2.options.appendChild(makePill("ice", "With ice"));
-    q2.options.appendChild(makePill("ice", "No ice (served up)"));
-    wizard.appendChild(q2.wrap);
-
-    // Q3: Base spirit (grouped by style)
-const q3 = makeQuestion("3. Spirit preference (choose one)");
-
-// helper to add a group label row
-function addGroupLabel(text) {
-  const label = document.createElement("div");
-  label.className = "wizard-group-label";
-  label.textContent = text;
-  q3.options.appendChild(label);
-}
-
-// helper to add individual spirit pills
-function addSpiritPill(name) {
-  q3.options.appendChild(makePill("spirit", name));
-}
-
-/* Clear Spirits */
-addGroupLabel("Clear Spirits");
-["Vodka", "Gin", "Pisco", "Cachaça"].forEach(addSpiritPill);
-
-/* Brown Spirits */
-addGroupLabel("Brown Spirits");
-["Bourbon", "Whiskey", "Scotch", "Apple Brandy", "Cognac"].forEach(addSpiritPill);
-
-/* Agave */
-addGroupLabel("Agave");
-["Tequila", "Mezcal"].forEach(addSpiritPill);
-
-/* Low ABV */
-addGroupLabel("Low ABV");
-["Sherry", "Amaro", "Vermouth"].forEach(addSpiritPill);
-
-wizard.appendChild(q3.wrap);
-;
-
-    // Submit row
-    const submitRow = document.createElement("div");
-    submitRow.className = "wizard-submit-row";
-
-    wizardSubmitBtn = document.createElement("button");
-    wizardSubmitBtn.type = "button";
-    wizardSubmitBtn.className = "wizard-submit-btn";
-    wizardSubmitBtn.textContent = "Get 3 suggestions";
-    wizardSubmitBtn.disabled = true;
-
-    submitRow.appendChild(wizardSubmitBtn);
-    wizard.appendChild(submitRow);
-
-    // Insert wizard above chat thread
-    shellEl.insertBefore(wizard, messagesEl);
-
-    // When wizard is submitted, we generate a structured question string
-    wizardSubmitBtn.addEventListener("click", () => {
-      if (!wizardState.style || !wizardState.ice || !wizardState.spirit) {
-        return;
-      }
-
-      const prefsLine = `${wizardState.style} · ${wizardState.ice} · ${wizardState.spirit}`;
-
-      // This is both the visible "user message" and the instruction
-      const question = `
-Here are my preferences:
-- Style: ${wizardState.style}
-- Ice: ${wizardState.ice}
-- Base spirit: ${wizardState.spirit}
-
-Using only Milk & Honey recipes, recommend exactly 3 cocktails that best match this profile and return them in your structured JSON format (recipes array, warnings, summary).
-`.trim();
-
-      // Show a short, human-friendly line in the thread
-      appendMessage(`Preferences: ${prefsLine}`, false);
-
-      // Submit the detailed question via the normal form flow
-      inputEl.value = question;
-      formEl.dispatchEvent(
-        new Event("submit", { cancelable: true, bubbles: true })
-      );
-    });
-  }
-
-  // --------------------------
-  // Chat helpers (existing behaviour)
-  // --------------------------
+  // ---- Basic chat helpers ----
   function appendMessage(content, fromBot = false) {
     const row = document.createElement("div");
-    row.className = `bartender-message ${
-      fromBot ? "bartender-bot" : "bartender-user"
-    }`;
+    row.className = `bartender-message ${fromBot ? "bartender-bot" : "bartender-user"}`;
 
     if (fromBot) {
       const avatar = document.createElement("div");
@@ -647,36 +477,22 @@ Using only Milk & Honey recipes, recommend exactly 3 cocktails that best match t
     typingEl = null;
   }
 
-  // --------------------------
-  // Submit handler (reused by wizard + free text)
-  // --------------------------
-  formEl.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const question = inputEl.value.trim();
-    if (!question) return;
-
-    // If the message didn’t come from the wizard we still want it in the thread
-    if (!question.startsWith("Here are my preferences:")) {
-      appendMessage(question, false);
-    }
-
-    inputEl.value = "";
+  // ---- Core call to Netlify function ----
+  async function callBartender(question) {
     showTyping();
 
     try {
-      const res = await fetch(
-        BARTENDER_FUNCTION_PATH || "/.netlify/functions/ccc-bartender",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            question,
-            recipes: [], // server uses Milk & Honey DB
-          }),
-        }
-      );
+      const res = await fetch(BARTENDER_FUNCTION_PATH || "/.netlify/functions/ccc-bartender", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // We pass an empty subset; server has the full M&H DB
+        body: JSON.stringify({
+          question,
+          recipes: [],
+        }),
+      });
 
       hideTyping();
 
@@ -689,7 +505,7 @@ Using only Milk & Honey recipes, recommend exactly 3 cocktails that best match t
       const data = await res.json();
       let structured = data.structured || null;
 
-      // Fallback: some responses embed JSON in answer
+      // Fallback: try parse if the model sent raw JSON in answer
       if (!structured && typeof data.answer === "string") {
         try {
           structured = JSON.parse(data.answer);
@@ -698,17 +514,22 @@ Using only Milk & Honey recipes, recommend exactly 3 cocktails that best match t
         }
       }
 
-      // Render 3-rec list + full specs into recipe cards panel
-      renderRecipeCards(structured);
+      // Render recipe cards
+      if (typeof renderRecipeCards === "function") {
+        renderRecipeCards(structured);
+      } else if (recipePanel) {
+        // safety: clear if structured missing
+        recipePanel.innerHTML = "";
+      }
 
-      // Short summary into chat
+      // Also summarize in chat
       if (structured && structured.summary) {
         appendMessage(structured.summary, true);
       } else if (data.answer) {
         appendMessage(data.answer, true);
       } else {
         appendMessage(
-          "I had trouble formatting that recipe. Try asking in a slightly different way.",
+          "I had trouble formatting that recipe. Try asking in a slightly different way, or tweak your wizard choices.",
           true
         );
       }
@@ -720,7 +541,74 @@ Using only Milk & Honey recipes, recommend exactly 3 cocktails that best match t
         true
       );
     }
+  }
+
+  // ---- Free-text form submit ----
+  formEl.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const question = inputEl.value.trim();
+    if (!question) return;
+
+    appendMessage(question, false);
+    inputEl.value = "";
+    callBartender(question);
   });
+
+  // ---- Wizard wiring ----
+  if (wizardEl && wizardSubmit) {
+    const state = {
+      style: null,
+      icePreference: null,
+      spirit: null,
+    };
+
+    // Click-to-select options
+    wizardEl.querySelectorAll(".wizard-options").forEach((groupEl) => {
+      const key = groupEl.dataset.wizardKey;
+      if (!key) return;
+
+      groupEl.querySelectorAll(".wizard-option").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const value = btn.dataset.value;
+          if (!value) return;
+
+          // Clear selection within this group (or sub-group)
+          groupEl.querySelectorAll(".wizard-option").forEach((b) => {
+            b.classList.toggle("is-selected", b === btn);
+          });
+
+          state[key] = value;
+        });
+      });
+    });
+
+    wizardSubmit.addEventListener("click", () => {
+      const { style, icePreference, spirit } = state;
+
+      if (!style || !icePreference || !spirit) {
+        appendMessage(
+          "Pick a style, ice preference, and base spirit first so I can narrow it down.",
+          true
+        );
+        return;
+      }
+
+      // Display what the guest chose in the chat
+      appendMessage(
+        `Style: <strong>${style}</strong> · <strong>${icePreference}</strong> · <strong>${spirit}</strong>. ` +
+          `Recommend 3 Milk &amp; Honey cocktails that fit this brief.`,
+        false
+      );
+
+      // Encode the wizard choices in the question string,
+      // exactly as the backend SYSTEM_PROMPT expects.
+      const wizardQuestion =
+        `Wizard selection | style: ${style} | icePreference: ${icePreference} | spirit: ${spirit}. ` +
+        `Recommend 3 Milk & Honey cocktails that fit this profile and return them in the structured JSON format.`;
+
+      callBartender(wizardQuestion);
+    });
+  }
 }
 
 // ==========================
