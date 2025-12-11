@@ -188,8 +188,22 @@
         </div>
       </div>
     </div>
+<div class="recipe-panel" id="bartenderRecipePanel">
+    <!-- JS will inject .recipe-card elements here -->
+  </div>
 
-    <form id="bartenderForm" class="bartender-form">
+  <form id="bartenderForm" class="bartender-form">
+    <textarea
+      id="bartenderInput"
+      class="bartender-input"
+      rows="2"
+      placeholder="Ask the Bar Bot anything…"
+    ></textarea>
+    <button class="bartender-submit-btn" type="submit">Ask</button>
+  </form>
+</section>
+   
+  <form id="bartenderForm" class="bartender-form">
       <textarea
         id="bartenderInput"
         class="bartender-input"
