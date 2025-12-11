@@ -540,3 +540,131 @@ function initBarBot() {
     }
   });
 }
+// ==========================
+// RENDER RECIPE CARDS
+// ==========================
+
+function renderRecipeCards(structured) {
+  const panel = document.getElementById("bartenderRecipePanel");
+  if (!panel) return;
+
+  // Clear old cards
+  panel.innerHTML = "";
+
+  if (!structured) {
+    return;
+  }
+
+  const { recipes, warnings } = structured;
+
+  // Optional warning banner at the top (e.g. drink not found)
+  if (Array.isArray(warnings) && warnings.length) {
+    const warnDiv = document.createElement("div");
+    warnDiv.className = "recipe-warning";
+    warnDiv.textContent = warnings.join(" ");
+    panel.appendChild(warnDiv);
+  }
+
+  if (!Array.isArray(recipes) || recipes.length === 0) {
+    return;
+  }
+
+  recipes.forEach((r) => {
+    const card = document.createElement("div");
+    card.className = "recipe-card";
+
+    // LEFT SIDE
+    const main = document.createElement("div");
+    main.className = "recipe-main";
+
+    const headerRow = document.createElement("div");
+    headerRow.className = "recipe-header-row";
+
+    const nameEl = document.createElement("div");
+    nameEl.className = "recipe-name";
+    nameEl.textContent = r.name || "Untitled Cocktail";
+
+    const tagEl = document.createElement("div");
+    tagEl.className = "recipe-tag-pill";
+    tagEl.textContent = "Milk & Honey Spec";
+
+    headerRow.appendChild(nameEl);
+    headerRow.appendChild(tagEl);
+    main.appendChild(headerRow);
+
+    if (r.description) {
+      const summaryEl = document.createElement("p");
+      summaryEl.className = "recipe-summary";
+      summaryEl.textContent = r.description;
+      main.appendChild(summaryEl);
+    }
+
+    // Ingredients
+    const ingTitle = document.createElement("div");
+    ingTitle.className = "recipe-ingredients-title";
+    ingTitle.textContent = "Ingredients";
+    main.appendChild(ingTitle);
+
+    const ingList = document.createElement("ul");
+    ingList.className = "recipe-ingredients";
+
+    if (Array.isArray(r.ingredients)) {
+      r.ingredients.forEach((ing) => {
+        const li = document.createElement("li");
+
+        const amt = document.createElement("span");
+        amt.className = "recipe-ingredients-amount";
+        amt.textContent = ing.amount || "";
+
+        const ingName = document.createElement("span");
+        ingName.className = "recipe-ingredients-ingredient";
+        ingName.textContent = ing.ingredient || "";
+
+        li.appendChild(amt);
+        li.appendChild(ingName);
+        ingList.appendChild(li);
+      });
+    }
+
+    main.appendChild(ingList);
+
+    // RIGHT SIDE
+    const meta = document.createElement("div");
+    meta.className = "recipe-meta";
+
+    function addMetaRow(label, value) {
+      if (!value) return;
+      const row = document.createElement("div");
+      row.className = "recipe-meta-row";
+
+      const lbl = document.createElement("span");
+      lbl.className = "recipe-meta-label";
+      lbl.textContent = label;
+
+      const val = document.createElement("span");
+      val.className = "recipe-meta-value";
+      val.textContent = value;
+
+      row.appendChild(lbl);
+      row.appendChild(val);
+      meta.appendChild(row);
+    }
+
+    addMetaRow("Glass", r.glass);
+    addMetaRow("Method", r.method);
+    addMetaRow("Ice", r.ice);
+    addMetaRow("Garnish", r.garnish);
+
+    if (r.notes) {
+      const notesEl = document.createElement("p");
+      notesEl.className = "recipe-notes";
+      notesEl.textContent = r.notes;
+      meta.appendChild(notesEl);
+    }
+
+    // Assemble card
+    card.appendChild(main);
+    card.appendChild(meta);
+    panel.appendChild(card);
+  });
+}
