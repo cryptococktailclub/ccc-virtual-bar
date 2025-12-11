@@ -176,10 +176,14 @@
   </section>
 
   <!-- BAR BOT -->
-  <section class="section card" id="bar-bot">
-    <h2 class="section-title">Bar Bot</h2>
-    <p class="section-subtitle">Ask for a classic, a riff, or a recipe based on what you’ve got.</p>
+<section class="section card" id="bar-bot">
+  <h2 class="section-title">Bar Bot</h2>
+  <p class="section-subtitle">
+    Ask for a classic, a riff, or a recipe based on what you’ve got.
+  </p>
 
+  <!-- Chat thread -->
+  <div class="bartender-shell">
     <div class="bartender-messages" id="bartenderMessages">
       <div class="bartender-message bartender-bot">
         <div class="bartender-avatar"></div>
@@ -188,22 +192,14 @@
         </div>
       </div>
     </div>
-<div class="recipe-panel" id="bartenderRecipePanel">
-    <!-- JS will inject .recipe-card elements here -->
-  </div>
 
-  <form id="bartenderForm" class="bartender-form">
-    <textarea
-      id="bartenderInput"
-      class="bartender-input"
-      rows="2"
-      placeholder="Ask the Bar Bot anything…"
-    ></textarea>
-    <button class="bartender-submit-btn" type="submit">Ask</button>
-  </form>
-</section>
-   
-  <form id="bartenderForm" class="bartender-form">
+    <!-- Recipe cards (Milk & Honey specs) -->
+    <div class="bartender-recipes" id="bartenderRecipePanel">
+      <!-- JS will inject .recipe-card elements here -->
+    </div>
+
+    <!-- Input row -->
+    <form id="bartenderForm" class="bartender-form">
       <textarea
         id="bartenderInput"
         class="bartender-input"
@@ -212,7 +208,8 @@
       ></textarea>
       <button class="bartender-submit-btn" type="submit">Ask</button>
     </form>
-  </section>
+  </div>
+</section>
 
   <!-- BAR TV -->
   <section class="section card" id="bar-tv">
