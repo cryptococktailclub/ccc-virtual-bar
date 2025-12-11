@@ -102,3 +102,116 @@ The JSON must have this shape:
 
 Remember: your entire response MUST be valid JSON only, with no additional commentary.
 `;
+// CommonJS export that Netlify/Lambda expects
+exports.handler = async function handler(event, context) {
+  // Only allow POST
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Method not allowed" }),
+    };
+  }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    console.error("CCC Bar Bot: Missing OPENAI_API_KEY");
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Missing OPENAI_API_KEY env var" }),
+    };
+  }
+
+  // Parse inbound body
+  let body;
+  try {
+    body = JSON.parse(event.body || "{}");
+  } catch (err) {
+    console.error("CCC Bar Bot: Failed to parse request body", err);
+    body = {};
+  }
+
+  const question = body.question || "";
+  const recipes = Array.isArray(body.recipes) ? body.recipes : [];
+
+  // Build compact recipe context
+  const recipeContext = recipes
+    .map((r) => {
+      const ing = (r.ingredients || [])
+        .map((i) => `${i.amount} ${i.ingredient}`)
+        .join(", ");
+      return `Name: ${r.name}
+Base/Category: ${r.category || ""} · Glass: ${r.glass || ""} · Method: ${r.method || ""}
+Ingredients: ${ing}
+Ice: ${r.ice || "-"} · Garnish: ${r.garnish || "-"}
+`;
+    })
+    .join("\n---\n");
+
+  const messages = [
+    { role: "system", content: SYSTEM_PROMPT },
+    {
+      role: "user",
+      content:
+        `Here is a subset of Milk & Honey recipes you may rely on:\n\n` +
+        recipeContext +
+        `\n\nUser question: ${question}`,
+    },
+  ];
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4.1-mini",
+        messages,
+        temperature: 0.4,
+        response_format: { type: "json_object" }, // force JSON
+      }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("CCC Bar Bot: OpenAI error response:", text);
+
+      let payload;
+      try {
+        payload = JSON.parse(text);
+      } catch {
+        payload = { error: "OpenAI request failed", raw: text };
+      }
+
+      return {
+        statusCode: 500,
+        body: JSON.stringify(payload),
+      };
+    }
+
+    const data = await response.json();
+    const raw = data.choices?.[0]?.message?.content || "{}";
+
+    let structured = null;
+    try {
+      structured = JSON.parse(raw);
+    } catch (err) {
+      console.error("CCC Bar Bot: Failed to parse model JSON:", err, "Raw content:", raw);
+    }
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        structured,
+        answer: raw,
+      }),
+    };
+  } catch (err) {
+    console.error("CCC Bar Bot: Server error:", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Server error" }),
+    };
+  }
+};
