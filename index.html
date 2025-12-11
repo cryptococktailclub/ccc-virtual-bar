@@ -175,130 +175,130 @@
     </div>
   </section>
 
-   <!-- BAR BOT -->
-  <section class="section card" id="bar-bot">
-    <h2 class="section-title">Bar Bot</h2>
-    <p class="section-subtitle">
-      Ask for a classic, a riff, or let the wizard narrow down your perfect pour.
-    </p>
+ <!-- BAR BOT -->
+<section class="section card" id="bar-bot">
+  <h2 class="section-title">Bar Bot</h2>
+  <p class="section-subtitle">
+    Tell the bartender your vibe and Bar Bot will pull three drinks from the back bar.
+  </p>
 
-    <!-- PREFERENCE WIZARD (single instance) -->
-    <div class="bartender-wizard" id="bartenderWizard">
-      <!-- Q1: Style -->
-      <div class="wizard-question">
-        <span class="wizard-label">1. Style</span>
-        <div class="wizard-options" data-question="style">
-          <button type="button" class="wizard-option" data-value="light_refreshing">
-            Light &amp; Refreshing
-            <span class="wizard-option-sub">Shaken, with juice</span>
-          </button>
-          <button type="button" class="wizard-option" data-value="spirit_forward">
-            Spirit Forward
-            <span class="wizard-option-sub">Stirred &amp; strong</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Q2: Ice -->
-      <div class="wizard-question">
-        <span class="wizard-label">2. Ice</span>
-        <div class="wizard-options" data-question="ice">
-          <button type="button" class="wizard-option" data-value="on_ice">
-            On Ice
-            <span class="wizard-option-sub">Built over rocks</span>
-          </button>
-          <button type="button" class="wizard-option" data-value="no_ice">
-            No Ice
-            <span class="wizard-option-sub">Up / served without ice</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Q3: Spirit preference (grouped) -->
-      <div class="wizard-question">
-        <span class="wizard-label">3. Spirit Preference</span>
-        <div class="wizard-groups">
-          <!-- Group 1: Agave & Cane -->
-          <div class="wizard-group">
-            <div class="wizard-group-title">Agave &amp; Cane</div>
-            <div class="wizard-options" data-question="spirits">
-              <button type="button" class="wizard-option" data-value="tequila">Tequila</button>
-              <button type="button" class="wizard-option" data-value="mezcal">Mezcal</button>
-              <button type="button" class="wizard-option" data-value="rum">Rum</button>
-              <button type="button" class="wizard-option" data-value="cachaca">Cachaça</button>
-              <button type="button" class="wizard-option" data-value="pisco">Pisco</button>
-            </div>
-          </div>
-
-          <!-- Group 2: Whiskey & Brandy -->
-          <div class="wizard-group">
-            <div class="wizard-group-title">Whiskey &amp; Brandy</div>
-            <div class="wizard-options" data-question="spirits">
-              <button type="button" class="wizard-option" data-value="bourbon">Bourbon</button>
-              <button type="button" class="wizard-option" data-value="rye_whiskey">Rye / Whiskey</button>
-              <button type="button" class="wizard-option" data-value="scotch">Scotch</button>
-              <button type="button" class="wizard-option" data-value="cognac">Cognac</button>
-              <button type="button" class="wizard-option" data-value="apple_brandy">Apple Brandy</button>
-            </div>
-          </div>
-
-          <!-- Group 3: Clear & Low ABV -->
-          <div class="wizard-group">
-            <div class="wizard-group-title">Clear &amp; Low ABV</div>
-            <div class="wizard-options" data-question="spirits">
-              <button type="button" class="wizard-option" data-value="gin">Gin</button>
-              <button type="button" class="wizard-option" data-value="vodka">Vodka</button>
-              <button type="button" class="wizard-option" data-value="sherry">Sherry</button>
-              <button type="button" class="wizard-option" data-value="amaro">Amaro</button>
-              <button type="button" class="wizard-option" data-value="vermouth">Vermouth</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Wizard CTA -->
-      <div class="wizard-submit-row">
-        <button
-          type="button"
-          class="wizard-submit-btn bartender-wizard-cta"
-          id="wizardRecommendBtn"
-          data-wizard-submit="true"
-          disabled
-        >
-          Recommend 3 cocktails
+  <!-- PREFERENCE WIZARD -->
+  <div class="bartender-wizard" id="bartenderWizard">
+    <!-- Q1: Style -->
+    <div class="wizard-question">
+      <span class="wizard-label">Step 1 · Vibe</span>
+      <div class="wizard-options" data-question="style">
+        <button type="button" class="wizard-option" data-value="light_refreshing">
+          Light &amp; Refreshing
+          <span class="wizard-option-sub">Bright, juicy, easygoing</span>
+        </button>
+        <button type="button" class="wizard-option" data-value="spirit_forward">
+          Spirit Forward
+          <span class="wizard-option-sub">Bold, boozy, slow sipper</span>
         </button>
       </div>
+    </div>
 
-      <div class="bartender-wizard-hint">
-        You can use the wizard, type a specific drink (“Gold Rush spec”), or ask for a style
-        (“spirit-forward tequila, up”).
+    <!-- Q2: Ice -->
+    <div class="wizard-question">
+      <span class="wizard-label">Step 2 · Served How</span>
+      <div class="wizard-options" data-question="ice">
+        <button type="button" class="wizard-option" data-value="on_ice">
+          On Ice
+          <span class="wizard-option-sub">Built over a rock</span>
+        </button>
+        <button type="button" class="wizard-option" data-value="no_ice">
+          No Ice
+          <span class="wizard-option-sub">Served up, no ice</span>
+        </button>
       </div>
     </div>
 
-    <!-- RECIPE PANEL (single dedicated container) -->
-    <div class="bartender-recipe-panel" id="bartenderRecipePanel"></div>
+    <!-- Q3: Spirit preference (grouped) -->
+    <div class="wizard-question">
+      <span class="wizard-label">Step 3 · Base Spirit</span>
 
-    <!-- CHAT THREAD (single instance) -->
-    <div class="bartender-messages" id="bartenderMessages">
-      <div class="bartender-message bartender-bot">
-        <div class="bartender-avatar"></div>
-        <div class="bartender-text">
-          Welcome back. What are you drinking tonight?
+      <div class="wizard-groups">
+        <!-- Group 1: Agave & Cane -->
+        <div class="wizard-group">
+          <div class="wizard-group-title">Agave &amp; Cane</div>
+          <div class="wizard-options" data-question="spirits">
+            <button type="button" class="wizard-option" data-value="tequila">Tequila</button>
+            <button type="button" class="wizard-option" data-value="mezcal">Mezcal</button>
+            <button type="button" class="wizard-option" data-value="rum">Rum</button>
+            <button type="button" class="wizard-option" data-value="cachaca">Cachaça</button>
+            <button type="button" class="wizard-option" data-value="pisco">Pisco</button>
+          </div>
+        </div>
+
+        <!-- Group 2: Whiskey & Brandy -->
+        <div class="wizard-group">
+          <div class="wizard-group-title">Whiskey &amp; Brandy</div>
+          <div class="wizard-options" data-question="spirits">
+            <button type="button" class="wizard-option" data-value="bourbon">Bourbon</button>
+            <button type="button" class="wizard-option" data-value="rye_whiskey">Rye / Whiskey</button>
+            <button type="button" class="wizard-option" data-value="scotch">Scotch</button>
+            <button type="button" class="wizard-option" data-value="cognac">Cognac</button>
+            <button type="button" class="wizard-option" data-value="apple_brandy">Apple Brandy</button>
+          </div>
+        </div>
+
+        <!-- Group 3: Clear & Low ABV -->
+        <div class="wizard-group">
+          <div class="wizard-group-title">Clear &amp; Low ABV</div>
+          <div class="wizard-options" data-question="spirits">
+            <button type="button" class="wizard-option" data-value="gin">Gin</button>
+            <button type="button" class="wizard-option" data-value="vodka">Vodka</button>
+            <button type="button" class="wizard-option" data-value="sherry">Sherry</button>
+            <button type="button" class="wizard-option" data-value="amaro">Amaro</button>
+            <button type="button" class="wizard-option" data-value="vermouth">Vermouth</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- INPUT FORM (single instance) -->
-    <form id="bartenderForm" class="bartender-form">
-      <textarea
-        id="bartenderInput"
-        class="bartender-input"
-        rows="2"
-        placeholder="Ask the Bar Bot for a classic, a riff, or a custom build…"
-      ></textarea>
-      <button class="bartender-submit-btn" type="submit">Ask</button>
-    </form>
-  </section>
+    <!-- Wizard CTA -->
+    <div class="wizard-submit-row">
+      <button
+        type="button"
+        class="wizard-submit-btn bartender-wizard-cta"
+        id="wizardRecommendBtn"
+        disabled
+      >
+        Show me 3 cocktails
+      </button>
+    </div>
+
+    <div class="bartender-wizard-hint">
+      Or just type to the bar: “Gold Rush spec” or “spirit-forward mezcal, up” and Bar Bot will build it.
+    </div>
+  </div>
+
+  <!-- RECIPE PANEL -->
+  <div class="bartender-recipe-panel" id="bartenderRecipePanel"></div>
+
+  <!-- CHAT THREAD -->
+  <div class="bartender-messages" id="bartenderMessages">
+    <div class="bartender-message bartender-bot">
+      <div class="bartender-avatar"></div>
+      <div class="bartender-text">
+        Welcome back. What are you in the mood for tonight?
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUT FORM -->
+  <form id="bartenderForm" class="bartender-form">
+    <textarea
+      id="bartenderInput"
+      class="bartender-input"
+      rows="2"
+      placeholder="Ask for a classic, a riff, or describe the drink you’re chasing…"
+    ></textarea>
+    <button class="bartender-submit-btn" type="submit">Ask</button>
+  </form>
+</section>
+
 
   <!-- BAR TV -->
   <section class="section card" id="bar-tv">
