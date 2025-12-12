@@ -225,51 +225,72 @@ function recipeMatchesWizard(r, prefs) {
 }
 
 
-function recommendFromWizard(prefs) {
-  const matches = [];
-  for (const r of MILK_HONEY_RECIPES) {
-    if (recipeMatchesWizard(r, prefs)) matches.push(r);
-    if (matches.length >= 12) break; // cap candidates
+function stableSeedFromPrefs(prefs, sessionId = "") {
+  const key = JSON.stringify({
+    style: prefs.style || "",
+    ice: prefs.ice || "",
+    spirits: Array.isArray(prefs.spirits) ? prefs.spirits.slice().sort() : [],
+    session: sessionId || "",
+  });
+  // simple hash
+  let h = 2166136261;
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 16777619);
   }
-
-  // If fewer than 3, relax filters in a controlled way
-  const warnings = [];
-  let results = matches;
-
-  if (results.length < 3) {
-    // Relax ice first
-    warnings.push("Could not find 3 perfect matches; relaxing ice preference for closest fits.");
-    const relaxed = MILK_HONEY_RECIPES.filter((r) => {
-      const p = { ...prefs, ice: null };
-      return recipeMatchesWizard(r, p);
-    });
-    results = relaxed;
-  }
-
-  if (results.length < 3) {
-    // Relax style next
-    warnings.push("Still short on matches; relaxing style for closest fits.");
-    const relaxed = MILK_HONEY_RECIPES.filter((r) => {
-      const p = { ...prefs, style: null, ice: prefs.ice || null };
-      return recipeMatchesWizard(r, p);
-    });
-    results = relaxed;
-  }
-
-  // Take top 3 distinct by name
-  const top = [];
-  const seen = new Set();
-  for (const r of results) {
-    if (!r || !r.name) continue;
-    const key = norm(r.name);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    top.push(r);
-    if (top.length === 3) break;
-  }
-
-  return { top, warnings };
+  return h >>> 0;
 }
+
+function seededSort(recipes, seed) {
+  // Schwartzian transform: compute a seeded score per recipe, then sort by it
+  return recipes
+    .map((r) => {
+      const n = norm(r.name || "");
+      let x = seed;
+      for (let i = 0; i < n.length; i++) {
+        x ^= n.charCodeAt(i);
+        x = Math.imul(x, 2654435761);
+      }
+      // ensure unsigned
+      const score = x >>> 0;
+      return { r, score };
+    })
+    .sort((a, b) => a.score - b.score)
+    .map((o) => o.r);
+}
+
+function recommendFromWizard(prefs, { excludeNames = [], index = 0, sessionId = "" } = {}) {
+  const warnings = [];
+
+  // 1) Collect full match set (no early break)
+  let results = MILK_HONEY_RECIPES.filter((r) => recipeMatchesWizard(r, prefs));
+
+  // Controlled relax (same as you had, but without shrinking variety)
+  if (results.length < 3) {
+    warnings.push("Could not find enough perfect matches; relaxing ice preference for closest fits.");
+    results = MILK_HONEY_RECIPES.filter((r) => recipeMatchesWizard(r, { ...prefs, ice: null }));
+  }
+  if (results.length < 3) {
+    warnings.push("Still short on matches; relaxing style for closest fits.");
+    results = MILK_HONEY_RECIPES.filter((r) =>
+      recipeMatchesWizard(r, { ...prefs, style: null, ice: prefs.ice || null })
+    );
+  }
+
+  // 2) Exclude previously served picks (by normalized name)
+  const excludeSet = new Set((excludeNames || []).map((n) => norm(n)));
+  results = results.filter((r) => r && r.name && !excludeSet.has(norm(r.name)));
+
+  // 3) Seeded rotation order (stable but not “same first 3”)
+  const seed = stableSeedFromPrefs(prefs, sessionId);
+  const ordered = seededSort(results, seed);
+
+  // 4) Pick one based on index
+  const pick = ordered.length ? ordered[Math.abs(index) % ordered.length] : null;
+
+  return { pick, warnings, total: ordered.length };
+}
+
 
 // ------------ Optional OpenAI fallback for generic Q&A ------------
 async function callOpenAI(question) {
