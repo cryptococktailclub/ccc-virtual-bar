@@ -881,6 +881,40 @@ body.theme-platinum .bartender-avatar {
   font-size: 0.72rem;
   color: var(--text-muted);
 }
+/* Wizard CTA row: left/right layout */
+.wizard-submit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Reusable CCC gradient pill button */
+.gradient-pill {
+  border-radius: 999px;
+  border: none;
+  padding: 10px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(120deg, var(--accent-neon-pink), var(--accent-gold-1));
+  color: #05010f;
+  box-shadow: 0 0 16px rgba(255, 20, 147, 0.4);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.gradient-pill:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.gradient-pill:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
 
 
 /* =========================
