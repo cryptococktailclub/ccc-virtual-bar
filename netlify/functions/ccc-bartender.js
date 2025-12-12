@@ -228,15 +228,16 @@ exports.handler = async (event) => {
       spirits: Array.isArray(wizardPrefs.spirits) ? wizardPrefs.spirits : [],
     };
 
-    const { top, warnings } = recommendFromWizard(prefs);
+    const first = top[0] || null;
 
-    const structured = {
-      summary: top.length
-        ? "Here are three Milk & Honey picks that fit your vibe. Choose one and I’ll pour the exact spec."
-        : "I couldn’t find a strong Milk & Honey match for those filters.",
-      warnings: warnings || [],
-      recipes: top.map((r) => toStructuredRecipe(r, "Recommended based on your wizard picks.")),
-    };
+const structured = {
+  summary: first
+    ? "Milk & Honey pick based on your wizard selections. Want another option? Hit Recommend again or ask for “another option”."
+    : "I couldn’t find a strong Milk & Honey match for those filters.",
+  warnings: warnings || [],
+  recipes: first ? [toStructuredRecipe(first, "Recommended based on your wizard picks.")] : [],
+};
+
 
     return jsonResponse(structured);
   }
