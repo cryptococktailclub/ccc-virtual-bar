@@ -788,7 +788,7 @@ if (wizardEl) {
     };
   }
 }
-
+} // <-- closes initBarBot()
 
 // ==========================
 // RENDER RECIPE CARDS
