@@ -667,41 +667,46 @@ function initBarBot() {
       return `Recommend three cocktails that are ${parts.join(", ")}.`;
     }
 
-        if (wizardSubmitBtn) {
-      wizardSubmitBtn.addEventListener("click", () => {
-        if (wizardSubmitBtn.disabled) return;
+     if (wizardSubmitBtn) {
+  wizardSubmitBtn.addEventListener("click", () => {
+    if (wizardSubmitBtn.disabled) return;
 
-        // Pick a primary spirit for backend wizard filtering
-        const primarySpirit =
-          Array.isArray(wizardState.spirits) && wizardState.spirits.length
-            ? wizardState.spirits[0]
-            : "";
+    // Choose a primary spirit for hard filtering (backend expects a single spirit)
+    const primarySpirit =
+      Array.isArray(wizardState.spirits) && wizardState.spirits.length
+        ? wizardState.spirits[0]
+        : "";
 
-        // Build backend-compatible wizard text markers (backend parses these reliably)
-        const questionText =
-          `style: ${wizardState.style === "light_refreshing" ? "Light and Refreshing" : "Spirit Forward"}\n` +
-          `icePreference: ${wizardState.ice === "no_ice" ? "No Ice" : "With Ice"}\n` +
-          `spirit: ${primarySpirit}`;
+    // 1) Friendly text for the chat bubble (on-brand / human readable)
+    const friendlyText = buildWizardQuestionText();
 
-        const payload = {
-          mode: "wizard",
-          question: questionText,
+    // 2) Strict markers for the backend (reliable parsing)
+    const markerText =
+      `style: ${wizardState.style === "light_refreshing" ? "Light and Refreshing" : "Spirit Forward"}\n` +
+      `icePreference: ${wizardState.ice === "no_ice" ? "No Ice" : "With Ice"}\n` +
+      `spirit: ${primarySpirit}`;
 
-          // CRITICAL: backend expects this object + these key names
-          wizard: {
-            style: wizardState.style,          // "light_refreshing" | "spirit_forward"
-            icePreference: wizardState.ice,    // "on_ice" | "no_ice"
-            spirit: primarySpirit,             // e.g. "rum"
-          },
+    // 3) Send markers + wizard object to backend, but show friendly text in chat
+    const payload = {
+      mode: "wizard",
+      question: markerText,
 
-          // Optional: keep for UI/debugging; backend can ignore
-          wizard_preferences: { ...wizardState },
-        };
+      // Backend-canonical object
+      wizard: {
+        style: wizardState.style,          // "light_refreshing" | "spirit_forward"
+        icePreference: wizardState.ice,    // "on_ice" | "no_ice"
+        spirit: primarySpirit,             // e.g. "rum"
+      },
 
-        callBartenderAPI(payload, { showQuestionInChat: true });
-      });
-    }
+      // Optional: multi-select retained for future, backend may ignore
+      wizard_preferences: { ...wizardState },
+    };
 
+    // Show the nice summary in the thread, but don't duplicate the marker text
+    callBartenderAPI(payload, { showQuestionInChat: false });
+    appendMessage(friendlyText, false);
+  });
+}
 
     // Initial button state
     updateWizardCTA();
