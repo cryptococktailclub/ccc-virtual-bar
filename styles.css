@@ -915,6 +915,19 @@ body.theme-platinum .bartender-avatar {
   filter: none;
   box-shadow: none;
 }
+.wizard-submit-btn {
+  min-width: 120px;
+}
+
+.wizard-submit-btn:first-child {
+  /* Search */
+  background: var(--ccc-gradient);
+}
+
+.wizard-prev-btn,
+.wizard-next-btn {
+  background: rgba(255,255,255,0.06);
+}
 
 
 /* =========================
