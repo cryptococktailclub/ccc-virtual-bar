@@ -21,7 +21,8 @@ function loadRecipes() {
   return Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.recipes) ? parsed.recipes : []);
 }
 
-const MILK_HONEY_RECIPES = loadRecipes();
+const MILK_HONEY_RECIPES = require("./recipes.json");
+
 
 // ------------ Normalization helpers ------------
 function norm(str) {
