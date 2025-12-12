@@ -13,7 +13,7 @@ const path = require("path");
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 
 // ------------ Load recipes.json (bundled alongside this function) ------------
-function loadRecipes() {
+
   const recipesPath = path.join(__dirname, "recipes.json");
   const raw = fs.readFileSync(recipesPath, "utf8");
   const parsed = JSON.parse(raw);
@@ -198,8 +198,8 @@ function recipeMatchesWizard(r, prefs) {
 
   return true;
 }
+// ------------ Wizard filtering (no OpenAI) ------------
 
-// ------------ Netlify handler ------------
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return {
@@ -220,27 +220,29 @@ exports.handler = async (event) => {
   const question = String(body.question || "").trim();
   const wizardPrefs = body.wizard_preferences || {};
 
-  // 1) Wizard: deterministic recommendations only
-  if (mode === "wizard") {
-    const prefs = {
-      style: wizardPrefs.style || null,
-      ice: wizardPrefs.ice || null,
-      spirits: Array.isArray(wizardPrefs.spirits) ? wizardPrefs.spirits : [],
-    };
+ // 1) Wizard: deterministic recommendations only
+if (mode === "wizard") {
+  const prefs = {
+    style: wizardPrefs.style || null,
+    ice: wizardPrefs.ice || null,
+    spirits: Array.isArray(wizardPrefs.spirits) ? wizardPrefs.spirits : [],
+  };
 
-    const first = top[0] || null;
+  const { top, warnings } = recommendFromWizard(prefs);
 
-const structured = {
-  summary: first
-    ? "Milk & Honey pick based on your wizard selections. Want another option? Hit Recommend again or ask for “another option”."
-    : "I couldn’t find a strong Milk & Honey match for those filters.",
-  warnings: warnings || [],
-  recipes: first ? [toStructuredRecipe(first, "Recommended based on your wizard picks.")] : [],
-};
+  // One-at-a-time response (best pick)
+  const first = top[0] || null;
 
+  const structured = {
+    summary: first
+      ? "Milk & Honey pick based on your wizard selections. Want another option?"
+      : "I couldn’t find a strong Milk & Honey match for those filters.",
+    warnings: warnings || [],
+    recipes: first ? [toStructuredRecipe(first, "Recommended based on your wizard picks.")] : [],
+  };
 
-    return jsonResponse(structured);
-  }
+  return jsonResponse(structured);
+}
 
   // 2) Chat: if user asks for a specific drink spec, return exact recipe deterministically
   if (question) {
@@ -290,3 +292,82 @@ const structured = {
     200
   );
 };
+function wizardHaystack(r) {
+  const parts = [
+    r.name,
+    r.category,
+    r.baseSpirit,
+    r.spirit,
+    r.method,
+    r.ice,
+    ...(Array.isArray(r.ingredients) ? r.ingredients.map((i) => i.ingredient) : []),
+  ];
+  return norm(parts.filter(Boolean).join(" "));
+}
+
+function scoreWizardMatch(r, prefs) {
+  // Higher score = better match
+  let score = 0;
+  const h = wizardHaystack(r);
+  const m = norm(r.method);
+
+  // Prefer the requested spirit(s) explicitly appearing
+  if (Array.isArray(prefs.spirits) && prefs.spirits.length) {
+    for (const raw of prefs.spirits) {
+      const s = norm(raw);
+      if (!s) continue;
+
+      if (h.includes(s)) score += 20;
+
+      // spirit groups/synonyms
+      if ((s === "mezcal" || s === "tequila") && (h.includes("mezcal") || h.includes("tequila") || h.includes("agave"))) {
+        score += 10;
+      }
+      if (s === "rye_whiskey" && (h.includes("rye") || h.includes("whiskey"))) {
+        score += 8;
+      }
+      if (s === "cachaca" && (h.includes("cachaca") || h.includes("cacha a"))) {
+        score += 8;
+      }
+    }
+  }
+
+  // Prefer method alignment
+  if (prefs.style === "spirit_forward") {
+    if (m.includes("stir")) score += 12;
+    if (m.includes("shake")) score -= 6;
+  }
+  if (prefs.style === "light_refreshing") {
+    if (m.includes("shake") || m.includes("build") || m.includes("highball") || m.includes("swizzle")) score += 10;
+    if (m.includes("stir")) score -= 4;
+  }
+
+  // Prefer exact ice alignment
+  const ice = norm(r.ice);
+  if (prefs.ice === "no_ice" && (ice.includes("up") || ice.includes("none") || ice.includes("no ice"))) score += 6;
+  if (prefs.ice === "on_ice" && !(ice.includes("up") || ice.includes("none") || ice.includes("no ice"))) score += 6;
+
+  return score;
+}
+
+function recommendFromWizard(prefs) {
+  const warnings = [];
+
+  const matches = MILK_HONEY_RECIPES
+    .filter((r) => recipeMatchesWizard(r, prefs))
+    .map((r) => ({ r, score: scoreWizardMatch(r, prefs) }))
+    .sort((a, b) => b.score - a.score)
+    .map((x) => x.r);
+
+  // If nothing matched, return empty with a useful warning
+  if (!matches.length) {
+    const spiritNote =
+      Array.isArray(prefs.spirits) && prefs.spirits.length ? ` (${prefs.spirits.join(", ")})` : "";
+    warnings.push(
+      `No exact Milk & Honey matches for the current filters${spiritNote}. Try relaxing one constraint (ice or style).`
+    );
+  }
+
+  // Keep returning 3 internally so you can “next option” later; wizard handler can pick 1.
+  return { top: matches.slice(0, 10), warnings };
+}
