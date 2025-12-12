@@ -345,36 +345,57 @@ async function callOpenAI(question) {
 
 // ------------ Netlify handler ------------
 exports.handler = async (event) => {
+  // Only allow POST
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Method not allowed" }),
+    };
+  }
+
+  // Parse inbound JSON
+  let body = {};
+  try {
+    body = JSON.parse(event.body || "{}");
+  } catch (_) {
+    body = {};
+  }
+
+  const mode = String(body.mode || "chat");
+  const question = String(body.question || "").trim();
+  const wizardPrefs = body.wizard_preferences || {};
+
+  // 1) Wizard path: deterministic single-pick with rotation
   if (mode === "wizard") {
-  const prefs = {
-    style: wizardPrefs.style || null,
-    ice: wizardPrefs.ice || null,
-    spirits: Array.isArray(wizardPrefs.spirits) ? wizardPrefs.spirits : [],
-  };
+    const prefs = {
+      style: wizardPrefs.style || null,
+      ice: wizardPrefs.ice || null,
+      spirits: Array.isArray(wizardPrefs.spirits) ? wizardPrefs.spirits : [],
+    };
 
-  const wizardIndex = Number.isFinite(Number(body.wizard_index)) ? Number(body.wizard_index) : 0;
-  const exclude = Array.isArray(body.exclude) ? body.exclude : [];
-  const sessionId = String(body.session_id || "");
+    const wizardIndex = Number.isFinite(Number(body.wizard_index)) ? Number(body.wizard_index) : 0;
+    const exclude = Array.isArray(body.exclude) ? body.exclude : [];
+    const sessionId = String(body.session_id || "");
 
-  const { pick, warnings, total } = recommendFromWizard(prefs, {
-    excludeNames: exclude,
-    index: wizardIndex,
-    sessionId,
-  });
+    const { pick, warnings, total } = recommendFromWizard(prefs, {
+      excludeNames: exclude,
+      index: wizardIndex,
+      sessionId,
+    });
 
-  const structured = {
-    summary: pick
-      ? `Milk & Honey pick based on your selections (${wizardIndex + 1}/${Math.max(1, total)}). Want another option?`
-      : "I couldn’t find a strong Milk & Honey match for those filters.",
-    warnings: warnings || [],
-    recipes: pick ? [toStructuredRecipe(pick, "Recommended based on your wizard picks.")] : [],
-  };
+    const structured = {
+      summary: pick
+        ? `Milk & Honey pick based on your selections (${wizardIndex + 1}/${Math.max(1, total)}). Want another option?`
+        : "I couldn’t find a strong Milk & Honey match for those filters.",
+      warnings: warnings || [],
+      recipes: pick ? [toStructuredRecipe(pick, "Recommended based on your wizard picks.")] : [],
+    };
 
-  return jsonResponse(structured);
-}
+    return jsonResponse(structured);
+  }
 
-
-  // 2) Chat: if user asks for a specific drink spec, return exact recipe deterministically
+  // 2) Chat: deterministic named-spec lookup
   if (question) {
     const match = findRecipeFromQuestion(question);
     if (match && isAskingForSpec(question)) {
@@ -389,7 +410,7 @@ exports.handler = async (event) => {
 
   // 3) Otherwise: minimal fallback (optional OpenAI)
   const modelStructured = question ? await callOpenAI(question) : null;
-  if (modelStructured && modelStructured.recipes && Array.isArray(modelStructured.recipes)) {
+  if (modelStructured && Array.isArray(modelStructured.recipes)) {
     return jsonResponse(modelStructured);
   }
 
@@ -422,3 +443,4 @@ exports.handler = async (event) => {
     200
   );
 };
+
