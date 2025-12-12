@@ -1,601 +1,356 @@
 // netlify/functions/ccc-bartender.js
+// CCC Bar Bot backend: deterministic recipe lookup + lightweight wizard filtering.
+// Goals:
+// 1) Always return correct Milk & Honey specs for named cocktails in recipes.json (no model drift).
+// 2) Keep token usage minimal by only calling OpenAI when strictly necessary (optional).
 
-// -----------------------------------------
-// Load Milk & Honey recipe data (local JSON)
-// -----------------------------------------
-let RAW_RECIPES;
-try {
-  RAW_RECIPES = require("./recipes.json");
-} catch (err) {
-  console.error("CCC Bar Bot: Failed to load recipes.json:", err);
-  RAW_RECIPES = [];
+const fs = require("fs");
+const path = require("path");
+
+// Optional: if OPENAI_API_KEY is set, we can use OpenAI for non-deterministic Q&A.
+// If you want ZERO model usage, leave OPENAI_API_KEY unset and the function will fall back
+// to deterministic matches + simple alternatives.
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+
+// ------------ Load recipes.json (bundled alongside this function) ------------
+function loadRecipes() {
+  const recipesPath = path.join(__dirname, "recipes.json");
+  const raw = fs.readFileSync(recipesPath, "utf8");
+  const parsed = JSON.parse(raw);
+  // Expect an array of recipe objects
+  return Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.recipes) ? parsed.recipes : []);
 }
 
-// recipes.json might be either an array or { recipes: [...] }
-const SOURCE_ARRAY = Array.isArray(RAW_RECIPES)
-  ? RAW_RECIPES
-  : RAW_RECIPES.recipes || RAW_RECIPES.MILK_HONEY_RECIPES || [];
+const MILK_HONEY_RECIPES = loadRecipes();
 
-// -----------------------------------------
-// Normalization helpers
-// -----------------------------------------
-function slugify(str) {
+// ------------ Normalization helpers ------------
+function norm(str) {
   return String(str || "")
     .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "recipe";
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
-function normalizeRecipe(raw, index) {
-  const name = raw.name || raw.title || `Recipe ${index + 1}`;
-  const id = raw.id || slugify(name);
+function stripCocktailSuffix(nameNorm) {
+  // "left hand cocktail" -> "left hand"
+  return nameNorm.replace(/\bcocktail\b/g, "").replace(/\s+/g, " ").trim();
+}
 
-  // Spirits / base
-  const baseSpirit =
-    raw.baseSpirit ||
-    raw.spirit ||
-    raw.base ||
-    (Array.isArray(raw.spirits) && raw.spirits[0]) ||
-    null;
+function unique(arr) {
+  return Array.from(new Set(arr));
+}
 
-  const spirits =
-    raw.spirits ||
-    raw.spiritList ||
-    (baseSpirit ? [baseSpirit] : []);
+// Build lookup maps once
+const RECIPES_BY_NORM = new Map();      // normalized full name -> recipe
+const RECIPES_BY_SHORT = new Map();     // normalized name with "cocktail" removed -> recipe
+const ALL_NAME_NORMS = [];              // for longest-match scanning
 
-  const tags = raw.tags || raw.tagList || [];
-  const style = raw.style || raw.profile || null;
-  const served = raw.served || raw.service || raw.ice || null;
+for (const r of MILK_HONEY_RECIPES) {
+  const n = norm(r.name);
+  if (!n) continue;
+  if (!RECIPES_BY_NORM.has(n)) RECIPES_BY_NORM.set(n, r);
 
-  const ingredients = Array.isArray(raw.ingredients) ? raw.ingredients : [];
-  const glass = raw.glass || "";
-  const method = raw.method || "";
-  const ice = raw.ice || "";
-  const garnish = raw.garnish || "";
-  const notes = raw.notes || "";
+  const short = stripCocktailSuffix(n);
+  if (short && !RECIPES_BY_SHORT.has(short)) RECIPES_BY_SHORT.set(short, r);
 
-  const description =
-    raw.description ||
-    raw.summary ||
-    raw.blurb ||
-    "";
+  ALL_NAME_NORMS.push(n);
+  if (short && short !== n) ALL_NAME_NORMS.push(short);
+}
+
+// Prefer longest names first when scanning questions
+ALL_NAME_NORMS.sort((a, b) => b.length - a.length);
+
+// ------------ Recipe shaping for client ------------
+function toStructuredRecipe(r, why = "") {
+  const ingredients = Array.isArray(r.ingredients)
+    ? r.ingredients.map((i) => ({
+        amount: String(i.amount || "").trim(),
+        ingredient: String(i.ingredient || "").trim(),
+      }))
+    : [];
 
   return {
-    id,
-    name,
-    baseSpirit,
-    spirits,
-    tags,
-    style,
-    served,
+    name: r.name || "Untitled Cocktail",
+    description: why || r.description || "",
     ingredients,
-    glass,
-    method,
-    ice,
-    garnish,
-    notes,
-    description,
+    glass: r.glass || "",
+    method: r.method || "",
+    ice: r.ice || "",
+    garnish: r.garnish || "",
+    notes: r.notes || "",
   };
 }
 
-const MILK_HONEY_RECIPES = SOURCE_ARRAY.map(normalizeRecipe);
-
-// Lookup maps
-const RECIPES_BY_ID = new Map();
-const RECIPES_BY_NAME = new Map();
-
-MILK_HONEY_RECIPES.forEach((r) => {
-  RECIPES_BY_ID.set(r.id, r);
-  RECIPES_BY_NAME.set(r.name.toLowerCase(), r);
-});
-
-// -----------------------------------------
-// Classification helpers for wizard filters
-// -----------------------------------------
-function classifyStyle(recipe) {
-  const method = (recipe.method || "").toLowerCase();
-  const tags = (recipe.tags || []).join(" ").toLowerCase();
-  const glass = (recipe.glass || "").toLowerCase();
-  const notes = (recipe.notes || "").toLowerCase();
-  const text = [method, tags, glass, notes].join(" ");
-
-  // Strong spirit-forward cues
-  if (
-    text.includes("old fashioned") ||
-    text.includes("manhattan") ||
-    text.includes("negroni") ||
-    text.includes("martini") ||
-    text.includes("spirit-forward") ||
-    text.includes("spirit forward") ||
-    text.includes("boozy")
-  ) {
-    return "spirit_forward";
-  }
-
-  // Light & refreshing cues
-  if (
-    text.includes("highball") ||
-    text.includes("collins") ||
-    text.includes("fizz") ||
-    text.includes("sour") ||
-    text.includes("swizzle") ||
-    text.includes("cooler") ||
-    text.includes("spritz")
-  ) {
-    return "light_refreshing";
-  }
-
-  // Fallback on method
-  if (method.includes("shake")) return "light_refreshing";
-  if (method.includes("stir")) return "spirit_forward";
-
-  return null;
-}
-
-function classifyIce(recipe) {
-  const ice = (recipe.ice || "").toLowerCase();
-  const glass = (recipe.glass || "").toLowerCase();
-  const notes = (recipe.notes || "").toLowerCase();
-  const text = [ice, glass, notes].join(" ");
-
-  if (
-    text.includes("up") ||
-    text.includes("no ice") ||
-    text.includes("served up") ||
-    text.includes("straight up") ||
-    text.includes("coupe") ||
-    text.includes("nick & nora") ||
-    text.includes("nick and nora")
-  ) {
-    return "no_ice";
-  }
-
-  if (
-    text.includes("rocks") ||
-    text.includes("large rock") ||
-    text.includes("over ice") ||
-    text.includes("kold-draft") ||
-    text.includes("kold draft") ||
-    text.includes("highball") ||
-    text.includes("collins")
-  ) {
-    return "on_ice";
-  }
-
-  return null;
-}
-
-function normalizeSpiritName(s) {
-  return String(s || "").toLowerCase().replace(/\s+/g, "_");
-}
-
-function recipeMatchesSpirit(recipe, spiritChoiceRaw) {
-  if (!spiritChoiceRaw) return true;
-  const choice = spiritChoiceRaw.toLowerCase();
-
-  const spiritLane = normalizeSpiritName(choice);
-
-  const allText = [
-    recipe.baseSpirit,
-    ...(recipe.spirits || []),
-    ...(recipe.tags || []),
-    recipe.description,
-    recipe.notes,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
-  if (allText.includes(choice)) return true;
-
-  // Loose mapping so "rye_whiskey" catches "rye" or "whiskey"
-  if (spiritLane === "rye_whiskey" || spiritLane === "whiskey" || spiritLane === "whisky") {
-    return allText.includes("rye") || allText.includes("whiskey") || allText.includes("whisky");
-  }
-
-  if (spiritLane === "cachaca") {
-    return allText.includes("cachaça") || allText.includes("cachaca");
-  }
-
-  if (spiritLane === "amaro") {
-    return allText.includes("amaro") || allText.includes("amari");
-  }
-
-  return false;
-}
-
-function recipeMatchesStyle(recipe, styleChoice) {
-  if (!styleChoice) return true;
-  const cls = classifyStyle(recipe);
-  if (!cls) return false;
-  return cls === styleChoice;
-}
-
-function recipeMatchesIce(recipe, iceChoice) {
-  if (!iceChoice) return true;
-  const cls = classifyIce(recipe);
-  if (!cls) return false;
-  if (iceChoice === "on_ice") return cls === "on_ice";
-  if (iceChoice === "no_ice") return cls === "no_ice";
-  return false;
-}
-
-function scoreRecipeForWizard(recipe, styleChoice, iceChoice, spiritChoice) {
-  let score = 0;
-  if (styleChoice && recipeMatchesStyle(recipe, styleChoice)) score += 3;
-  if (iceChoice && recipeMatchesIce(recipe, iceChoice)) score += 2;
-  if (spiritChoice && recipeMatchesSpirit(recipe, spiritChoice)) score += 4;
-
-  // slight bias toward well-tagged recipes
-  if ((recipe.tags || []).length > 0) score += 1;
-
-  return score;
-}
-
-// -----------------------------------------
-// Wizard detection & extraction
-// -----------------------------------------
-function extractWizardFromBodyAndQuestion(body, question) {
-  const wizard = {
-    style: null,          // "light_refreshing" | "spirit_forward"
-    icePreference: null,  // "on_ice" | "no_ice"
-    spirit: null,         // e.g. "rum", "gin", "tequila", "sherry"
-  };
-
-  // If the frontend ever sends a structured wizard object, honor it first
-  if (body && typeof body.wizard === "object" && body.wizard !== null) {
-    const w = body.wizard;
-    wizard.style = w.style || wizard.style;
-    wizard.icePreference = w.icePreference || wizard.icePreference;
-    wizard.spirit = w.spirit || wizard.spirit;
-  }
-
-  // Also parse from the question text (current implementation)
-  const q = String(question || "");
-
-  const styleMatch = q.match(/style:\s*(Light and Refreshing|Spirit Forward)/i);
-  if (styleMatch) {
-    wizard.style =
-      styleMatch[1].toLowerCase().includes("light") ? "light_refreshing" : "spirit_forward";
-  }
-
-  const iceMatch = q.match(/icePreference:\s*(With Ice|No Ice)/i);
-  if (iceMatch) {
-    wizard.icePreference =
-      iceMatch[1].toLowerCase().includes("no") ? "no_ice" : "on_ice";
-  }
-
-  const spiritMatch = q.match(/spirit:\s*([A-Za-zÀ-ÿ\s]+)/i);
-  if (spiritMatch) {
-    wizard.spirit = spiritMatch[1].trim();
-  }
-
-  // We consider it "wizard mode" if all three are present
-  const isWizard =
-    Boolean(wizard.style) &&
-    Boolean(wizard.icePreference) &&
-    Boolean(wizard.spirit);
-
-  return { isWizard, wizard };
-}
-
-// -----------------------------------------
-// Build response with full specs from local recipes
-// -----------------------------------------
-function toClientRecipeShape(recipe) {
+function jsonResponse(structured, statusCode = 200) {
+  const raw = JSON.stringify(structured);
   return {
-    name: recipe.name,
-    description: recipe.description || recipe.notes || "",
-    ingredients: Array.isArray(recipe.ingredients)
-      ? recipe.ingredients.map((ing) => ({
-          amount: ing.amount || ing.qty || "",
-          ingredient: ing.ingredient || ing.name || "",
-        }))
-      : [],
-    glass: recipe.glass || "",
-    method: recipe.method || "",
-    ice: recipe.ice || "",
-    garnish: recipe.garnish || "",
-    notes: recipe.notes || "",
+    statusCode,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ structured, answer: raw }),
   };
 }
 
-// -----------------------------------------
-// Wizard handler (NO OpenAI CALL)
-// -----------------------------------------
-function handleWizard(wizard) {
-  if (!MILK_HONEY_RECIPES.length) {
-    return {
-      summary: "No recipes are available at the moment.",
-      warnings: ["Milk & Honey recipe data failed to load on the server."],
-      recipes: [],
-    };
-  }
+// ------------ Deterministic name detection ------------
+function findRecipeFromQuestion(question) {
+  const qn = norm(question);
+  if (!qn) return null;
 
-  const styleChoice = wizard.style; // "light_refreshing" / "spirit_forward"
-  const iceChoice = wizard.icePreference; // "on_ice" / "no_ice"
-  const spiritChoice = wizard.spirit; // raw text
+  // Fast: exact whole-string match
+  if (RECIPES_BY_NORM.has(qn)) return RECIPES_BY_NORM.get(qn);
+  if (RECIPES_BY_SHORT.has(qn)) return RECIPES_BY_SHORT.get(qn);
 
-  // Scored & filtered
-  const scored = MILK_HONEY_RECIPES.map((r) => ({
-    recipe: r,
-    score: scoreRecipeForWizard(r, styleChoice, iceChoice, spiritChoice),
-  }));
-
-  // Keep only those with positive score
-  let candidates = scored.filter((s) => s.score > 0);
-
-  let relaxed = false;
-  let relaxedDetails = [];
-
-  // If we didn't find enough, relax in stages
-  if (candidates.length < 3) {
-    // First, relax ice preference
-    const withoutIceFilter = MILK_HONEY_RECIPES.map((r) => ({
-      recipe: r,
-      score: scoreRecipeForWizard(r, styleChoice, null, spiritChoice),
-    })).filter((s) => s.score > 0);
-
-    if (withoutIceFilter.length > candidates.length) {
-      candidates = withoutIceFilter;
-      relaxed = true;
-      relaxedDetails.push("ice preference was relaxed slightly");
+  // Longest-match scan inside question
+  // Use word-boundary-ish matching on the normalized string (space-separated words)
+  for (const nameNorm of ALL_NAME_NORMS) {
+    // ensure we match as a phrase in the question
+    const pattern = new RegExp(`(?:^|\\s)${nameNorm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:\\s|$)`, "i");
+    if (pattern.test(" " + qn + " ")) {
+      return RECIPES_BY_NORM.get(nameNorm) || RECIPES_BY_SHORT.get(nameNorm) || null;
     }
   }
+  return null;
+}
 
-  if (candidates.length < 3) {
-    // Then relax style as well
-    const withoutStyleAndIce = MILK_HONEY_RECIPES.map((r) => ({
-      recipe: r,
-      score: scoreRecipeForWizard(r, null, null, spiritChoice),
-    })).filter((s) => s.score > 0);
+function isAskingForSpec(question) {
+  const q = norm(question);
+  if (!q) return false;
+  return (
+    q.includes("spec") ||
+    q.includes("recipe") ||
+    q.includes("how to make") ||
+    q.includes("build") ||
+    q.includes("make a") ||
+    q.includes("how do i make") ||
+    // common pattern: user just types the drink name
+    q.split(" ").length <= 5
+  );
+}
 
-    if (withoutStyleAndIce.length > candidates.length) {
-      candidates = withoutStyleAndIce;
-      relaxed = true;
-      relaxedDetails.push("style and ice filters were loosened");
-    }
+// ------------ Wizard filtering (no OpenAI) ------------
+function recipeMatchesWizard(r, prefs) {
+  const method = norm(r.method);
+  const ice = norm(r.ice);
+  const category = norm(r.category);
+
+  // Style
+  if (prefs.style === "light_refreshing") {
+    // favor shaken / built
+    const ok = method.includes("shake") || method.includes("build") || method.includes("swizzle") || method.includes("highball");
+    if (!ok) return false;
+  }
+  if (prefs.style === "spirit_forward") {
+    const ok = method.includes("stir") || method.includes("old fashioned") || method.includes("manhattan");
+    if (!ok) return false;
   }
 
-  if (candidates.length === 0) {
-    return {
-      summary: "I couldn’t find a Milk & Honey drink that fits those exact filters.",
-      warnings: [
-        "No recipes matched your style, ice, and spirit combination strictly. Try a different spirit or tweak your preferences.",
-      ],
-      recipes: [],
-    };
+  // Ice preference
+  if (prefs.ice === "on_ice") {
+    // treat "none", "up" as no-ice
+    const ok = !(ice.includes("none") || ice.includes("up") || ice.includes("no ice"));
+    if (!ok) return false;
+  }
+  if (prefs.ice === "no_ice") {
+    const ok = ice.includes("none") || ice.includes("up") || ice.includes("no ice");
+    if (!ok) return false;
   }
 
-  // Sort by score, highest first
-  candidates.sort((a, b) => b.score - a.score);
+  // Spirit preference(s)
+  if (Array.isArray(prefs.spirits) && prefs.spirits.length) {
+    const spirits = prefs.spirits.map((s) => norm(s));
+    const cat = category;
+    // Recipes are categorized broadly. We'll match if the recipe category includes any chosen spirit keyword.
+    const ok = spirits.some((s) => cat.includes(s));
+    if (!ok) return false;
+  }
 
-  const top = candidates.slice(0, 3).map((s) => toClientRecipeShape(s.recipe));
+  return true;
+}
 
-  const baseSummaryParts = [];
-  if (styleChoice === "light_refreshing") baseSummaryParts.push("light & refreshing");
-  if (styleChoice === "spirit_forward") baseSummaryParts.push("spirit-forward");
-  if (iceChoice === "on_ice") baseSummaryParts.push("over ice");
-  if (iceChoice === "no_ice") baseSummaryParts.push("served up");
-  if (spiritChoice) baseSummaryParts.push(spiritChoice);
+function recommendFromWizard(prefs) {
+  const matches = [];
+  for (const r of MILK_HONEY_RECIPES) {
+    if (recipeMatchesWizard(r, prefs)) matches.push(r);
+    if (matches.length >= 12) break; // cap candidates
+  }
 
-  const summary =
-    "Here are three Milk & Honey cocktails in the " +
-    (baseSummaryParts.length ? baseSummaryParts.join(" / ") : "requested") +
-    " lane.";
-
+  // If fewer than 3, relax filters in a controlled way
   const warnings = [];
-  if (relaxed && relaxedDetails.length) {
-    warnings.push(
-      `Not enough strict matches were found, so ${relaxedDetails.join(
-        " and "
-      )}. These are the closest Milk & Honey fits.`
-    );
+  let results = matches;
+
+  if (results.length < 3) {
+    // Relax ice first
+    warnings.push("Could not find 3 perfect matches; relaxing ice preference for closest fits.");
+    const relaxed = MILK_HONEY_RECIPES.filter((r) => {
+      const p = { ...prefs, ice: null };
+      return recipeMatchesWizard(r, p);
+    });
+    results = relaxed;
   }
 
-  return {
-    summary,
-    warnings,
-    recipes: top,
+  if (results.length < 3) {
+    // Relax style next
+    warnings.push("Still short on matches; relaxing style for closest fits.");
+    const relaxed = MILK_HONEY_RECIPES.filter((r) => {
+      const p = { ...prefs, style: null, ice: prefs.ice || null };
+      return recipeMatchesWizard(r, p);
+    });
+    results = relaxed;
+  }
+
+  // Take top 3 distinct by name
+  const top = [];
+  const seen = new Set();
+  for (const r of results) {
+    if (!r || !r.name) continue;
+    const key = norm(r.name);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    top.push(r);
+    if (top.length === 3) break;
+  }
+
+  return { top, warnings };
+}
+
+// ------------ Optional OpenAI fallback for generic Q&A ------------
+async function callOpenAI(question) {
+  // Keep this ultra-small.
+  // If you want to disable OpenAI completely, remove OPENAI_API_KEY from env.
+  if (!OPENAI_API_KEY) return null;
+
+  const payload = {
+    model: "gpt-4.1-mini",
+    temperature: 0.2,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are CCC Bar Bot. Respond ONLY in pure JSON with keys summary,warnings,recipes. " +
+          "If the user asks for a spec, only answer if the recipe is in the provided list. " +
+          "If not, return recipes:[] and a warning.",
+      },
+      {
+        role: "user",
+        content:
+          "User: " + question + "\n\n" +
+          "Note: You do NOT have the recipe list. If you cannot answer deterministically, return recipes:[] with a warning.",
+      },
+    ],
   };
-}
-
-// -----------------------------------------
-// Free-text chat via compact catalog + OpenAI
-// -----------------------------------------
-const CATALOG_SYSTEM_PROMPT = `
-You are Bar Bot, the house bartender for Crypto Cocktail Club, working strictly from the Milk & Honey cocktail canon.
-
-You will be given:
-- A compact catalog of cocktails: each line has an ID, name, base spirit, and style hints.
-- A user question.
-
-Your job:
-1. Choose up to THREE cocktails from the catalog that best answer the user's request.
-2. Return JSON ONLY with the following literal shape:
-
-{
-  "summary": "Short summary of what you’re recommending.",
-  "warnings": ["Optional warning or note, or an empty array."],
-  "recipeIds": ["id_one", "id_two"]
-}
-
-Rules:
-- You MUST use IDs from the catalog (the token before the first colon).
-- If the user asks for a specific classic that exists (e.g. "Gold Rush", "Right Hand"), include that cocktail’s ID first.
-- Do NOT invent cocktails that are not in the catalog.
-- If nothing fits, return:
-  {
-    "summary": "Explain briefly why nothing matches.",
-    "warnings": ["No suitable Milk & Honey recipe was found."],
-    "recipeIds": []
-  }
-
-Remember: valid JSON only. No extra commentary, no trailing commas.
-`;
-
-function buildCatalogSummary() {
-  // Keep the catalog compact: one line per recipe, minimal metadata
-  return MILK_HONEY_RECIPES.map((r) => {
-    const spirits = (r.spirits || []).join(", ");
-    const style = classifyStyle(r) || "n/a";
-    const ice = classifyIce(r) || "n/a";
-    return `${r.id}: ${r.name} | base: ${r.baseSpirit || "n/a"} | spirits: ${
-      spirits || "n/a"
-    } | style: ${style} | serve: ${ice}`;
-  }).join("\n");
-}
-
-async function callOpenAIForRecipeIds(apiKey, question) {
-  const catalog = buildCatalogSummary();
-
-  const messages = [
-    { role: "system", content: CATALOG_SYSTEM_PROMPT },
-    {
-      role: "user",
-      content:
-        `Here is the cocktail catalog:\n` +
-        catalog +
-        `\n\nUser question: ${question}\n\nRemember to respond with JSON only.`,
-    },
-  ];
 
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages,
-      temperature: 0.3,
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    console.error("CCC Bar Bot: OpenAI error response:", text);
-    throw new Error("OpenAI request failed");
+    const txt = await res.text();
+    console.error("CCC Bar Bot: OpenAI error:", txt);
+    return null;
   }
 
   const data = await res.json();
   const raw = data.choices?.[0]?.message?.content || "";
-
-  let parsed;
   try {
-    parsed = JSON.parse(raw);
-  } catch (err) {
-    console.error("CCC Bar Bot: Failed to parse JSON from model:", err, "Raw:", raw);
-    throw new Error("Model returned invalid JSON");
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error("CCC Bar Bot: Could not parse OpenAI JSON:", e, raw);
+    return null;
   }
-
-  return parsed;
 }
 
-function resolveRecipesByIds(recipeIds) {
-  if (!Array.isArray(recipeIds)) return [];
-
-  const out = [];
-  recipeIds.forEach((idRaw) => {
-    if (!idRaw) return;
-    const id = String(idRaw).trim();
-    let recipe = RECIPES_BY_ID.get(id);
-
-    // Fallback: sometimes the model might emit the name instead of ID
-    if (!recipe) {
-      recipe = RECIPES_BY_NAME.get(id.toLowerCase());
-    }
-
-    if (recipe) {
-      out.push(toClientRecipeShape(recipe));
-    }
-  });
-
-  return out;
-}
-
-// -----------------------------------------
-// Netlify Function handler
-// -----------------------------------------
-exports.handler = async (event, context) => {
-  // Only allow POST
+// ------------ Netlify handler ------------
+exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error: "Method not allowed" }),
     };
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    console.error("CCC Bar Bot: Missing OPENAI_API_KEY");
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Missing OPENAI_API_KEY env var" }),
-    };
-  }
-
-  // Parse inbound body
-  let body;
+  let body = {};
   try {
     body = JSON.parse(event.body || "{}");
-  } catch (err) {
-    console.error("CCC Bar Bot: Failed to parse request body", err);
+  } catch (_) {
     body = {};
   }
 
-  const question = body.question || "";
+  const mode = String(body.mode || "chat");
+  const question = String(body.question || "").trim();
+  const wizardPrefs = body.wizard_preferences || {};
 
-  // Decide: wizard path (no OpenAI) vs free-text chat (OpenAI with tiny payload)
-  const { isWizard, wizard } = extractWizardFromBodyAndQuestion(body, question);
+  // 1) Wizard: deterministic recommendations only
+  if (mode === "wizard") {
+    const prefs = {
+      style: wizardPrefs.style || null,
+      ice: wizardPrefs.ice || null,
+      spirits: Array.isArray(wizardPrefs.spirits) ? wizardPrefs.spirits : [],
+    };
 
-  try {
-    if (isWizard) {
-      // ---------------------------------
-      // WIZARD MODE (NO TOKEN SPEND)
-      // ---------------------------------
-      const structured = handleWizard(wizard);
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          structured,
-          answer: JSON.stringify(structured),
-        }),
-      };
-    }
-
-    // ---------------------------------
-    // FREE-TEXT CHAT MODE (MINIMAL TOKENS)
-    // ---------------------------------
-    const aiResult = await callOpenAIForRecipeIds(apiKey, question);
-
-    const summary = aiResult.summary || "Here are some Milk & Honey drinks for you.";
-    const warnings = Array.isArray(aiResult.warnings) ? aiResult.warnings : [];
-    const recipeIds = Array.isArray(aiResult.recipeIds) ? aiResult.recipeIds : [];
-
-    const resolvedRecipes = resolveRecipesByIds(recipeIds);
+    const { top, warnings } = recommendFromWizard(prefs);
 
     const structured = {
-      summary,
-      warnings,
-      recipes: resolvedRecipes,
+      summary: top.length
+        ? "Here are three Milk & Honey picks that fit your vibe. Choose one and I’ll pour the exact spec."
+        : "I couldn’t find a strong Milk & Honey match for those filters.",
+      warnings: warnings || [],
+      recipes: top.map((r) => toStructuredRecipe(r, "Recommended based on your wizard picks.")),
     };
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        structured,
-        answer: JSON.stringify(structured),
-      }),
-    };
-  } catch (err) {
-    console.error("CCC Bar Bot: Server error:", err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Server error" }),
-    };
+    return jsonResponse(structured);
   }
+
+  // 2) Chat: if user asks for a specific drink spec, return exact recipe deterministically
+  if (question) {
+    const match = findRecipeFromQuestion(question);
+    if (match && isAskingForSpec(question)) {
+      const structured = {
+        summary: `Milk & Honey spec for ${match.name}.`,
+        warnings: [],
+        recipes: [toStructuredRecipe(match, "Exact spec from the Milk & Honey dataset.")],
+      };
+      return jsonResponse(structured);
+    }
+  }
+
+  // 3) Otherwise: minimal fallback (optional OpenAI)
+  const modelStructured = question ? await callOpenAI(question) : null;
+  if (modelStructured && modelStructured.recipes && Array.isArray(modelStructured.recipes)) {
+    return jsonResponse(modelStructured);
+  }
+
+  // 4) Final fallback: suggest closest name matches if any
+  if (question) {
+    const qn = norm(question);
+    const candidates = [];
+    for (const r of MILK_HONEY_RECIPES) {
+      const rn = stripCocktailSuffix(norm(r.name));
+      if (!rn) continue;
+      if (rn.includes(qn) || qn.includes(rn)) candidates.push(r.name);
+      if (candidates.length >= 5) break;
+    }
+
+    const structured = {
+      summary: "I can’t pull a canonical Milk & Honey spec for that request from my dataset.",
+      warnings: [
+        candidates.length
+          ? `Closest matches in the book: ${unique(candidates).slice(0, 5).join(", ")}.`
+          : "Try asking by exact drink name (e.g., “Left Hand Cocktail spec”).",
+      ],
+      recipes: [],
+    };
+
+    return jsonResponse(structured);
+  }
+
+  return jsonResponse(
+    { summary: "No question received.", warnings: ["Send a question in the request body."], recipes: [] },
+    200
+  );
 };
