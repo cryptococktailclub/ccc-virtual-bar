@@ -574,181 +574,221 @@ function initBarBot() {
 
   // ---- Wizard wiring (refactored) ----
 
-  if (wizardEl) {
-    const wizardSubmitBtn =
-      wizardEl.querySelector("[data-wizard-submit]") ||
-      wizardEl.querySelector("#wizardRecommendBtn") ||
-      wizardEl.querySelector(".wizard-submit-btn");
+  // ---- Wizard wiring (refactored) ----
+if (wizardEl) {
+  const wizardSubmitBtn =
+    wizardEl.querySelector("[data-wizard-submit]") ||
+    wizardEl.querySelector("#wizardRecommendBtn") ||
+    wizardEl.querySelector(".wizard-submit-btn");
 
-    const wizardNextBtn =
-      wizardEl.querySelector("[data-wizard-next]") ||
-      wizardEl.querySelector("#wizardNextBtn");
+  const wizardOptionGroups = wizardEl.querySelectorAll(".wizard-options");
 
-    const wizardOptionGroups = wizardEl.querySelectorAll(".wizard-options");
+  // Persistent state for wizard answers
+  const wizardState = {
+    style: null,   // "light_refreshing" | "spirit_forward"
+    ice: null,     // "on_ice" | "no_ice"
+    spirits: [],   // array of strings (multi-select)
+  };
 
-    // Persistent state for wizard answers
-    const wizardState = {
-      style: null,   // "light_refreshing" | "spirit_forward"
-      ice: null,     // "on_ice" | "no_ice"
-      spirits: [],   // array of strings (multi-select)
-    };
+  // Rotation + anti-repeat state
+  let wizardIndex = 0;
+  let wizardExclude = [];
+  const sessionId =
+    (typeof crypto !== "undefined" && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : String(Date.now());
 
-    // Cycle index for "Another option"
-    let wizardIndex = 0;
-    let hasSearchedOnce = false;
+  // --- Ensure we have a right-side "Another option" button ---
+  // If your HTML already includes a button with [data-wizard-next], we'll use it.
+  // Otherwise we create it next to the submit button.
+  let wizardNextBtn = wizardEl.querySelector("[data-wizard-next]");
+  if (!wizardNextBtn && wizardSubmitBtn) {
+    // Attempt to append into the submit row if present; else insert after submit button.
+    const submitRow =
+      wizardSubmitBtn.closest(".wizard-submit-row") || wizardSubmitBtn.parentElement;
 
-    function updateWizardCTA() {
-      const ready =
-        !!wizardState.style &&
-        !!wizardState.ice &&
-        Array.isArray(wizardState.spirits) &&
-        wizardState.spirits.length > 0;
+    wizardNextBtn = document.createElement("button");
+    wizardNextBtn.type = "button";
+    wizardNextBtn.className = "wizard-submit-btn wizard-next-btn"; // style in CSS (see note below)
+    wizardNextBtn.setAttribute("data-wizard-next", "true");
+    wizardNextBtn.textContent = "Another option";
+    wizardNextBtn.disabled = true;
 
-      if (wizardSubmitBtn) wizardSubmitBtn.disabled = !ready;
+    // Keep Search on left, Another on right: add as second button in the same row
+    submitRow.appendChild(wizardNextBtn);
+  }
 
-      // Only enable "Another option" after first Search
-      if (wizardNextBtn) wizardNextBtn.disabled = !ready || !hasSearchedOnce;
+  function updateWizardCTA() {
+    if (!wizardSubmitBtn) return;
+
+    const ready =
+      !!wizardState.style &&
+      !!wizardState.ice &&
+      Array.isArray(wizardState.spirits) &&
+      wizardState.spirits.length > 0;
+
+    wizardSubmitBtn.disabled = !ready;
+
+    // "Another option" should be enabled only after at least one successful search
+    if (wizardNextBtn) {
+      wizardNextBtn.disabled = !ready || wizardExclude.length === 0;
     }
+  }
 
-    function handleSingleChoice(questionKey, value, buttonEl, groupEl) {
-      const allButtons = groupEl.querySelectorAll(".wizard-option");
-      allButtons.forEach((b) => b.classList.remove("is-selected"));
+  function handleSingleChoice(questionKey, value, buttonEl, groupEl) {
+    const allButtons = groupEl.querySelectorAll(".wizard-option");
+    allButtons.forEach((b) => b.classList.remove("is-selected"));
 
+    buttonEl.classList.add("is-selected");
+    wizardState[questionKey] = value;
+
+    // Changing filters should reset rotation/exclude to avoid confusing repeats
+    wizardIndex = 0;
+    wizardExclude = [];
+  }
+
+  function handleMultiChoice(value, buttonEl) {
+    const idx = wizardState.spirits.indexOf(value);
+    if (idx >= 0) {
+      wizardState.spirits.splice(idx, 1);
+      buttonEl.classList.remove("is-selected");
+    } else {
+      wizardState.spirits.push(value);
       buttonEl.classList.add("is-selected");
-      wizardState[questionKey] = value;
     }
 
-    function handleMultiChoice(value, buttonEl) {
-      const idx = wizardState.spirits.indexOf(value);
-      if (idx >= 0) {
-        wizardState.spirits.splice(idx, 1);
-        buttonEl.classList.remove("is-selected");
-      } else {
-        wizardState.spirits.push(value);
-        buttonEl.classList.add("is-selected");
-      }
-    }
+    // Any change to spirit picks resets rotation
+    wizardIndex = 0;
+    wizardExclude = [];
+  }
 
-    // Attach click handlers to all wizard-option buttons
-    wizardOptionGroups.forEach((groupEl) => {
-      const questionKey = groupEl.getAttribute("data-question");
-      if (!questionKey) return;
+  // Attach click handlers to all wizard-option buttons
+  wizardOptionGroups.forEach((groupEl) => {
+    const questionKey = groupEl.getAttribute("data-question");
+    if (!questionKey) return;
 
-      groupEl.querySelectorAll(".wizard-option").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const value = btn.getAttribute("data-value");
-          if (!value) return;
+    groupEl.querySelectorAll(".wizard-option").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const value = btn.getAttribute("data-value");
+        if (!value) return;
 
-          if (questionKey === "style" || questionKey === "ice") {
-            handleSingleChoice(questionKey, value, btn, groupEl);
-          } else if (questionKey === "spirits") {
-            handleMultiChoice(value, btn);
-          }
-
-          updateWizardCTA();
-        });
-      });
-    });
-
-    function buildWizardQuestionText() {
-      const parts = [];
-
-      if (wizardState.style === "light_refreshing") {
-        parts.push("light & refreshing, shaken with juice");
-      } else if (wizardState.style === "spirit_forward") {
-        parts.push("spirit-forward and stirred");
-      }
-
-      if (wizardState.ice === "on_ice") {
-        parts.push("served on ice");
-      } else if (wizardState.ice === "no_ice") {
-        parts.push("served up without ice");
-      }
-
-      if (wizardState.spirits.length) {
-        parts.push(`featuring: ${wizardState.spirits.join(", ")}`);
-      }
-
-      if (!parts.length) return "Search for a cocktail based on my preferences.";
-      return `Search for a cocktail that is ${parts.join(", ")}.`;
-    }
-
-    function buildWizardPayload({ index, showFriendlyText }) {
-      // Primary spirit used as a strict hint (you already do this)
-      const primarySpirit =
-        Array.isArray(wizardState.spirits) && wizardState.spirits.length
-          ? wizardState.spirits[0]
-          : "";
-
-      const friendlyText = buildWizardQuestionText();
-
-      // Strict markers for backend (reliable parsing) — keep your existing pattern
-      const markerText =
-        `style: ${wizardState.style === "light_refreshing" ? "Light and Refreshing" : "Spirit Forward"}\n` +
-        `icePreference: ${wizardState.ice === "no_ice" ? "No Ice" : "With Ice"}\n` +
-        `spirit: ${primarySpirit}`;
-
-      const payload = {
-        mode: "wizard",
-        question: markerText,
-
-        // Backend-canonical object (your current shape)
-        wizard: {
-          style: wizardState.style,          // "light_refreshing" | "spirit_forward"
-          icePreference: wizardState.ice,    // "on_ice" | "no_ice"
-          spirit: primarySpirit,             // e.g. "mezcal"
-        },
-
-        // Your existing multi-select object (backend can ignore or use)
-        wizard_preferences: { ...wizardState },
-
-        // NEW: wizard index for cycling “Another option”
-        wizard_index: index,
-      };
-
-      if (showFriendlyText) {
-        appendMessage(friendlyText, false);
-      }
-
-      return payload;
-    }
-
-    // Search button: resets index to 0 and enables "Another option"
-    if (wizardSubmitBtn) {
-      wizardSubmitBtn.addEventListener("click", () => {
-        if (wizardSubmitBtn.disabled) return;
-
-        wizardIndex = 0;
-        hasSearchedOnce = true;
-
-        const payload = buildWizardPayload({ index: wizardIndex, showFriendlyText: true });
-
-        // Do NOT show marker text in chat
-        callBartenderAPI(payload, { showQuestionInChat: false });
+        if (questionKey === "style" || questionKey === "ice") {
+          handleSingleChoice(questionKey, value, btn, groupEl);
+        } else if (questionKey === "spirits") {
+          handleMultiChoice(value, btn);
+        }
 
         updateWizardCTA();
       });
+    });
+  });
+
+  function buildWizardFriendlyText() {
+    const parts = [];
+
+    if (wizardState.style === "light_refreshing") {
+      parts.push("light & refreshing");
+    } else if (wizardState.style === "spirit_forward") {
+      parts.push("spirit-forward and stirred");
     }
 
-    // Another option: increments index and fetches next recommendation
-    if (wizardNextBtn) {
-      wizardNextBtn.addEventListener("click", () => {
-        if (wizardNextBtn.disabled) return;
-
-        wizardIndex += 1;
-
-        // Keep thread clean: short user nudge instead of repeating full prefs
-        appendMessage("Another option.", false);
-
-        const payload = buildWizardPayload({ index: wizardIndex, showFriendlyText: false });
-        callBartenderAPI(payload, { showQuestionInChat: false });
-      });
+    if (wizardState.ice === "on_ice") {
+      parts.push("served on ice");
+    } else if (wizardState.ice === "no_ice") {
+      parts.push("served up without ice");
     }
 
-    // Initial button state
-    updateWizardCTA();
+    if (wizardState.spirits.length) {
+      parts.push(`spirit: ${wizardState.spirits.join(", ")}`);
+    }
+
+    return parts.length
+      ? `Searching Milk & Honey for cocktails that are ${parts.join(", ")}.`
+      : "Searching Milk & Honey for a cocktail recommendation.";
+  }
+
+  function buildWizardMarkerText(primarySpirit) {
+    return (
+      `style: ${wizardState.style === "light_refreshing" ? "Light and Refreshing" : "Spirit Forward"}\n` +
+      `icePreference: ${wizardState.ice === "no_ice" ? "No Ice" : "With Ice"}\n` +
+      `spirit: ${primarySpirit}`
+    );
+  }
+
+  async function runWizardSearch({ increment = false } = {}) {
+    if (!wizardSubmitBtn || wizardSubmitBtn.disabled) return;
+
+    if (increment) wizardIndex += 1;
+    else {
+      // Search resets the rotation and prior excludes
+      wizardIndex = 0;
+      wizardExclude = [];
+    }
+
+    const primarySpirit =
+      Array.isArray(wizardState.spirits) && wizardState.spirits.length
+        ? wizardState.spirits[0]
+        : "";
+
+    const friendlyText = buildWizardFriendlyText();
+    const markerText = buildWizardMarkerText(primarySpirit);
+
+    // Show friendly text in chat (NOT marker text)
+    appendMessage(friendlyText, false);
+
+    const payload = {
+      mode: "wizard",
+      question: markerText,
+
+      // Keep for your backend’s prefs-based filtering:
+      wizard_preferences: { ...wizardState },
+
+      // Rotation controls (backend uses these):
+      wizard_index: wizardIndex,
+      exclude: wizardExclude,
+      session_id: sessionId,
+    };
+
+    await callBartenderAPI(payload, { showQuestionInChat: false });
+  }
+
+  // Search (left)
+  if (wizardSubmitBtn) {
+    // Update button label
+    wizardSubmitBtn.textContent = "Search";
+
+    wizardSubmitBtn.addEventListener("click", () => {
+      runWizardSearch({ increment: false });
+    });
+  }
+
+  // Another option (right)
+  if (wizardNextBtn) {
+    wizardNextBtn.addEventListener("click", () => {
+      runWizardSearch({ increment: true });
+    });
+  }
+
+  // Initial button state
+  updateWizardCTA();
+
+  // --- Hook: capture last served recipe name to prevent repeats ---
+  // We do this by monkey-patching renderRecipeCards if it exists, without breaking it.
+  // If you prefer, I can rewrite this as a cleaner callback pattern.
+  if (typeof window !== "undefined" && typeof window.renderRecipeCards === "function") {
+    const originalRender = window.renderRecipeCards;
+    window.renderRecipeCards = function (structured) {
+      try {
+        const name = structured?.recipes?.[0]?.name;
+        if (name && !wizardExclude.includes(name)) wizardExclude.push(name);
+      } catch (_) {}
+      const out = originalRender.apply(this, arguments);
+      updateWizardCTA();
+      return out;
+    };
   }
 }
+
 
 // ==========================
 // RENDER RECIPE CARDS
