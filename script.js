@@ -580,25 +580,34 @@ function initBarBot() {
       wizardEl.querySelector("#wizardRecommendBtn") ||
       wizardEl.querySelector(".wizard-submit-btn");
 
+    const wizardNextBtn =
+      wizardEl.querySelector("[data-wizard-next]") ||
+      wizardEl.querySelector("#wizardNextBtn");
+
     const wizardOptionGroups = wizardEl.querySelectorAll(".wizard-options");
 
     // Persistent state for wizard answers
     const wizardState = {
       style: null,   // "light_refreshing" | "spirit_forward"
       ice: null,     // "on_ice" | "no_ice"
-      spirits: [],   // array of strings
+      spirits: [],   // array of strings (multi-select)
     };
 
-    function updateWizardCTA() {
-      if (!wizardSubmitBtn) return;
+    // Cycle index for "Another option"
+    let wizardIndex = 0;
+    let hasSearchedOnce = false;
 
+    function updateWizardCTA() {
       const ready =
         !!wizardState.style &&
         !!wizardState.ice &&
         Array.isArray(wizardState.spirits) &&
         wizardState.spirits.length > 0;
 
-      wizardSubmitBtn.disabled = !ready;
+      if (wizardSubmitBtn) wizardSubmitBtn.disabled = !ready;
+
+      // Only enable "Another option" after first Search
+      if (wizardNextBtn) wizardNextBtn.disabled = !ready || !hasSearchedOnce;
     }
 
     function handleSingleChoice(questionKey, value, buttonEl, groupEl) {
@@ -660,53 +669,81 @@ function initBarBot() {
         parts.push(`featuring: ${wizardState.spirits.join(", ")}`);
       }
 
-      if (!parts.length) {
-        return "Recommend three cocktails based on my preferences.";
-      }
-
-      return `Recommend three cocktails that are ${parts.join(", ")}.`;
+      if (!parts.length) return "Search for a cocktail based on my preferences.";
+      return `Search for a cocktail that is ${parts.join(", ")}.`;
     }
 
-     if (wizardSubmitBtn) {
-  wizardSubmitBtn.addEventListener("click", () => {
-    if (wizardSubmitBtn.disabled) return;
+    function buildWizardPayload({ index, showFriendlyText }) {
+      // Primary spirit used as a strict hint (you already do this)
+      const primarySpirit =
+        Array.isArray(wizardState.spirits) && wizardState.spirits.length
+          ? wizardState.spirits[0]
+          : "";
 
-    // Choose a primary spirit for hard filtering (backend expects a single spirit)
-    const primarySpirit =
-      Array.isArray(wizardState.spirits) && wizardState.spirits.length
-        ? wizardState.spirits[0]
-        : "";
+      const friendlyText = buildWizardQuestionText();
 
-    // 1) Friendly text for the chat bubble (on-brand / human readable)
-    const friendlyText = buildWizardQuestionText();
+      // Strict markers for backend (reliable parsing) — keep your existing pattern
+      const markerText =
+        `style: ${wizardState.style === "light_refreshing" ? "Light and Refreshing" : "Spirit Forward"}\n` +
+        `icePreference: ${wizardState.ice === "no_ice" ? "No Ice" : "With Ice"}\n` +
+        `spirit: ${primarySpirit}`;
 
-    // 2) Strict markers for the backend (reliable parsing)
-    const markerText =
-      `style: ${wizardState.style === "light_refreshing" ? "Light and Refreshing" : "Spirit Forward"}\n` +
-      `icePreference: ${wizardState.ice === "no_ice" ? "No Ice" : "With Ice"}\n` +
-      `spirit: ${primarySpirit}`;
+      const payload = {
+        mode: "wizard",
+        question: markerText,
 
-    // 3) Send markers + wizard object to backend, but show friendly text in chat
-    const payload = {
-      mode: "wizard",
-      question: markerText,
+        // Backend-canonical object (your current shape)
+        wizard: {
+          style: wizardState.style,          // "light_refreshing" | "spirit_forward"
+          icePreference: wizardState.ice,    // "on_ice" | "no_ice"
+          spirit: primarySpirit,             // e.g. "mezcal"
+        },
 
-      // Backend-canonical object
-      wizard: {
-        style: wizardState.style,          // "light_refreshing" | "spirit_forward"
-        icePreference: wizardState.ice,    // "on_ice" | "no_ice"
-        spirit: primarySpirit,             // e.g. "rum"
-      },
+        // Your existing multi-select object (backend can ignore or use)
+        wizard_preferences: { ...wizardState },
 
-      // Optional: multi-select retained for future, backend may ignore
-      wizard_preferences: { ...wizardState },
-    };
+        // NEW: wizard index for cycling “Another option”
+        wizard_index: index,
+      };
 
-    // Show the nice summary in the thread, but don't duplicate the marker text
-    callBartenderAPI(payload, { showQuestionInChat: false });
-    appendMessage(friendlyText, false);
-  });
-}
+      if (showFriendlyText) {
+        appendMessage(friendlyText, false);
+      }
+
+      return payload;
+    }
+
+    // Search button: resets index to 0 and enables "Another option"
+    if (wizardSubmitBtn) {
+      wizardSubmitBtn.addEventListener("click", () => {
+        if (wizardSubmitBtn.disabled) return;
+
+        wizardIndex = 0;
+        hasSearchedOnce = true;
+
+        const payload = buildWizardPayload({ index: wizardIndex, showFriendlyText: true });
+
+        // Do NOT show marker text in chat
+        callBartenderAPI(payload, { showQuestionInChat: false });
+
+        updateWizardCTA();
+      });
+    }
+
+    // Another option: increments index and fetches next recommendation
+    if (wizardNextBtn) {
+      wizardNextBtn.addEventListener("click", () => {
+        if (wizardNextBtn.disabled) return;
+
+        wizardIndex += 1;
+
+        // Keep thread clean: short user nudge instead of repeating full prefs
+        appendMessage("Another option.", false);
+
+        const payload = buildWizardPayload({ index: wizardIndex, showFriendlyText: false });
+        callBartenderAPI(payload, { showQuestionInChat: false });
+      });
+    }
 
     // Initial button state
     updateWizardCTA();
