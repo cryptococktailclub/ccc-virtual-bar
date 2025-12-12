@@ -132,137 +132,71 @@ function isAskingForSpec(question) {
 function recipeMatchesWizard(r, prefs) {
   const method = norm(r.method);
   const ice = norm(r.ice);
-  const category = norm(r.category);
 
   // Style
   if (prefs.style === "light_refreshing") {
-    // favor shaken / built
-    const ok = method.includes("shake") || method.includes("build") || method.includes("swizzle") || method.includes("highball");
+    const ok =
+      method.includes("shake") ||
+      method.includes("build") ||
+      method.includes("swizzle") ||
+      method.includes("highball");
     if (!ok) return false;
   }
+
   if (prefs.style === "spirit_forward") {
-    const ok = method.includes("stir") || method.includes("old fashioned") || method.includes("manhattan");
+    const ok =
+      method.includes("stir") ||
+      method.includes("old fashioned") ||
+      method.includes("manhattan");
     if (!ok) return false;
   }
 
   // Ice preference
   if (prefs.ice === "on_ice") {
-    // treat "none", "up" as no-ice
     const ok = !(ice.includes("none") || ice.includes("up") || ice.includes("no ice"));
     if (!ok) return false;
   }
+
   if (prefs.ice === "no_ice") {
     const ok = ice.includes("none") || ice.includes("up") || ice.includes("no ice");
     if (!ok) return false;
   }
 
-  // Spirit preference(s)
+  // Spirit preference(s) — match against ingredients + common fields (NOT just category)
   if (Array.isArray(prefs.spirits) && prefs.spirits.length) {
-    const spirits = prefs.spirits.map((s) => norm(s));
-    const cat = category;
-    // Recipes are categorized broadly. We'll match if the recipe category includes any chosen spirit keyword.
-    const ok = spirits.some((s) => cat.includes(s));
+    const haystackParts = [
+      r.name,
+      r.category,
+      r.baseSpirit,
+      r.spirit,
+      r.method,
+      r.ice,
+      ...(Array.isArray(r.ingredients) ? r.ingredients.map((i) => i.ingredient) : []),
+    ];
+    const haystack = norm(haystackParts.filter(Boolean).join(" "));
+
+    // Normalize wizard spirit values to common synonyms
+    const wanted = new Set();
+    for (const raw of prefs.spirits) {
+      const s = norm(raw);
+
+      // direct
+      if (s) wanted.add(s);
+
+      // synonyms / grouping
+      if (s === "mezcal" || s === "tequila") wanted.add("agave");
+      if (s === "rye_whiskey") {
+        wanted.add("rye");
+        wanted.add("whiskey");
+      }
+      if (s === "cachaca") wanted.add("cacha a"); // norm() turns ç into space sometimes; keep tolerant
+    }
+
+    const ok = Array.from(wanted).some((w) => w && haystack.includes(w));
     if (!ok) return false;
   }
 
   return true;
-}
-
-function recommendFromWizard(prefs) {
-  const matches = [];
-  for (const r of MILK_HONEY_RECIPES) {
-    if (recipeMatchesWizard(r, prefs)) matches.push(r);
-    if (matches.length >= 12) break; // cap candidates
-  }
-
-  // If fewer than 3, relax filters in a controlled way
-  const warnings = [];
-  let results = matches;
-
-  if (results.length < 3) {
-    // Relax ice first
-    warnings.push("Could not find 3 perfect matches; relaxing ice preference for closest fits.");
-    const relaxed = MILK_HONEY_RECIPES.filter((r) => {
-      const p = { ...prefs, ice: null };
-      return recipeMatchesWizard(r, p);
-    });
-    results = relaxed;
-  }
-
-  if (results.length < 3) {
-    // Relax style next
-    warnings.push("Still short on matches; relaxing style for closest fits.");
-    const relaxed = MILK_HONEY_RECIPES.filter((r) => {
-      const p = { ...prefs, style: null, ice: prefs.ice || null };
-      return recipeMatchesWizard(r, p);
-    });
-    results = relaxed;
-  }
-
-  // Take top 3 distinct by name
-  const top = [];
-  const seen = new Set();
-  for (const r of results) {
-    if (!r || !r.name) continue;
-    const key = norm(r.name);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    top.push(r);
-    if (top.length === 3) break;
-  }
-
-  return { top, warnings };
-}
-
-// ------------ Optional OpenAI fallback for generic Q&A ------------
-async function callOpenAI(question) {
-  // Keep this ultra-small.
-  // If you want to disable OpenAI completely, remove OPENAI_API_KEY from env.
-  if (!OPENAI_API_KEY) return null;
-
-  const payload = {
-    model: "gpt-4.1-mini",
-    temperature: 0.2,
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are CCC Bar Bot. Respond ONLY in pure JSON with keys summary,warnings,recipes. " +
-          "If the user asks for a spec, only answer if the recipe is in the provided list. " +
-          "If not, return recipes:[] and a warning.",
-      },
-      {
-        role: "user",
-        content:
-          "User: " + question + "\n\n" +
-          "Note: You do NOT have the recipe list. If you cannot answer deterministically, return recipes:[] with a warning.",
-      },
-    ],
-  };
-
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) {
-    const txt = await res.text();
-    console.error("CCC Bar Bot: OpenAI error:", txt);
-    return null;
-  }
-
-  const data = await res.json();
-  const raw = data.choices?.[0]?.message?.content || "";
-  try {
-    return JSON.parse(raw);
-  } catch (e) {
-    console.error("CCC Bar Bot: Could not parse OpenAI JSON:", e, raw);
-    return null;
-  }
 }
 
 // ------------ Netlify handler ------------
