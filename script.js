@@ -605,42 +605,36 @@ if (wizardEl) {
   if (!wizardNextBtn && wizardSubmitBtn) {
     // Attempt to append into the submit row if present; else insert after submit button.
     const submitRow =
-      wizardSubmitBtn.closest(".wizard-submit-row") || wizardSubmitBtn.parentElement;
+  wizardSubmitBtn.closest(".wizard-submit-row") || wizardSubmitBtn.parentElement;
 
-    wizardNextBtn = document.createElement("button");
-    wizardNextBtn.type = "button";
-    wizardNextBtn.className = "wizard-submit-btn wizard-next-btn"; // style in CSS (see note below)
-    wizardNextBtn.setAttribute("data-wizard-next", "true");
-    wizardNextBtn.textContent = "Next";
-    wizardNextBtn.disabled = true;
+// Ensure Previous button exists
+let wizardPrevBtn = submitRow.querySelector("[data-wizard-prev]");
+if (!wizardPrevBtn) {
+  wizardPrevBtn = document.createElement("button");
+  wizardPrevBtn.type = "button";
+  wizardPrevBtn.className = "wizard-submit-btn wizard-prev-btn";
+  wizardPrevBtn.setAttribute("data-wizard-prev", "true");
+  wizardPrevBtn.textContent = "Previous";
+  wizardPrevBtn.disabled = true;
+}
 
-    // Keep Search on left, Another on right: add as second button in the same row
-    submitRow.appendChild(wizardNextBtn);
-  }
+// Ensure Next button exists
+let wizardNextBtn = submitRow.querySelector("[data-wizard-next]");
+if (!wizardNextBtn) {
+  wizardNextBtn = document.createElement("button");
+  wizardNextBtn.type = "button";
+  wizardNextBtn.className = "wizard-submit-btn wizard-next-btn";
+  wizardNextBtn.setAttribute("data-wizard-next", "true");
+  wizardNextBtn.textContent = "Next";
+  wizardNextBtn.disabled = true;
+}
 
-  function updateWizardCTA() {
-    if (!wizardSubmitBtn) return;
+// Clear row and re-append in strict order
+submitRow.innerHTML = "";
+submitRow.appendChild(wizardSubmitBtn); // Search (left)
+submitRow.appendChild(wizardPrevBtn);   // Previous (middle)
+submitRow.appendChild(wizardNextBtn);   // Next (right)
 
-    const ready =
-      !!wizardState.style &&
-      !!wizardState.ice &&
-      Array.isArray(wizardState.spirits) &&
-      wizardState.spirits.length > 0;
-
-    wizardSubmitBtn.disabled = !ready;
-
-    // "Another option" should be enabled only after at least one successful search
-    if (wizardNextBtn) {
-      wizardNextBtn.disabled = !ready || wizardExclude.length === 0;
-    }
-  }
-
-  function handleSingleChoice(questionKey, value, buttonEl, groupEl) {
-    const allButtons = groupEl.querySelectorAll(".wizard-option");
-    allButtons.forEach((b) => b.classList.remove("is-selected"));
-
-    buttonEl.classList.add("is-selected");
-    wizardState[questionKey] = value;
 
     // Changing filters should reset rotation/exclude to avoid confusing repeats
     wizardIndex = 0;
