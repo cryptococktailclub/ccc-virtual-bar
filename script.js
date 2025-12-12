@@ -611,7 +611,7 @@ if (wizardEl) {
     wizardNextBtn.type = "button";
     wizardNextBtn.className = "wizard-submit-btn wizard-next-btn"; // style in CSS (see note below)
     wizardNextBtn.setAttribute("data-wizard-next", "true");
-    wizardNextBtn.textContent = "Another option";
+    wizardNextBtn.textContent = "Next";
     wizardNextBtn.disabled = true;
 
     // Keep Search on left, Another on right: add as second button in the same row
