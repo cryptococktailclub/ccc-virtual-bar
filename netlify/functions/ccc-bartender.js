@@ -132,41 +132,98 @@ function isAskingForSpec(question) {
 function recipeMatchesWizard(r, prefs) {
   const method = norm(r.method);
   const ice = norm(r.ice);
-  const category = norm(r.category);
 
+  // ----------------
   // Style
+  // ----------------
   if (prefs.style === "light_refreshing") {
-    // favor shaken / built
-    const ok = method.includes("shake") || method.includes("build") || method.includes("swizzle") || method.includes("highball");
-    if (!ok) return false;
-  }
-  if (prefs.style === "spirit_forward") {
-    const ok = method.includes("stir") || method.includes("old fashioned") || method.includes("manhattan");
+    const ok =
+      method.includes("shake") ||
+      method.includes("build") ||
+      method.includes("swizzle") ||
+      method.includes("highball") ||
+      method.includes("collins");
     if (!ok) return false;
   }
 
+  if (prefs.style === "spirit_forward") {
+    // Important: many mezcal/tequila stirred drinks will simply say "stir"
+    const ok =
+      method.includes("stir") ||
+      method.includes("old fashioned") ||
+      method.includes("manhattan") ||
+      method.includes("negroni");
+    if (!ok) return false;
+  }
+
+  // ----------------
   // Ice preference
+  // ----------------
   if (prefs.ice === "on_ice") {
-    // treat "none", "up" as no-ice
     const ok = !(ice.includes("none") || ice.includes("up") || ice.includes("no ice"));
     if (!ok) return false;
   }
+
   if (prefs.ice === "no_ice") {
     const ok = ice.includes("none") || ice.includes("up") || ice.includes("no ice");
     if (!ok) return false;
   }
 
+  // ----------------
   // Spirit preference(s)
+  // Match against: name/category/baseSpirit/spirit/method/ice + ALL ingredient names
+  // ----------------
   if (Array.isArray(prefs.spirits) && prefs.spirits.length) {
-    const spirits = prefs.spirits.map((s) => norm(s));
-    const cat = category;
-    // Recipes are categorized broadly. We'll match if the recipe category includes any chosen spirit keyword.
-    const ok = spirits.some((s) => cat.includes(s));
+    const haystackParts = [
+      r.name,
+      r.category,
+      r.baseSpirit,
+      r.spirit,
+      r.method,
+      r.ice,
+      ...(Array.isArray(r.ingredients) ? r.ingredients.map((i) => i.ingredient) : []),
+    ];
+    const haystack = norm(haystackParts.filter(Boolean).join(" "));
+
+    // Build “wanted” set with synonyms
+    const wanted = new Set();
+    for (const raw of prefs.spirits) {
+      const s = norm(raw);
+      if (!s) continue;
+
+      wanted.add(s);
+
+      // Wizard uses "rye_whiskey"
+      if (s === "rye_whiskey") {
+        wanted.add("rye");
+        wanted.add("whiskey");
+      }
+
+      // Aggressive agave mapping for mezcal/tequila
+      if (s === "mezcal") {
+        wanted.add("agave");
+        wanted.add("tequila"); // many recipes may group agave spirits loosely
+      }
+      if (s === "tequila") {
+        wanted.add("agave");
+        wanted.add("mezcal");
+      }
+
+      // Cachaça tolerance (diacritics often get lost)
+      if (s === "cachaca") {
+        wanted.add("cacha");
+        wanted.add("cachaca");
+        wanted.add("cachaça");
+      }
+    }
+
+    const ok = Array.from(wanted).some((w) => w && haystack.includes(w));
     if (!ok) return false;
   }
 
   return true;
 }
+
 
 function recommendFromWizard(prefs) {
   const matches = [];
@@ -287,25 +344,30 @@ exports.handler = async (event) => {
   const wizardPrefs = body.wizard_preferences || {};
 
   // 1) Wizard: deterministic recommendations only
-  if (mode === "wizard") {
-    const prefs = {
-      style: wizardPrefs.style || null,
-      ice: wizardPrefs.ice || null,
-      spirits: Array.isArray(wizardPrefs.spirits) ? wizardPrefs.spirits : [],
-    };
+if (mode === "wizard") {
+  const prefs = {
+    style: wizardPrefs.style || null,
+    ice: wizardPrefs.ice || null,
+    spirits: Array.isArray(wizardPrefs.spirits) ? wizardPrefs.spirits : [],
+  };
 
-    const { top, warnings } = recommendFromWizard(prefs);
+  const { top, warnings } = recommendFromWizard(prefs);
 
-    const structured = {
-      summary: top.length
-        ? "Here are three Milk & Honey picks that fit your vibe. Choose one and I’ll pour the exact spec."
-        : "I couldn’t find a strong Milk & Honey match for those filters.",
-      warnings: warnings || [],
-      recipes: top.map((r) => toStructuredRecipe(r, "Recommended based on your wizard picks.")),
-    };
+  // Optional: client can pass wizard_index to step through results
+  const idx = Number.isFinite(Number(body.wizard_index)) ? Number(body.wizard_index) : 0;
+  const pick = top.length ? top[Math.max(0, idx) % top.length] : null;
 
-    return jsonResponse(structured);
-  }
+  const structured = {
+    summary: pick
+      ? "Milk & Honey pick based on your wizard selections. Want another option?"
+      : "I couldn’t find a strong Milk & Honey match for those filters.",
+    warnings: warnings || [],
+    recipes: pick ? [toStructuredRecipe(pick, "Recommended based on your wizard picks.")] : [],
+  };
+
+  return jsonResponse(structured);
+}
+
 
   // 2) Chat: if user asks for a specific drink spec, return exact recipe deterministically
   if (question) {
