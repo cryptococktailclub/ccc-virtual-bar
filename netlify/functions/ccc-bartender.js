@@ -345,42 +345,26 @@ async function callOpenAI(question) {
 
 // ------------ Netlify handler ------------
 exports.handler = async (event) => {
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Method not allowed" }),
-    };
-  }
-
-  let body = {};
-  try {
-    body = JSON.parse(event.body || "{}");
-  } catch (_) {
-    body = {};
-  }
-
-  const mode = String(body.mode || "chat");
-  const question = String(body.question || "").trim();
-  const wizardPrefs = body.wizard_preferences || {};
-
-  // 1) Wizard: deterministic recommendations only
-if (mode === "wizard") {
+  if (mode === "wizard") {
   const prefs = {
     style: wizardPrefs.style || null,
     ice: wizardPrefs.ice || null,
     spirits: Array.isArray(wizardPrefs.spirits) ? wizardPrefs.spirits : [],
   };
 
-  const { top, warnings } = recommendFromWizard(prefs);
+  const wizardIndex = Number.isFinite(Number(body.wizard_index)) ? Number(body.wizard_index) : 0;
+  const exclude = Array.isArray(body.exclude) ? body.exclude : [];
+  const sessionId = String(body.session_id || "");
 
-  // Optional: client can pass wizard_index to step through results
-  const idx = Number.isFinite(Number(body.wizard_index)) ? Number(body.wizard_index) : 0;
-  const pick = top.length ? top[Math.max(0, idx) % top.length] : null;
+  const { pick, warnings, total } = recommendFromWizard(prefs, {
+    excludeNames: exclude,
+    index: wizardIndex,
+    sessionId,
+  });
 
   const structured = {
     summary: pick
-      ? "Milk & Honey pick based on your wizard selections. Want another option?"
+      ? `Milk & Honey pick based on your selections (${wizardIndex + 1}/${Math.max(1, total)}). Want another option?`
       : "I couldn’t find a strong Milk & Honey match for those filters.",
     warnings: warnings || [],
     recipes: pick ? [toStructuredRecipe(pick, "Recommended based on your wizard picks.")] : [],
