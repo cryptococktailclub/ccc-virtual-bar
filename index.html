@@ -258,16 +258,27 @@
     </div>
 
     <!-- Wizard CTA -->
-    <div class="wizard-submit-row">
-      <button
-        type="button"
-        class="wizard-submit-btn bartender-wizard-cta"
-        id="wizardRecommendBtn"
-        disabled
-      >
-        Show me 3 cocktails
-      </button>
-    </div>
+   <div class="wizard-submit-row">
+  <button
+    type="button"
+    class="wizard-submit-btn bartender-wizard-cta"
+    id="wizardRecommendBtn"
+    data-wizard-submit
+    disabled
+  >
+    Search
+  </button>
+
+  <button
+    type="button"
+    class="wizard-next-btn"
+    id="wizardNextBtn"
+    data-wizard-next
+    disabled
+  >
+    Another option
+  </button>
+</div>
 
     <div class="bartender-wizard-hint">
       Or just type to the bar: “Gold Rush spec” or “spirit-forward mezcal, up” and Bar Bot will build it.
