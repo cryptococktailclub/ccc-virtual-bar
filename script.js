@@ -667,22 +667,41 @@ function initBarBot() {
       return `Recommend three cocktails that are ${parts.join(", ")}.`;
     }
 
-    if (wizardSubmitBtn) {
+        if (wizardSubmitBtn) {
       wizardSubmitBtn.addEventListener("click", () => {
         if (wizardSubmitBtn.disabled) return;
 
-        const questionText = buildWizardQuestionText();
+        // Pick a primary spirit for backend wizard filtering
+        const primarySpirit =
+          Array.isArray(wizardState.spirits) && wizardState.spirits.length
+            ? wizardState.spirits[0]
+            : "";
+
+        // Build backend-compatible wizard text markers (backend parses these reliably)
+        const questionText =
+          `style: ${wizardState.style === "light_refreshing" ? "Light and Refreshing" : "Spirit Forward"}\n` +
+          `icePreference: ${wizardState.ice === "no_ice" ? "No Ice" : "With Ice"}\n` +
+          `spirit: ${primarySpirit}`;
 
         const payload = {
           mode: "wizard",
           question: questionText,
+
+          // CRITICAL: backend expects this object + these key names
+          wizard: {
+            style: wizardState.style,          // "light_refreshing" | "spirit_forward"
+            icePreference: wizardState.ice,    // "on_ice" | "no_ice"
+            spirit: primarySpirit,             // e.g. "rum"
+          },
+
+          // Optional: keep for UI/debugging; backend can ignore
           wizard_preferences: { ...wizardState },
         };
 
-        // Show the preference summary as the "user" message
         callBartenderAPI(payload, { showQuestionInChat: true });
       });
     }
+
 
     // Initial button state
     updateWizardCTA();
