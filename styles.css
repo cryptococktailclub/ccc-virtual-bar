@@ -1795,3 +1795,22 @@ body.theme-platinum .bar-tv-frame {
   /* Optional subtle glow to match hero */
   text-shadow: 0 0 6px rgba(255, 215, 0, 0.35);
 }
+/* ======================================================
+   FORCE HEADER TITLE TO STAY ON ONE LINE (MOBILE + TABLET)
+   ====================================================== */
+
+.top-nav .brand-title {
+  white-space: nowrap;          /* Prevent wrapping */
+  overflow: hidden;             /* Avoid accidental overflow */
+  text-overflow: ellipsis;      /* Safety — rarely needed but prevents spill */
+  max-width: 100%;              /* Ensures proper shrinking on small screens */
+}
+
+/* Slightly tighten letter-spacing on small screens
+   so the title fits elegantly in one line */
+@media (max-width: 768px) {
+  .top-nav .brand-title {
+    letter-spacing: 0.12em;     /* Reduce from your larger desktop spacing */
+    font-size: 0.78rem;         /* Scales well while staying readable */
+  }
+}
