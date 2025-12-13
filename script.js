@@ -609,45 +609,54 @@ function initBarBot() {
     let wizardHistoryPos = -1;
 
     // --- Find/create buttons in desired order: Search | Previous | Next ---
-    // Search uses the existing submit button (rename to "Search")
-    if (wizardSubmitBtn) wizardSubmitBtn.textContent = "Search";
+// HARD RESET: remove any legacy "Another option" buttons
+wizardEl.querySelectorAll(".wizard-next-btn, [data-wizard-next]").forEach((btn) => {
+  if (btn.textContent.toLowerCase().includes("another")) {
+    btn.remove();
+  }
+});
 
-    let wizardPrevBtn = wizardEl.querySelector("[data-wizard-prev]");
-    let wizardNextBtn = wizardEl.querySelector("[data-wizard-next]");
+if (wizardSubmitBtn) {
+  wizardSubmitBtn.textContent = "Search";
+  wizardSubmitBtn.classList.add("ccc-pill");
+}
 
-    if (wizardSubmitBtn) {
-      const submitRow =
-        wizardSubmitBtn.closest(".wizard-submit-row") || wizardSubmitBtn.parentElement;
+let wizardPrevBtn = wizardEl.querySelector("[data-wizard-prev]");
+let wizardNextBtn = wizardEl.querySelector("[data-wizard-next]");
 
-      // Ensure Previous exists
-      if (!wizardPrevBtn) {
-        wizardPrevBtn = document.createElement("button");
-        wizardPrevBtn.type = "button";
-        wizardPrevBtn.className = "wizard-submit-btn wizard-prev-btn";
-        wizardPrevBtn.setAttribute("data-wizard-prev", "true");
-        wizardPrevBtn.textContent = "Previous";
-        wizardPrevBtn.disabled = true;
-      }
+const submitRow =
+  wizardSubmitBtn.closest(".wizard-submit-row") || wizardSubmitBtn.parentElement;
 
-      // Ensure Next exists
-      if (!wizardNextBtn) {
-        wizardNextBtn = document.createElement("button");
-        wizardNextBtn.type = "button";
-        wizardNextBtn.className = "wizard-submit-btn wizard-next-btn";
-        wizardNextBtn.setAttribute("data-wizard-next", "true");
-        wizardNextBtn.textContent = "Next";
-        wizardNextBtn.disabled = true;
-      }
+// PREVIOUS
+if (!wizardPrevBtn) {
+  wizardPrevBtn = document.createElement("button");
+  wizardPrevBtn.type = "button";
+  wizardPrevBtn.className = "wizard-submit-btn ccc-pill wizard-prev-btn";
+  wizardPrevBtn.setAttribute("data-wizard-prev", "true");
+  wizardPrevBtn.textContent = "Previous";
+  wizardPrevBtn.disabled = true;
+}
 
-      // Enforce order: Search, Previous, Next
-      // Remove if already present to avoid duplicates, then append in order.
-      try {
-        if (wizardPrevBtn.parentNode) wizardPrevBtn.parentNode.removeChild(wizardPrevBtn);
-        if (wizardNextBtn.parentNode) wizardNextBtn.parentNode.removeChild(wizardNextBtn);
-      } catch (_) {}
+// NEXT (explicitly force label)
+if (!wizardNextBtn) {
+  wizardNextBtn = document.createElement("button");
+  wizardNextBtn.type = "button";
+  wizardNextBtn.className = "wizard-submit-btn ccc-pill wizard-next-btn";
+  wizardNextBtn.setAttribute("data-wizard-next", "true");
+  wizardNextBtn.textContent = "Next";
+  wizardNextBtn.disabled = true;
+} else {
+  wizardNextBtn.textContent = "Next";
+}
 
-      submitRow.appendChild(wizardPrevBtn);
-      submitRow.appendChild(wizardNextBtn);
+// Enforce order: Search → Previous → Next
+[ wizardPrevBtn, wizardNextBtn ].forEach(btn => {
+  if (btn.parentNode) btn.parentNode.removeChild(btn);
+});
+
+submitRow.appendChild(wizardPrevBtn);
+submitRow.appendChild(wizardNextBtn);
+
     }
 
     // --- Indicator (subtle "x of n") ---
