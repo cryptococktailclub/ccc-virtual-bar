@@ -494,7 +494,8 @@ function initBarBot() {
     typingEl = null;
   }
 
-  // Shared API call for wizard + free-text chat
+   // Shared API call for wizard + free-text chat
+  // UPDATED: returns `structured` so wizard can manage history/indicator cleanly
   async function callBartenderAPI(payload, { showQuestionInChat = false } = {}) {
     const questionText = payload.question || "";
 
@@ -516,7 +517,7 @@ function initBarBot() {
       if (!res.ok) {
         appendMessage("Bar Bot is temporarily offline. Try again shortly.", true);
         console.error("CCC Bar Bot HTTP error:", res.status, await res.text());
-        return;
+        return null;
       }
 
       const data = await res.json();
@@ -544,6 +545,8 @@ function initBarBot() {
       } else {
         appendMessage("I had trouble formatting that recipe. Try asking in a slightly different way.", true);
       }
+
+      return structured;
     } catch (err) {
       hideTyping();
       console.error("CCC Bar Bot error:", err);
@@ -551,6 +554,7 @@ function initBarBot() {
         "I couldn’t reach the back bar AI right now. Please check the Netlify function and OpenAI key.",
         true
       );
+      return null;
     }
   }
 
@@ -572,216 +576,441 @@ function initBarBot() {
     callBartenderAPI(payload, { showQuestionInChat: true });
   });
 
-  // ---- Wizard wiring (refactored) ----
+  // ---- Wizard wiring (Search / Previous / Next + persistence + shortcuts) ----
 
-  // ---- Wizard wiring (refactored) ----
-if (wizardEl) {
-  const wizardSubmitBtn =
-    wizardEl.querySelector("[data-wizard-submit]") ||
-    wizardEl.querySelector("#wizardRecommendBtn") ||
-    wizardEl.querySelector(".wizard-submit-btn");
+  if (wizardEl) {
+    const wizardSubmitBtn =
+      wizardEl.querySelector("[data-wizard-submit]") ||
+      wizardEl.querySelector("#wizardRecommendBtn") ||
+      wizardEl.querySelector(".wizard-submit-btn");
 
-  const wizardOptionGroups = wizardEl.querySelectorAll(".wizard-options");
+    const wizardOptionGroups = wizardEl.querySelectorAll(".wizard-options");
 
-  // Persistent state for wizard answers
-  const wizardState = {
-    style: null,   // "light_refreshing" | "spirit_forward"
-    ice: null,     // "on_ice" | "no_ice"
-    spirits: [],   // array of strings (multi-select)
-  };
+    // Persistent state for wizard answers
+    const wizardState = {
+      style: null,   // "light_refreshing" | "spirit_forward"
+      ice: null,     // "on_ice" | "no_ice"
+      spirits: [],   // array of strings (multi-select)
+    };
 
-  // Rotation + anti-repeat state
-  let wizardIndex = 0;
-  let wizardExclude = [];
-  const sessionId =
-    (typeof crypto !== "undefined" && crypto.randomUUID)
-      ? crypto.randomUUID()
-      : String(Date.now());
+    // Session + rotation state
+    const WIZARD_STORAGE_KEY = "ccc_wizard_session_v1";
 
-  // --- Ensure we have a right-side "Another option" button ---
-  // If your HTML already includes a button with [data-wizard-next], we'll use it.
-  // Otherwise we create it next to the submit button.
-  let wizardNextBtn = wizardEl.querySelector("[data-wizard-next]");
-  if (!wizardNextBtn && wizardSubmitBtn) {
-    // Attempt to append into the submit row if present; else insert after submit button.
-    const submitRow =
-  wizardSubmitBtn.closest(".wizard-submit-row") || wizardSubmitBtn.parentElement;
+    let wizardIndex = 0;
+    let wizardExclude = [];
+    const sessionId =
+      (typeof crypto !== "undefined" && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : String(Date.now());
 
-// Ensure Previous button exists
-let wizardPrevBtn = submitRow.querySelector("[data-wizard-prev]");
-if (!wizardPrevBtn) {
-  wizardPrevBtn = document.createElement("button");
-  wizardPrevBtn.type = "button";
-  wizardPrevBtn.className = "wizard-submit-btn wizard-prev-btn";
-  wizardPrevBtn.setAttribute("data-wizard-prev", "true");
-  wizardPrevBtn.textContent = "Previous";
-  wizardPrevBtn.disabled = true;
-}
+    // History for Previous/Next navigation
+    // Each entry: { structured, wizardIndex, wizardExclude }
+    let wizardHistory = [];
+    let wizardHistoryPos = -1;
 
-// Ensure Next button exists
-let wizardNextBtn = submitRow.querySelector("[data-wizard-next]");
-if (!wizardNextBtn) {
-  wizardNextBtn = document.createElement("button");
-  wizardNextBtn.type = "button";
-  wizardNextBtn.className = "wizard-submit-btn wizard-next-btn";
-  wizardNextBtn.setAttribute("data-wizard-next", "true");
-  wizardNextBtn.textContent = "Next";
-  wizardNextBtn.disabled = true;
-}
+    // --- Find/create buttons in desired order: Search | Previous | Next ---
+    // Search uses the existing submit button (rename to "Search")
+    if (wizardSubmitBtn) wizardSubmitBtn.textContent = "Search";
 
-// Clear row and re-append in strict order
-submitRow.innerHTML = "";
-submitRow.appendChild(wizardSubmitBtn); // Search (left)
-submitRow.appendChild(wizardPrevBtn);   // Previous (middle)
-submitRow.appendChild(wizardNextBtn);   // Next (right)
+    let wizardPrevBtn = wizardEl.querySelector("[data-wizard-prev]");
+    let wizardNextBtn = wizardEl.querySelector("[data-wizard-next]");
 
+    if (wizardSubmitBtn) {
+      const submitRow =
+        wizardSubmitBtn.closest(".wizard-submit-row") || wizardSubmitBtn.parentElement;
 
-    // Changing filters should reset rotation/exclude to avoid confusing repeats
-    wizardIndex = 0;
-    wizardExclude = [];
-  }
+      // Ensure Previous exists
+      if (!wizardPrevBtn) {
+        wizardPrevBtn = document.createElement("button");
+        wizardPrevBtn.type = "button";
+        wizardPrevBtn.className = "wizard-submit-btn wizard-prev-btn";
+        wizardPrevBtn.setAttribute("data-wizard-prev", "true");
+        wizardPrevBtn.textContent = "Previous";
+        wizardPrevBtn.disabled = true;
+      }
 
-  function handleMultiChoice(value, buttonEl) {
-    const idx = wizardState.spirits.indexOf(value);
-    if (idx >= 0) {
-      wizardState.spirits.splice(idx, 1);
-      buttonEl.classList.remove("is-selected");
-    } else {
-      wizardState.spirits.push(value);
-      buttonEl.classList.add("is-selected");
+      // Ensure Next exists
+      if (!wizardNextBtn) {
+        wizardNextBtn = document.createElement("button");
+        wizardNextBtn.type = "button";
+        wizardNextBtn.className = "wizard-submit-btn wizard-next-btn";
+        wizardNextBtn.setAttribute("data-wizard-next", "true");
+        wizardNextBtn.textContent = "Next";
+        wizardNextBtn.disabled = true;
+      }
+
+      // Enforce order: Search, Previous, Next
+      // Remove if already present to avoid duplicates, then append in order.
+      try {
+        if (wizardPrevBtn.parentNode) wizardPrevBtn.parentNode.removeChild(wizardPrevBtn);
+        if (wizardNextBtn.parentNode) wizardNextBtn.parentNode.removeChild(wizardNextBtn);
+      } catch (_) {}
+
+      submitRow.appendChild(wizardPrevBtn);
+      submitRow.appendChild(wizardNextBtn);
     }
 
-    // Any change to spirit picks resets rotation
-    wizardIndex = 0;
-    wizardExclude = [];
-  }
+    // --- Indicator (subtle "x of n") ---
+    let wizardIndicatorEl = wizardEl.querySelector("[data-wizard-indicator]");
+    if (!wizardIndicatorEl && wizardSubmitBtn) {
+      const submitRow =
+        wizardSubmitBtn.closest(".wizard-submit-row") || wizardSubmitBtn.parentElement;
 
-  // Attach click handlers to all wizard-option buttons
-  wizardOptionGroups.forEach((groupEl) => {
-    const questionKey = groupEl.getAttribute("data-question");
-    if (!questionKey) return;
-
-    groupEl.querySelectorAll(".wizard-option").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const value = btn.getAttribute("data-value");
-        if (!value) return;
-
-        if (questionKey === "style" || questionKey === "ice") {
-          handleSingleChoice(questionKey, value, btn, groupEl);
-        } else if (questionKey === "spirits") {
-          handleMultiChoice(value, btn);
-        }
-
-        updateWizardCTA();
-      });
-    });
-  });
-
-  function buildWizardFriendlyText() {
-    const parts = [];
-
-    if (wizardState.style === "light_refreshing") {
-      parts.push("light & refreshing");
-    } else if (wizardState.style === "spirit_forward") {
-      parts.push("spirit-forward and stirred");
+      wizardIndicatorEl = document.createElement("div");
+      wizardIndicatorEl.className = "wizard-indicator";
+      wizardIndicatorEl.setAttribute("data-wizard-indicator", "true");
+      wizardIndicatorEl.textContent = "";
+      submitRow.insertAdjacentElement("afterend", wizardIndicatorEl);
     }
 
-    if (wizardState.ice === "on_ice") {
-      parts.push("served on ice");
-    } else if (wizardState.ice === "no_ice") {
-      parts.push("served up without ice");
+    function parseIndexTotalFromSummary(summaryText) {
+      const s = String(summaryText || "");
+      const m = s.match(/\((\d+)\s*\/\s*(\d+)\)/);
+      if (!m) return null;
+      const idx = Number(m[1]);
+      const total = Number(m[2]);
+      if (!Number.isFinite(idx) || !Number.isFinite(total) || total <= 0) return null;
+      return { idx, total };
     }
 
-    if (wizardState.spirits.length) {
-      parts.push(`spirit: ${wizardState.spirits.join(", ")}`);
+    function updateWizardIndicator(structured) {
+      if (!wizardIndicatorEl) return;
+      const parsed = parseIndexTotalFromSummary(structured?.summary);
+      wizardIndicatorEl.textContent = parsed ? `${parsed.idx} of ${parsed.total}` : "";
     }
 
-    return parts.length
-      ? `Searching Milk & Honey for cocktails that are ${parts.join(", ")}.`
-      : "Searching Milk & Honey for a cocktail recommendation.";
-  }
+    // --- Persistence helpers ---
+    function saveWizardSession() {
+      try {
+        const payload = {
+          wizardState,
+          wizardIndex,
+          wizardExclude,
+          sessionId,
+          wizardHistory,
+          wizardHistoryPos,
+          ts: Date.now(),
+        };
+        localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify(payload));
+      } catch (_) {}
+    }
 
-  function buildWizardMarkerText(primarySpirit) {
-    return (
-      `style: ${wizardState.style === "light_refreshing" ? "Light and Refreshing" : "Spirit Forward"}\n` +
-      `icePreference: ${wizardState.ice === "no_ice" ? "No Ice" : "With Ice"}\n` +
-      `spirit: ${primarySpirit}`
-    );
-  }
+    function loadWizardSession() {
+      try {
+        const raw = localStorage.getItem(WIZARD_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return null;
+        return parsed;
+      } catch (_) {
+        return null;
+      }
+    }
 
-  async function runWizardSearch({ increment = false } = {}) {
-    if (!wizardSubmitBtn || wizardSubmitBtn.disabled) return;
-
-    if (increment) wizardIndex += 1;
-    else {
-      // Search resets the rotation and prior excludes
+    function resetWizardRunState() {
       wizardIndex = 0;
       wizardExclude = [];
+      wizardHistory = [];
+      wizardHistoryPos = -1;
+      if (wizardIndicatorEl) wizardIndicatorEl.textContent = "";
+      saveWizardSession();
     }
 
-    const primarySpirit =
-      Array.isArray(wizardState.spirits) && wizardState.spirits.length
-        ? wizardState.spirits[0]
-        : "";
+    // --- CTA enable/disable ---
+    function updateWizardCTA() {
+      if (!wizardSubmitBtn) return;
 
-    const friendlyText = buildWizardFriendlyText();
-    const markerText = buildWizardMarkerText(primarySpirit);
+      const ready =
+        !!wizardState.style &&
+        !!wizardState.ice &&
+        Array.isArray(wizardState.spirits) &&
+        wizardState.spirits.length > 0;
 
-    // Show friendly text in chat (NOT marker text)
-    appendMessage(friendlyText, false);
+      wizardSubmitBtn.disabled = !ready;
 
-    const payload = {
-      mode: "wizard",
-      question: markerText,
+      // Previous is enabled only if we have earlier history
+      if (wizardPrevBtn) {
+        wizardPrevBtn.disabled = !ready || wizardHistoryPos <= 0;
+      }
 
-      // Keep for your backend’s prefs-based filtering:
-      wizard_preferences: { ...wizardState },
+      // Next is enabled only if ready and we've run at least one search OR we can go forward in history
+      if (wizardNextBtn) {
+        const hasRun = wizardHistoryPos >= 0;
+        const canGoForward = wizardHistoryPos < wizardHistory.length - 1;
+        wizardNextBtn.disabled = !ready || (!hasRun && !canGoForward);
+      }
+    }
 
-      // Rotation controls (backend uses these):
-      wizard_index: wizardIndex,
-      exclude: wizardExclude,
-      session_id: sessionId,
-    };
+    // --- Selection handlers ---
+    function handleSingleChoice(questionKey, value, buttonEl, groupEl) {
+      const allButtons = groupEl.querySelectorAll(".wizard-option");
+      allButtons.forEach((b) => b.classList.remove("is-selected"));
 
-    await callBartenderAPI(payload, { showQuestionInChat: false });
-  }
+      buttonEl.classList.add("is-selected");
+      wizardState[questionKey] = value;
 
-  // Search (left)
-  if (wizardSubmitBtn) {
-    // Update button label
-    wizardSubmitBtn.textContent = "Search";
-
-    wizardSubmitBtn.addEventListener("click", () => {
-      runWizardSearch({ increment: false });
-    });
-  }
-
-  // Another option (right)
-  if (wizardNextBtn) {
-    wizardNextBtn.addEventListener("click", () => {
-      runWizardSearch({ increment: true });
-    });
-  }
-
-  // Initial button state
-  updateWizardCTA();
-
-  // --- Hook: capture last served recipe name to prevent repeats ---
-  // We do this by monkey-patching renderRecipeCards if it exists, without breaking it.
-  // If you prefer, I can rewrite this as a cleaner callback pattern.
-  if (typeof window !== "undefined" && typeof window.renderRecipeCards === "function") {
-    const originalRender = window.renderRecipeCards;
-    window.renderRecipeCards = function (structured) {
-      try {
-        const name = structured?.recipes?.[0]?.name;
-        if (name && !wizardExclude.includes(name)) wizardExclude.push(name);
-      } catch (_) {}
-      const out = originalRender.apply(this, arguments);
+      // Filters changed → reset rotation/history
+      resetWizardRunState();
       updateWizardCTA();
-      return out;
-    };
+    }
+
+    function handleMultiChoice(value, buttonEl) {
+      const idx = wizardState.spirits.indexOf(value);
+      if (idx >= 0) {
+        wizardState.spirits.splice(idx, 1);
+        buttonEl.classList.remove("is-selected");
+      } else {
+        wizardState.spirits.push(value);
+        buttonEl.classList.add("is-selected");
+      }
+
+      // Filters changed → reset rotation/history
+      resetWizardRunState();
+      updateWizardCTA();
+    }
+
+    // Attach click handlers to wizard-option buttons
+    wizardOptionGroups.forEach((groupEl) => {
+      const questionKey = groupEl.getAttribute("data-question");
+      if (!questionKey) return;
+
+      groupEl.querySelectorAll(".wizard-option").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const value = btn.getAttribute("data-value");
+          if (!value) return;
+
+          if (questionKey === "style" || questionKey === "ice") {
+            handleSingleChoice(questionKey, value, btn, groupEl);
+          } else if (questionKey === "spirits") {
+            handleMultiChoice(value, btn);
+          }
+
+          updateWizardCTA();
+          saveWizardSession();
+        });
+      });
+    });
+
+    function buildWizardFriendlyText() {
+      const parts = [];
+
+      if (wizardState.style === "light_refreshing") {
+        parts.push("light & refreshing");
+      } else if (wizardState.style === "spirit_forward") {
+        parts.push("spirit-forward and stirred");
+      }
+
+      if (wizardState.ice === "on_ice") {
+        parts.push("served on ice");
+      } else if (wizardState.ice === "no_ice") {
+        parts.push("served up without ice");
+      }
+
+      if (wizardState.spirits.length) {
+        parts.push(`spirit: ${wizardState.spirits.join(", ")}`);
+      }
+
+      return parts.length
+        ? `Searching Milk & Honey for cocktails that are ${parts.join(", ")}.`
+        : "Searching Milk & Honey for a cocktail recommendation.";
+    }
+
+    function buildWizardMarkerText(primarySpirit) {
+      return (
+        `style: ${wizardState.style === "light_refreshing" ? "Light and Refreshing" : "Spirit Forward"}\n` +
+        `icePreference: ${wizardState.ice === "no_ice" ? "No Ice" : "With Ice"}\n` +
+        `spirit: ${primarySpirit}`
+      );
+    }
+
+    function pushWizardHistory(structured) {
+      // Truncate forward history if user went back, then searches again
+      if (wizardHistoryPos < wizardHistory.length - 1) {
+        wizardHistory = wizardHistory.slice(0, wizardHistoryPos + 1);
+      }
+
+      wizardHistory.push({
+        structured,
+        wizardIndex,
+        wizardExclude: [...wizardExclude],
+      });
+      wizardHistoryPos = wizardHistory.length - 1;
+
+      updateWizardIndicator(structured);
+      updateWizardCTA();
+      saveWizardSession();
+    }
+
+    async function runWizardSearch({ mode = "search" } = {}) {
+      if (!wizardSubmitBtn || wizardSubmitBtn.disabled) return;
+
+      // Determine whether we're navigating forward in history or calling backend again
+      if (mode === "next" && wizardHistoryPos < wizardHistory.length - 1) {
+        wizardHistoryPos += 1;
+        const snap = wizardHistory[wizardHistoryPos];
+        if (snap?.structured) {
+          renderRecipeCards(snap.structured);
+          updateWizardIndicator(snap.structured);
+        }
+        updateWizardCTA();
+        saveWizardSession();
+        return;
+      }
+
+      // Search: reset run state
+      if (mode === "search") {
+        wizardIndex = 0;
+        wizardExclude = [];
+        wizardHistory = [];
+        wizardHistoryPos = -1;
+        if (wizardIndicatorEl) wizardIndicatorEl.textContent = "";
+      }
+
+      // Next: advance index, keep exclude/history
+      if (mode === "next") {
+        wizardIndex += 1;
+      }
+
+      // Primary spirit used for marker text
+      const primarySpirit =
+        Array.isArray(wizardState.spirits) && wizardState.spirits.length
+          ? wizardState.spirits[0]
+          : "";
+
+      // Friendly line in chat (not marker text)
+      appendMessage(buildWizardFriendlyText(), false);
+
+      const payload = {
+        mode: "wizard",
+        question: buildWizardMarkerText(primarySpirit),
+        wizard_preferences: { ...wizardState },
+        wizard_index: wizardIndex,
+        exclude: wizardExclude,
+        session_id: sessionId,
+      };
+
+      const structured = await callBartenderAPI(payload, { showQuestionInChat: false });
+      if (!structured) {
+        updateWizardCTA();
+        saveWizardSession();
+        return;
+      }
+
+      // Add returned recipe name to exclude to prevent repeats
+      const servedName = structured?.recipes?.[0]?.name;
+      if (servedName && !wizardExclude.includes(servedName)) wizardExclude.push(servedName);
+
+      pushWizardHistory(structured);
+    }
+
+    function runWizardPrevious() {
+      if (wizardHistoryPos <= 0) return;
+
+      wizardHistoryPos -= 1;
+      const snap = wizardHistory[wizardHistoryPos];
+
+      if (snap?.structured) {
+        renderRecipeCards(snap.structured);
+        updateWizardIndicator(snap.structured);
+      }
+
+      updateWizardCTA();
+      saveWizardSession();
+    }
+
+    // Button wiring
+    if (wizardSubmitBtn) {
+      wizardSubmitBtn.addEventListener("click", () => runWizardSearch({ mode: "search" }));
+    }
+    if (wizardPrevBtn) {
+      wizardPrevBtn.addEventListener("click", () => runWizardPrevious());
+    }
+    if (wizardNextBtn) {
+      wizardNextBtn.addEventListener("click", () => runWizardSearch({ mode: "next" }));
+    }
+
+    // Keyboard shortcuts: ← Previous, → Next (ignore typing in inputs)
+    function shouldIgnoreKeydown(e) {
+      if (!e) return true;
+      if (e.metaKey || e.ctrlKey || e.altKey) return true;
+
+      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+      if (tag === "input" || tag === "textarea" || tag === "select") return true;
+      if (e.target && e.target.isContentEditable) return true;
+
+      return false;
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (shouldIgnoreKeydown(e)) return;
+      if (!wizardEl) return;
+
+      if (e.key === "ArrowLeft") {
+        if (wizardPrevBtn && !wizardPrevBtn.disabled) {
+          e.preventDefault();
+          wizardPrevBtn.click();
+        }
+      } else if (e.key === "ArrowRight") {
+        if (wizardNextBtn && !wizardNextBtn.disabled) {
+          e.preventDefault();
+          wizardNextBtn.click();
+        }
+      }
+    });
+
+    // Restore session on load (filters + last result)
+    (function restoreWizardFromStorage() {
+      const stored = loadWizardSession();
+      if (!stored) return;
+
+      // Restore wizardState
+      if (stored.wizardState && typeof stored.wizardState === "object") {
+        wizardState.style = stored.wizardState.style || null;
+        wizardState.ice = stored.wizardState.ice || null;
+        wizardState.spirits = Array.isArray(stored.wizardState.spirits) ? stored.wizardState.spirits : [];
+      }
+
+      // Restore run state (index/exclude/history)
+      wizardIndex = Number.isFinite(Number(stored.wizardIndex)) ? Number(stored.wizardIndex) : 0;
+      wizardExclude = Array.isArray(stored.wizardExclude) ? stored.wizardExclude : [];
+      wizardHistory = Array.isArray(stored.wizardHistory) ? stored.wizardHistory : [];
+      wizardHistoryPos = Number.isFinite(Number(stored.wizardHistoryPos)) ? Number(stored.wizardHistoryPos) : -1;
+
+      // Re-apply selected UI classes
+      try {
+        wizardOptionGroups.forEach((groupEl) => {
+          const key = groupEl.getAttribute("data-question");
+          if (!key) return;
+
+          groupEl.querySelectorAll(".wizard-option").forEach((btn) => {
+            const v = btn.getAttribute("data-value");
+            if (!v) return;
+
+            if (key === "style" || key === "ice") {
+              btn.classList.toggle("is-selected", wizardState[key] === v);
+            } else if (key === "spirits") {
+              btn.classList.toggle("is-selected", Array.isArray(wizardState.spirits) && wizardState.spirits.includes(v));
+            }
+          });
+        });
+      } catch (_) {}
+
+      // Re-render the last recipe card if available
+      const snap = wizardHistoryPos >= 0 ? wizardHistory[wizardHistoryPos] : null;
+      if (snap?.structured) {
+        renderRecipeCards(snap.structured);
+        updateWizardIndicator(snap.structured);
+      }
+
+      updateWizardCTA();
+      saveWizardSession();
+    })();
+
+    // Initial CTA state
+    updateWizardCTA();
+    saveWizardSession();
   }
-}
+
 } // <-- closes initBarBot()
 
 // ==========================
