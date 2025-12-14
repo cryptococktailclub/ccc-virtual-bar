@@ -179,6 +179,17 @@ function initAudioPlayer() {
     if (albumArt) albumArt.classList.toggle("glow-active", isPlaying);
     if (tonearm) tonearm.classList.toggle("is-engaged", isPlaying);
     if (turntable) turntable.classList.toggle("speaker-drop-active", isPlaying);
+  function setPlayingVisual(isPlaying) {
+    if (platter) platter.classList.toggle("is-playing", isPlaying);
+    if (eq) eq.classList.toggle("is-playing", isPlaying);
+    if (albumArt) albumArt.classList.toggle("glow-active", isPlaying);
+    if (tonearm) tonearm.classList.toggle("is-engaged", isPlaying);
+    if (turntable) turntable.classList.toggle("speaker-drop-active", isPlaying);
+
+  // NEW: disc spin
+  if (trackDisc) trackDisc.classList.toggle("is-spinning", isPlaying);
+}
+
   }
 
   function loadTrack(index, autoPlay = false) {
