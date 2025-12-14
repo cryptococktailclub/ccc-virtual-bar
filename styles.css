@@ -834,96 +834,65 @@ body.theme-platinum .bartender-avatar {
 }
 /* =========================
    BAR BOT – WIZARD CTA
+   Search (gradient) + Prev/Next (neon)
    ========================= */
 
-.wizard-submit-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 4px;
+.wizard-submit-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
 }
 
-.wizard-submit-btn {
-  border-radius: 999px;
-  border: 1px solid transparent;
-  padding: 6px 16px;
-  font-size: 0.76rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  cursor: pointer;
-  background: linear-gradient(
-    120deg,
-    var(--accent-neon-pink),
-    var(--accent-gold-1)
-  );
-  color: #05010f;
-  box-shadow: 0 0 16px rgba(0, 0, 0, 0.9);
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    opacity 0.18s ease;
+/* Base button sizing/typography (no colors here) */
+.wizard-submit-btn,
+.wizard-nav-btn{
+  border-radius:999px;
+  padding:10px 18px;
+  font-size:0.76rem;
+  font-weight:600;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
 }
 
-.wizard-submit-btn:disabled {
-  opacity: 0.35;
-  cursor: default;
-  box-shadow: none;
+/* SEARCH = CCC gradient */
+.wizard-submit-gradient{
+  border:1px solid transparent;
+  background:linear-gradient(120deg, var(--accent-neon-pink), var(--accent-gold-1));
+  color:#05010f;
+  box-shadow:0 0 16px rgba(0,0,0,.9);
 }
 
-.wizard-submit-btn:not(:disabled):hover {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.9);
+.wizard-submit-gradient:disabled{
+  opacity:.35;
+  cursor:default;
+  box-shadow:none;
 }
 
-/* Hint line under the wizard */
-.bartender-wizard-hint {
-  margin-top: 4px;
-  font-size: 0.72rem;
-  color: var(--text-muted);
-}
-/* Wizard CTA row: left/right layout */
-.wizard-submit-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+.wizard-submit-gradient:not(:disabled):hover{
+  transform:translateY(-1px) scale(1.02);
+  box-shadow:0 10px 22px rgba(0,0,0,.9);
 }
 
-/* CCC Gradient Pill */
-.ccc-pill {
-  background: linear-gradient(
-    135deg,
-    #ff1493 0%,   /* Neon Pink */
-    #ffd700 50%,  /* Gold */
-    #e8e8e8 100%  /* Platinum */
-  );
-  color: #000;
-  border: none;
-  border-radius: 999px;
-  padding: 12px 22px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+/* PREVIOUS / NEXT = neon pill (not gradient) */
+.wizard-nav-neon{
+  background:rgba(255, 20, 147, 0.10);
+  border:1px solid rgba(255, 20, 147, 0.55);
+  color:var(--text);
+  box-shadow:0 0 14px rgba(255, 20, 147, 0.18);
 }
 
-.ccc-pill:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(255, 215, 0, 0.35);
+.wizard-nav-neon:not(:disabled):hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 22px rgba(255, 20, 147, 0.22);
 }
 
-.ccc-pill:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-/* Button row spacing */
-.wizard-submit-row {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  align-items: center;
+.wizard-nav-neon:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  box-shadow:none;
 }
 
 /* =========================
