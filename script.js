@@ -154,6 +154,9 @@ function initAudioPlayer() {
   const timelineProgress = document.getElementById("timeline-progress");
   const timeCurrent = document.getElementById("time-current");
   const timeRemaining = document.getElementById("time-remaining");
+  const trackDisc = document.getElementById("turntableTrackDisc");
+  const trackDiscTitle = document.getElementById("trackDiscTitle");
+  const trackDiscArtist = document.getElementById("trackDiscArtist");
 
   const prevBtn = document.getElementById("prev-btn");
   const playBtn = document.getElementById("play-btn");
@@ -198,6 +201,18 @@ function initAudioPlayer() {
     }
     if (timelineProgress) timelineProgress.style.width = "0%";
     if (dockTrack) dockTrack.textContent = `${track.title} — ${track.artist}`;
+// Track disc overlay update
+if (trackDisc) {
+  if (trackDiscTitle) trackDiscTitle.textContent = track.title || "";
+  if (trackDiscArtist) trackDiscArtist.textContent = track.artist || "";
+
+  trackDisc.classList.add("is-visible");
+
+  // “Land” micro animation on change
+  trackDisc.classList.remove("is-landing");
+  void trackDisc.offsetWidth; // force reflow
+  trackDisc.classList.add("is-landing");
+}
 
     // highlight active vinyl + micro "drop"
     vinylRow.querySelectorAll(".vinyl-item").forEach((btn, idx) => {
