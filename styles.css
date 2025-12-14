@@ -837,24 +837,54 @@ body.theme-platinum .bartender-avatar {
    Search (gradient) + Prev/Next (neon)
    ========================= */
 
+/* Row: Search left, Prev/Next grouped right */
 .wizard-submit-row{
   display:flex;
   align-items:center;
-  justify-content:space-between; /* Search left, nav group right */
   gap:10px;
 }
 
+/* Right-side group wrapper */
 .wizard-nav-right{
+  margin-left:auto;
   display:flex;
   align-items:center;
-  gap:10px; /* spacing between Previous and Next */
+  gap:10px;
 }
 
-/* PREVIOUS / NEXT = CCC neon pink pill */
+/* Shared pill base for ALL CTA buttons */
+.wizard-submit-btn,
+.wizard-nav-btn{
+  appearance:none;
+  border-radius:999px;
+  padding:10px 16px;
+  font-size:0.76rem;
+  font-weight:600;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  cursor:pointer;
+  line-height:1;
+  border:1px solid transparent;
+  transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease, background .18s ease, border-color .18s ease;
+}
+
+/* SEARCH = gradient pill */
+.wizard-submit-gradient{
+  background:linear-gradient(120deg, var(--accent-neon-pink), var(--accent-gold-1));
+  color:#05010f;
+  box-shadow:0 0 16px rgba(0,0,0,.9);
+}
+
+.wizard-submit-gradient:not(:disabled):hover{
+  transform:translateY(-1px) scale(1.02);
+  box-shadow:0 10px 22px rgba(0,0,0,.9);
+}
+
+/* PREVIOUS / NEXT = neon pink pill */
 .wizard-nav-neon{
   background: rgba(255, 20, 147, 0.14);
-  border: 1px solid rgba(255, 20, 147, 0.85);
-  color: #fff;
+  border-color: rgba(255, 20, 147, 0.85);
+  color:#fff;
   text-shadow: 0 0 10px rgba(255, 20, 147, 0.55);
   box-shadow:
     0 0 14px rgba(255, 20, 147, 0.35),
@@ -862,17 +892,20 @@ body.theme-platinum .bartender-avatar {
 }
 
 .wizard-nav-neon:not(:disabled):hover{
-  transform: translateY(-1px);
+  transform:translateY(-1px);
   box-shadow:
     0 0 22px rgba(255, 20, 147, 0.55),
     inset 0 0 14px rgba(255, 20, 147, 0.25);
 }
 
-.wizard-nav-neon:disabled{
-  opacity: .40;
-  cursor: not-allowed;
-  text-shadow: none;
-  box-shadow: none;
+/* Disabled state for ALL CTA buttons */
+.wizard-submit-btn:disabled,
+.wizard-nav-btn:disabled{
+  opacity:.40;
+  cursor:not-allowed;
+  text-shadow:none;
+  box-shadow:none;
+  transform:none;
 }
 
 /* =========================
