@@ -889,40 +889,31 @@ body.theme-platinum .bartender-avatar {
   gap: 10px;
 }
 
-/* =========================================
-   CCC Gradient Pill Buttons (Bar Bot)
-   ========================================= */
-
+/* CCC Gradient Pill */
 .ccc-pill {
   background: linear-gradient(
     135deg,
-    var(--ccc-neon-start, #ff1493),
-    var(--ccc-neon-end, #c71585)
+    #ff1493 0%,   /* Neon Pink */
+    #ffd700 50%,  /* Gold */
+    #e8e8e8 100%  /* Platinum */
   );
-  color: #ffffff;
+  color: #000;
   border: none;
   border-radius: 999px;
-  padding: 10px 18px;
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  padding: 12px 22px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-  box-shadow: 0 0 14px rgba(255, 20, 147, 0.35);
 }
 
 .ccc-pill:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 0 20px rgba(255, 20, 147, 0.55);
-}
-
-.ccc-pill:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 0 10px rgba(255, 20, 147, 0.4);
+  box-shadow: 0 6px 18px rgba(255, 215, 0, 0.35);
 }
 
 .ccc-pill:disabled {
-  opacity: 0.35;
+  opacity: 0.45;
   cursor: not-allowed;
   box-shadow: none;
 }
