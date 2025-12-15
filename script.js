@@ -506,6 +506,8 @@ wizardEl.querySelectorAll(".wizard-options").forEach(group => {
           b.classList.toggle("is-selected", b === btn)
         );
       }
+// 🔑 RESTORE SEARCH FUNCTION
+submitBtn.addEventListener("click", runWizard);
 
       // Reset run state on preference change
       wizardHistory = [];
