@@ -197,11 +197,52 @@
   Tell Bar Bot what you feel like and it will provide a recommendation and recipe.
 </p>
 
-  <!-- PREFERENCE WIZARD -->
- <div id="bartenderWizard">
-  <!-- all wizard options -->
-  <!-- submit row -->
+<!-- PREFERENCE WIZARD -->
+<div id="bartenderWizard">
+
+  <!-- Q1 -->
+  <div class="wizard-question">
+    <span class="wizard-label">Step 1 · Vibe</span>
+    <div class="wizard-options" data-question="style">
+      ...
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="wizard-question">
+    <span class="wizard-label">Step 2 · Served How</span>
+    <div class="wizard-options" data-question="ice">
+      ...
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="wizard-question">
+    <span class="wizard-label">Step 3 · Base Spirit</span>
+    <div class="wizard-groups">
+      ...
+    </div>
+  </div>
+
+  <!-- Wizard CTA -->
+  <div class="wizard-submit-row">
+    <button
+      type="button"
+      class="wizard-submit-btn wizard-submit-gradient"
+      data-wizard-submit
+      disabled
+    >
+      Search
+    </button>
+
+    <div class="wizard-nav-right">
+      <button type="button" data-wizard-prev disabled>Previous</button>
+      <button type="button" data-wizard-next disabled>Next</button>
+    </div>
+  </div>
+
 </div>
+
 
     <!-- Q1: Style -->
     <div class="wizard-question">
