@@ -149,15 +149,18 @@ function initAudioPlayer() {
 
   const trackTitleEl = document.getElementById("track-title");
   const trackArtistEl = document.getElementById("track-artist");
-  const trackDiscInner = trackDisc ? trackDisc.querySelector(".turntable-track-disc-inner") : null;
   const trackDurationEl = document.getElementById("track-duration");
+
   const timelineBar = document.getElementById("timeline-bar");
   const timelineProgress = document.getElementById("timeline-progress");
   const timeCurrent = document.getElementById("time-current");
   const timeRemaining = document.getElementById("time-remaining");
+
+  // Disc overlay elements
   const trackDisc = document.getElementById("turntableTrackDisc");
   const trackDiscTitle = document.getElementById("trackDiscTitle");
   const trackDiscArtist = document.getElementById("trackDiscArtist");
+  const trackDiscInner = trackDisc ? trackDisc.querySelector(".turntable-track-disc-inner") : null;
 
   const prevBtn = document.getElementById("prev-btn");
   const playBtn = document.getElementById("play-btn");
@@ -174,32 +177,27 @@ function initAudioPlayer() {
   const audio = new Audio();
   audio.preload = "metadata";
 
- function setPlayingVisual(isPlaying) {
-  if (platter) platter.classList.toggle("is-playing", isPlaying);
-  if (eq) eq.classList.toggle("is-playing", isPlaying);
-  if (albumArt) albumArt.classList.toggle("glow-active", isPlaying);
-  if (tonearm) tonearm.classList.toggle("is-engaged", isPlaying);
-  if (turntable) turntable.classList.toggle("speaker-drop-active", isPlaying);
+  function setPlayingVisual(isPlaying) {
+    if (platter) platter.classList.toggle("is-playing", isPlaying);
+    if (eq) eq.classList.toggle("is-playing", isPlaying);
+    if (albumArt) albumArt.classList.toggle("glow-active", isPlaying);
+    if (tonearm) tonearm.classList.toggle("is-engaged", isPlaying);
+    if (turntable) turntable.classList.toggle("speaker-drop-active", isPlaying);
 
-  // Disc: spin inner, fade wrapper when stopped
-  if (trackDisc) {
-    if (isPlaying) {
-      trackDisc.classList.add("is-visible");
-      trackDisc.classList.remove("is-hidden");
-    } else {
-      trackDisc.classList.add("is-hidden");
+    // Disc wrapper: show while playing, fade when paused/stopped
+    if (trackDisc) {
+      if (isPlaying) {
+        trackDisc.classList.add("is-visible");
+        trackDisc.classList.remove("is-hidden");
+      } else {
+        trackDisc.classList.add("is-hidden");
+      }
     }
-  }
 
-  if (trackDiscInner) {
-    trackDiscInner.classList.toggle("is-spinning", isPlaying);
-  }
-}
-
-  // NEW: disc spin
-  if (trackDisc) trackDisc.classList.toggle("is-spinning", isPlaying);
-}
-
+    // Spin INNER disc so centering transform is not overwritten
+    if (trackDiscInner) {
+      trackDiscInner.classList.toggle("is-spinning", isPlaying);
+    }
   }
 
   function loadTrack(index, autoPlay = false) {
@@ -222,20 +220,20 @@ function initAudioPlayer() {
     }
     if (timelineProgress) timelineProgress.style.width = "0%";
     if (dockTrack) dockTrack.textContent = `${track.title} — ${track.artist}`;
-// Track disc overlay update
-if (trackDisc) {
-  if (trackDiscTitle) trackDiscTitle.textContent = track.title || "";
-  if (trackDiscArtist) trackDiscArtist.textContent = track.artist || "";
 
-  trackDisc.classList.add("is-visible");
-  trackDisc.classList.remove("is-hidden");
+    // Track disc overlay update
+    if (trackDisc) {
+      if (trackDiscTitle) trackDiscTitle.textContent = track.title || "";
+      if (trackDiscArtist) trackDiscArtist.textContent = track.artist || "";
 
-  // “Land” micro animation on change
-  trackDisc.classList.remove("is-landing");
-  void trackDisc.offsetWidth;
-  trackDisc.classList.add("is-landing");
-}
+      trackDisc.classList.add("is-visible");
+      trackDisc.classList.remove("is-hidden");
 
+      // “Land” micro animation on change (wrapper only)
+      trackDisc.classList.remove("is-landing");
+      void trackDisc.offsetWidth;
+      trackDisc.classList.add("is-landing");
+    }
 
     // highlight active vinyl + micro "drop"
     vinylRow.querySelectorAll(".vinyl-item").forEach((btn, idx) => {
@@ -252,7 +250,7 @@ if (trackDisc) {
     const label = turntable ? turntable.querySelector(".turntable-label") : null;
     if (label) {
       label.classList.remove("label-drop");
-      void label.offsetWidth; // force reflow
+      void label.offsetWidth;
       label.classList.add("label-drop");
     }
 
@@ -278,9 +276,7 @@ if (trackDisc) {
 
   // Vinyl click
   vinylRow.querySelectorAll(".vinyl-item").forEach((btn, idx) => {
-    btn.addEventListener("click", () => {
-      loadTrack(idx, true);
-    });
+    btn.addEventListener("click", () => loadTrack(idx, true));
   });
 
   // Play / Pause
@@ -333,9 +329,7 @@ if (trackDisc) {
     const pct = (audio.currentTime / audio.duration) * 100;
     if (timelineProgress) timelineProgress.style.width = `${pct}%`;
     if (timeCurrent) timeCurrent.textContent = formatTime(audio.currentTime);
-    if (timeRemaining) {
-      timeRemaining.textContent = `-${formatTime(audio.duration - audio.currentTime)}`;
-    }
+    if (timeRemaining) timeRemaining.textContent = `-${formatTime(audio.duration - audio.currentTime)}`;
   });
 
   // Seek
@@ -343,8 +337,7 @@ if (trackDisc) {
     if (!audio.duration || !isFinite(audio.duration)) return;
     const rect = timelineBar.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    const pct = clickX / rect.width;
-    audio.currentTime = pct * audio.duration;
+    audio.currentTime = (clickX / rect.width) * audio.duration;
   });
 
   // Autoplay next track
