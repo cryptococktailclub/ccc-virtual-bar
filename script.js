@@ -692,30 +692,115 @@ if (wizardEl) {
   submitRow.appendChild(wizardPrevBtn);
   submitRow.appendChild(wizardNextBtn);
 
-  // ---------- Indicator: “x of n” ----------
-  let wizardIndicatorEl = wizardEl.querySelector("[data-wizard-indicator]");
-  if (!wizardIndicatorEl) {
-    wizardIndicatorEl = document.createElement("div");
-    wizardIndicatorEl.className = "wizard-indicator";
-    wizardIndicatorEl.setAttribute("data-wizard-indicator", "true");
-    wizardIndicatorEl.textContent = "";
-    submitRow.insertAdjacentElement("afterend", wizardIndicatorEl);
+ // =======================================================
+// CCC BAR BOT – CLEAN WIZARD + ACCURATE INDICATOR
+// =======================================================
+
+// ---------- CONFIG ----------
+const WIZARD_SELECTOR = "#wizard";
+const NEXT_BTN_SELECTOR = "#wizard-next";
+
+// Example cocktail data (replace with your real data)
+const COCKTAILS = [
+  { id: 1, name: "Neon Negroni" },
+  { id: 2, name: "Chrome Martini" },
+  { id: 3, name: "Gold Old Fashioned" },
+  { id: 4, name: "Platinum Spritz" }
+];
+
+// ---------- STATE ----------
+let remainingCocktails = [];
+let currentIndex = 0;
+
+// ---------- DOM ----------
+const wizardEl = document.querySelector(WIZARD_SELECTOR);
+const nextBtn = document.querySelector(NEXT_BTN_SELECTOR);
+
+// ---------- INIT ----------
+function initWizard() {
+  // Clone source data (never mutate original)
+  remainingCocktails = [...COCKTAILS];
+  currentIndex = 0;
+
+  ensureIndicator();
+  renderStep();
+  updateIndicator();
+  updateButtonState();
+}
+
+// ---------- INDICATOR ----------
+function ensureIndicator() {
+  let indicator = wizardEl.querySelector("[data-wizard-indicator]");
+  if (!indicator) {
+    indicator = document.createElement("div");
+    indicator.className = "wizard-indicator";
+    indicator.setAttribute("data-wizard-indicator", "true");
+    wizardEl.appendChild(indicator);
+  }
+}
+
+function updateIndicator() {
+  const indicator = wizardEl.querySelector("[data-wizard-indicator]");
+  if (!indicator) return;
+
+  const total = remainingCocktails.length;
+  const current = total === 0 ? 0 : currentIndex + 1;
+
+  indicator.textContent = `${current} of ${total}`;
+}
+
+// ---------- RENDER ----------
+function renderStep() {
+  wizardEl.querySelectorAll(".wizard-step").forEach(el => el.remove());
+
+  if (remainingCocktails.length === 0) {
+    const done = document.createElement("div");
+    done.className = "wizard-step";
+    done.textContent = "No cocktails remaining.";
+    wizardEl.appendChild(done);
+    return;
   }
 
-  function parseIndexTotalFromSummary(summaryText) {
-    const s = String(summaryText || "");
-    const m = s.match(/\((\d+)\s*\/\s*(\d+)\)/);
-    if (!m) return null;
-    const idx = Number(m[1]);
-    const total = Number(m[2]);
-    if (!Number.isFinite(idx) || !Number.isFinite(total) || total <= 0) return null;
-    return { idx, total };
+  const cocktail = remainingCocktails[currentIndex];
+
+  const step = document.createElement("div");
+  step.className = "wizard-step";
+  step.textContent = cocktail.name;
+
+  wizardEl.appendChild(step);
+}
+
+// ---------- NAVIGATION ----------
+function nextCocktail() {
+  if (remainingCocktails.length === 0) return;
+
+  // Remove current cocktail permanently
+  remainingCocktails.splice(currentIndex, 1);
+
+  // Clamp index
+  if (currentIndex >= remainingCocktails.length) {
+    currentIndex = 0;
   }
 
-  function updateWizardIndicator(structured) {
-    const parsed = parseIndexTotalFromSummary(structured?.summary);
-    wizardIndicatorEl.textContent = parsed ? `${parsed.idx} of ${parsed.total}` : "";
-  }
+  renderStep();
+  updateIndicator();
+  updateButtonState();
+}
+
+// ---------- UI STATE ----------
+function updateButtonState() {
+  if (!nextBtn) return;
+  nextBtn.disabled = remainingCocktails.length === 0;
+}
+
+// ---------- EVENTS ----------
+if (nextBtn) {
+  nextBtn.addEventListener("click", nextCocktail);
+}
+
+// ---------- START ----------
+initWizard();
+
 
   // ---------- Persistence ----------
   function saveWizardSession() {
