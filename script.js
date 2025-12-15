@@ -488,6 +488,32 @@ function initBarBot() {
     console.warn("CCC: BarBot missing required DOM");
     return;
   }
+// =========================
+// ABSOLUTE FAILSAFE SEARCH
+// =========================
+
+// Treat the entire submit row as "Search"
+const fallbackSubmitRow = wizardEl.querySelector(".wizard-submit-row");
+
+if (fallbackSubmitRow) {
+  fallbackSubmitRow.style.pointerEvents = "auto";
+
+  fallbackSubmitRow.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("CCC: Wizard search triggered (fallback row)");
+    runWizard();
+  });
+}
+
+// Keyboard fallback
+wizardEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    console.log("CCC: Wizard search triggered (Enter)");
+    runWizard();
+  }
+});
 
   /* =========================
      CHAT
