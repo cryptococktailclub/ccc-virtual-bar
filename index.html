@@ -200,146 +200,99 @@
 <!-- PREFERENCE WIZARD -->
 <div id="bartenderWizard">
 
-  <!-- Q1 -->
+  <!-- Step 1: Vibe -->
   <div class="wizard-question">
     <span class="wizard-label">Step 1 · Vibe</span>
     <div class="wizard-options" data-question="style">
-      ...
+      <button type="button" class="wizard-option" data-value="light_refreshing">
+        Light &amp; Refreshing
+        <span class="wizard-option-sub">Bright, juicy, easygoing</span>
+      </button>
+      <button type="button" class="wizard-option" data-value="spirit_forward">
+        Spirit Forward
+        <span class="wizard-option-sub">Bold, boozy, slow sipper</span>
+      </button>
     </div>
   </div>
 
-  <!-- Q2 -->
+  <!-- Step 2: Ice -->
   <div class="wizard-question">
     <span class="wizard-label">Step 2 · Served How</span>
     <div class="wizard-options" data-question="ice">
-      ...
+      <button type="button" class="wizard-option" data-value="on_ice">
+        On Ice
+        <span class="wizard-option-sub">Built over a rock</span>
+      </button>
+      <button type="button" class="wizard-option" data-value="no_ice">
+        No Ice
+        <span class="wizard-option-sub">Served up, no ice</span>
+      </button>
     </div>
   </div>
 
-  <!-- Q3 -->
+  <!-- Step 3: Base Spirit -->
   <div class="wizard-question">
     <span class="wizard-label">Step 3 · Base Spirit</span>
+
     <div class="wizard-groups">
-      ...
+
+      <div class="wizard-group">
+        <div class="wizard-group-title">Agave &amp; Cane</div>
+        <div class="wizard-options" data-question="spirits">
+          <button type="button" class="wizard-option" data-value="tequila">Tequila</button>
+          <button type="button" class="wizard-option" data-value="mezcal">Mezcal</button>
+          <button type="button" class="wizard-option" data-value="rum">Rum</button>
+          <button type="button" class="wizard-option" data-value="cachaca">Cachaça</button>
+          <button type="button" class="wizard-option" data-value="pisco">Pisco</button>
+        </div>
+      </div>
+
+      <div class="wizard-group">
+        <div class="wizard-group-title">Whiskey &amp; Brandy</div>
+        <div class="wizard-options" data-question="spirits">
+          <button type="button" class="wizard-option" data-value="bourbon">Bourbon</button>
+          <button type="button" class="wizard-option" data-value="rye_whiskey">Rye / Whiskey</button>
+          <button type="button" class="wizard-option" data-value="scotch">Scotch</button>
+          <button type="button" class="wizard-option" data-value="cognac">Cognac</button>
+          <button type="button" class="wizard-option" data-value="apple_brandy">Apple Brandy</button>
+        </div>
+      </div>
+
+      <div class="wizard-group">
+        <div class="wizard-group-title">Clear &amp; Low ABV</div>
+        <div class="wizard-options" data-question="spirits">
+          <button type="button" class="wizard-option" data-value="gin">Gin</button>
+          <button type="button" class="wizard-option" data-value="vodka">Vodka</button>
+          <button type="button" class="wizard-option" data-value="sherry">Sherry</button>
+          <button type="button" class="wizard-option" data-value="amaro">Amaro</button>
+          <button type="button" class="wizard-option" data-value="vermouth">Vermouth</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- Wizard CTA -->
+  <!-- Wizard Controls -->
   <div class="wizard-submit-row">
     <button
       type="button"
       class="wizard-submit-btn wizard-submit-gradient"
       data-wizard-submit
-      disabled
     >
       Search
     </button>
 
     <div class="wizard-nav-right">
-      <button type="button" data-wizard-prev disabled>Previous</button>
-      <button type="button" data-wizard-next disabled>Next</button>
+      <button type="button" class="wizard-nav-btn" data-wizard-prev>
+        Previous
+      </button>
+      <button type="button" class="wizard-nav-btn" data-wizard-next>
+        Next
+      </button>
     </div>
   </div>
 
 </div>
-
-
-    <!-- Q1: Style -->
-    <div class="wizard-question">
-      <span class="wizard-label">Step 1 · Vibe</span>
-      <div class="wizard-options" data-question="style">
-        <button type="button" class="wizard-option" data-value="light_refreshing">
-          Light &amp; Refreshing
-          <span class="wizard-option-sub">Bright, juicy, easygoing</span>
-        </button>
-        <button type="button" class="wizard-option" data-value="spirit_forward">
-          Spirit Forward
-          <span class="wizard-option-sub">Bold, boozy, slow sipper</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Q2: Ice -->
-    <div class="wizard-question">
-      <span class="wizard-label">Step 2 · Served How</span>
-      <div class="wizard-options" data-question="ice">
-        <button type="button" class="wizard-option" data-value="on_ice">
-          On Ice
-          <span class="wizard-option-sub">Built over a rock</span>
-        </button>
-        <button type="button" class="wizard-option" data-value="no_ice">
-          No Ice
-          <span class="wizard-option-sub">Served up, no ice</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Q3: Spirit preference (grouped) -->
-    <div class="wizard-question">
-      <span class="wizard-label">Step 3 · Base Spirit</span>
-
-      <div class="wizard-groups">
-        <!-- Group 1: Agave & Cane -->
-        <div class="wizard-group">
-          <div class="wizard-group-title">Agave &amp; Cane</div>
-          <div class="wizard-options" data-question="spirits">
-            <button type="button" class="wizard-option" data-value="tequila">Tequila</button>
-            <button type="button" class="wizard-option" data-value="mezcal">Mezcal</button>
-            <button type="button" class="wizard-option" data-value="rum">Rum</button>
-            <button type="button" class="wizard-option" data-value="cachaca">Cachaça</button>
-            <button type="button" class="wizard-option" data-value="pisco">Pisco</button>
-          </div>
-        </div>
-
-        <!-- Group 2: Whiskey & Brandy -->
-        <div class="wizard-group">
-          <div class="wizard-group-title">Whiskey &amp; Brandy</div>
-          <div class="wizard-options" data-question="spirits">
-            <button type="button" class="wizard-option" data-value="bourbon">Bourbon</button>
-            <button type="button" class="wizard-option" data-value="rye_whiskey">Rye / Whiskey</button>
-            <button type="button" class="wizard-option" data-value="scotch">Scotch</button>
-            <button type="button" class="wizard-option" data-value="cognac">Cognac</button>
-            <button type="button" class="wizard-option" data-value="apple_brandy">Apple Brandy</button>
-          </div>
-        </div>
-
-        <!-- Group 3: Clear & Low ABV -->
-        <div class="wizard-group">
-          <div class="wizard-group-title">Clear &amp; Low ABV</div>
-          <div class="wizard-options" data-question="spirits">
-            <button type="button" class="wizard-option" data-value="gin">Gin</button>
-            <button type="button" class="wizard-option" data-value="vodka">Vodka</button>
-            <button type="button" class="wizard-option" data-value="sherry">Sherry</button>
-            <button type="button" class="wizard-option" data-value="amaro">Amaro</button>
-            <button type="button" class="wizard-option" data-value="vermouth">Vermouth</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-<!-- Wizard CTA -->
-<div class="wizard-submit-row">
-  <button type="button"
-    class="wizard-submit-btn wizard-submit-gradient"
-    id="wizardRecommendBtn"
-    data-wizard-submit
-    disabled>Search</button>
-
-  <div class="wizard-nav-right">
-    <button type="button"
-      class="wizard-nav-btn wizard-nav-neon"
-      id="wizardPrevBtn"
-      data-wizard-prev
-      disabled>Previous</button>
-
-    <button type="button"
-      class="wizard-nav-btn wizard-nav-neon"
-      id="wizardNextBtn"
-      data-wizard-next
-      disabled>Next</button>
-  </div>
-</div>
-
 
   <!-- RECIPE PANEL -->
   <div class="bartender-recipe-panel" id="bartenderRecipePanel"></div>
