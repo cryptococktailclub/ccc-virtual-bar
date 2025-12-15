@@ -471,21 +471,24 @@ function initBarTV() {
 }
 
 // ==========================
-// BAR BOT (CHAT + WIZARD)
+// BAR BOT (CHAT + WIZARD) — FIXED
 // ==========================
 
 function initBarBot() {
+  // Prevent double-init (this was killing functionality)
+  if (window.__cccBarBotInit) return;
+  window.__cccBarBotInit = true;
+
   const messagesEl = document.getElementById("bartenderMessages");
   const formEl = document.getElementById("bartenderForm");
   const inputEl = document.getElementById("bartenderInput");
-  const recipePanel = document.getElementById("bartenderRecipePanel");
   const wizardEl = document.getElementById("bartenderWizard");
 
   if (!messagesEl || !formEl || !inputEl || !wizardEl) return;
 
-  /* =========================
+  /* -------------------------
      CHAT
-     ========================= */
+  ------------------------- */
 
   function appendMessage(content, fromBot = false) {
     const row = document.createElement("div");
@@ -525,9 +528,9 @@ function initBarBot() {
     inputEl.value = "";
   });
 
-  /* =========================
+  /* -------------------------
      WIZARD STATE
-     ========================= */
+  ------------------------- */
 
   let wizardHistory = [];
   let wizardHistoryPos = -1;
@@ -535,20 +538,23 @@ function initBarBot() {
 
   const STORAGE_KEY = "ccc_wizard_session_v4";
 
-  /* =========================
-     BUTTONS (NO DUPLICATES)
-     ========================= */
+  /* -------------------------
+     EXISTING BUTTONS ONLY
+  ------------------------- */
 
   const submitBtn = wizardEl.querySelector("[data-wizard-submit]");
+  const prevBtn = wizardEl.querySelector("[data-wizard-prev]");
+  const nextBtn = wizardEl.querySelector("[data-wizard-next]");
   const submitRow = wizardEl.querySelector(".wizard-submit-row");
-  const navRight = submitRow.querySelector(".wizard-nav-right");
 
-  const prevBtn = navRight.querySelector("[data-wizard-prev]");
-  const nextBtn = navRight.querySelector("[data-wizard-next]");
+  if (!submitBtn || !prevBtn || !nextBtn || !submitRow) {
+    console.warn("CCC: Wizard buttons missing or miswired.");
+    return;
+  }
 
-  /* =========================
+  /* -------------------------
      INDICATOR (CREATE ONCE)
-     ========================= */
+  ------------------------- */
 
   let indicator = wizardEl.querySelector(".wizard-indicator");
   let crumbs = wizardEl.querySelector(".wizard-breadcrumbs");
@@ -586,9 +592,9 @@ function initBarBot() {
     nextBtn.disabled = wizardHistoryPos >= wizardHistory.length - 1;
   }
 
-  /* =========================
+  /* -------------------------
      NAVIGATION
-     ========================= */
+  ------------------------- */
 
   function jumpTo(index) {
     if (!wizardHistory[index]) return;
@@ -621,17 +627,13 @@ function initBarBot() {
     saveSession();
   }
 
-  /* =========================
-     EVENTS (BOUND ONCE)
-     ========================= */
-
   submitBtn.onclick = runWizard;
   prevBtn.onclick = () => jumpTo(wizardHistoryPos - 1);
   nextBtn.onclick = () => jumpTo(wizardHistoryPos + 1);
 
-  /* =========================
+  /* -------------------------
      SESSION
-     ========================= */
+  ------------------------- */
 
   function saveSession() {
     localStorage.setItem(
