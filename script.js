@@ -475,7 +475,6 @@ function initBarTV() {
 // ==========================
 
 function initBarBot() {
-  // Prevent double-init (this was killing functionality)
   if (window.__cccBarBotInit) return;
   window.__cccBarBotInit = true;
 
@@ -483,45 +482,16 @@ function initBarBot() {
   const formEl = document.getElementById("bartenderForm");
   const inputEl = document.getElementById("bartenderInput");
   const wizardEl = document.getElementById("bartenderWizard");
+  const recipePanel = document.getElementById("bartenderRecipePanel");
 
-  if (!messagesEl || !formEl || !inputEl || !wizardEl) return;
-// Bind wizard option buttons
-wizardEl.querySelectorAll(".wizard-options").forEach(group => {
-  const key = group.dataset.question;
-  if (!key) return;
+  if (!messagesEl || !formEl || !inputEl || !wizardEl || !recipePanel) {
+    console.warn("CCC: BarBot missing required DOM elements");
+    return;
+  }
 
-  group.querySelectorAll(".wizard-option").forEach(btn => {
-    btn.onclick = () => {
-      const value = btn.dataset.value;
-      if (!value) return;
-
-      if (key === "spirits") {
-        btn.classList.toggle("is-selected");
-        wizardState.spirits = [...wizardEl.querySelectorAll(
-          '.wizard-options[data-question="spirits"] .wizard-option.is-selected'
-        )].map(b => b.dataset.value);
-      } else {
-        wizardState[key] = value;
-        group.querySelectorAll(".wizard-option").forEach(b =>
-          b.classList.toggle("is-selected", b === btn)
-        );
-      }
-// 🔑 RESTORE SEARCH FUNCTION
-submitBtn.addEventListener("click", runWizard);
-
-      // Reset run state on preference change
-      wizardHistory = [];
-      wizardHistoryPos = -1;
-      wizardExclude = [];
-      updateIndicator();
-      saveSession();
-    };
-  });
-});
-
-  /* -------------------------
+  /* =========================
      CHAT
-  ------------------------- */
+  ========================= */
 
   function appendMessage(content, fromBot = false) {
     const row = document.createElement("div");
@@ -536,19 +506,28 @@ submitBtn.addEventListener("click", runWizard);
   }
 
   async function callBartenderAPI(payload) {
-    appendMessage(payload.question || "Finding a cocktail…", false);
+    if (payload.question) {
+      appendMessage(payload.question, false);
+    }
+
     try {
       const res = await fetch(BARTENDER_FUNCTION_PATH, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       const data = await res.json();
       const structured = data.structured || JSON.parse(data.answer || "{}");
-      if (structured) renderRecipeCards(structured);
-      appendMessage(structured?.summary || data.answer, true);
+
+      if (structured) {
+        renderRecipeCards(structured);
+      }
+
+      appendMessage(structured?.summary || data.answer || "Cheers.", true);
       return structured;
-    } catch {
+    } catch (err) {
+      console.error("CCC: Bartender API failed", err);
       appendMessage("Bar Bot is offline.", true);
       return null;
     }
@@ -556,30 +535,29 @@ submitBtn.addEventListener("click", runWizard);
 
   formEl.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (!inputEl.value.trim()) return;
-    callBartenderAPI({ mode: "chat", question: inputEl.value.trim() });
+    const q = inputEl.value.trim();
+    if (!q) return;
+    callBartenderAPI({ mode: "chat", question: q });
     inputEl.value = "";
   });
-// Wizard preferences (REQUIRED by backend)
-const wizardState = {
-  style: null,     // "light_refreshing" | "spirit_forward"
-  ice: null,       // "on_ice" | "no_ice"
-  spirits: [],     // array of strings
-};
 
-  /* -------------------------
+  /* =========================
      WIZARD STATE
-  ------------------------- */
+  ========================= */
+
+  const wizardState = {
+    style: null,
+    ice: null,
+    spirits: [],
+  };
 
   let wizardHistory = [];
   let wizardHistoryPos = -1;
   let wizardExclude = [];
 
-  const STORAGE_KEY = "ccc_wizard_session_v4";
-
-  /* -------------------------
-     EXISTING BUTTONS ONLY
-  ------------------------- */
+  /* =========================
+     BUTTONS
+  ========================= */
 
   const submitBtn = wizardEl.querySelector("[data-wizard-submit]");
   const prevBtn = wizardEl.querySelector("[data-wizard-prev]");
@@ -587,123 +565,111 @@ const wizardState = {
   const submitRow = wizardEl.querySelector(".wizard-submit-row");
 
   if (!submitBtn || !prevBtn || !nextBtn || !submitRow) {
-    console.warn("CCC: Wizard buttons missing or miswired.");
+    console.warn("CCC: Wizard buttons missing");
     return;
   }
 
-  /* -------------------------
-     INDICATOR (CREATE ONCE)
-  ------------------------- */
+  /* =========================
+     INDICATOR
+  ========================= */
 
   let indicator = wizardEl.querySelector(".wizard-indicator");
-  let crumbs = wizardEl.querySelector(".wizard-breadcrumbs");
-
   if (!indicator) {
     indicator = document.createElement("div");
     indicator.className = "wizard-indicator";
     submitRow.after(indicator);
   }
 
-  if (!crumbs) {
-    crumbs = document.createElement("div");
-    crumbs.className = "wizard-breadcrumbs";
-    indicator.after(crumbs);
-  }
-
   function updateIndicator() {
     const total = wizardHistory.length;
     const current = total ? wizardHistoryPos + 1 : 0;
-
     indicator.textContent = `${current} of ${total}`;
-    indicator.classList.remove("pulse");
-    void indicator.offsetWidth;
-    indicator.classList.add("pulse");
-
-    crumbs.innerHTML = "";
-    wizardHistory.forEach((_, i) => {
-      const dot = document.createElement("span");
-      dot.className = "wizard-dot" + (i === wizardHistoryPos ? " active" : "");
-      dot.onclick = () => jumpTo(i);
-      crumbs.appendChild(dot);
-    });
 
     prevBtn.disabled = wizardHistoryPos <= 0;
     nextBtn.disabled = wizardHistoryPos >= wizardHistory.length - 1;
   }
 
-  /* -------------------------
-     NAVIGATION
-  ------------------------- */
+  /* =========================
+     WIZARD OPTIONS
+  ========================= */
 
-  function jumpTo(index) {
-    if (!wizardHistory[index]) return;
-    wizardHistoryPos = index;
-    renderRecipeCards(wizardHistory[index].structured);
-    updateIndicator();
-    saveSession();
-  }
+  wizardEl.querySelectorAll(".wizard-options").forEach(group => {
+    const key = group.dataset.question;
+    if (!key) return;
 
-  async function runWizard() {
-  // Guard: require at least one spirit
-  if (!wizardState.spirits.length) {
-    appendMessage("Choose at least one spirit to continue.", true);
-    return;
-  }
+    group.querySelectorAll(".wizard-option").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const value = btn.dataset.value;
+        if (!value) return;
 
-  const structured = await callBartenderAPI({
-    mode: "wizard",
-    wizard_preferences: wizardState,
-    exclude: wizardExclude,
+        if (key === "spirits") {
+          btn.classList.toggle("is-selected");
+          wizardState.spirits = [...group.querySelectorAll(".wizard-option.is-selected")]
+            .map(b => b.dataset.value);
+        } else {
+          wizardState[key] = value;
+          group.querySelectorAll(".wizard-option")
+            .forEach(b => b.classList.toggle("is-selected", b === btn));
+        }
+
+        wizardHistory = [];
+        wizardHistoryPos = -1;
+        wizardExclude = [];
+        updateIndicator();
+      });
+    });
   });
 
-  if (!structured || !structured.recipes?.length) {
-    appendMessage("No more cocktails match your preferences.", true);
-    return;
+  /* =========================
+     WIZARD RUN
+  ========================= */
+
+  async function runWizard() {
+    if (!wizardState.spirits.length) {
+      appendMessage("Select at least one spirit to begin.", true);
+      return;
+    }
+
+    const structured = await callBartenderAPI({
+      mode: "wizard",
+      wizard_preferences: wizardState,
+      exclude: wizardExclude,
+    });
+
+    if (!structured || !structured.recipes?.length) {
+      appendMessage("No more cocktails match your preferences.", true);
+      return;
+    }
+
+    const name = structured.recipes[0].name;
+    if (name) wizardExclude.push(name);
+
+    wizardHistory.push({ structured });
+    wizardHistoryPos = wizardHistory.length - 1;
+    updateIndicator();
   }
 
-  const name = structured.recipes[0].name;
+  /* =========================
+     NAVIGATION
+  ========================= */
 
-  if (name && wizardExclude.includes(name)) {
-    appendMessage("You’ve seen all matching cocktails.", true);
-    return;
-  }
+  submitBtn.addEventListener("click", runWizard);
 
-  if (name) wizardExclude.push(name);
+  prevBtn.addEventListener("click", () => {
+    if (wizardHistoryPos <= 0) return;
+    wizardHistoryPos--;
+    renderRecipeCards(wizardHistory[wizardHistoryPos].structured);
+    updateIndicator();
+  });
 
-  wizardHistory.push({ structured });
-  wizardHistoryPos = wizardHistory.length - 1;
+  nextBtn.addEventListener("click", () => {
+    if (wizardHistoryPos >= wizardHistory.length - 1) return;
+    wizardHistoryPos++;
+    renderRecipeCards(wizardHistory[wizardHistoryPos].structured);
+    updateIndicator();
+  });
 
   updateIndicator();
-  saveSession();
-}
-
-  /* -------------------------
-     SESSION
-  ------------------------- */
-
-  function saveSession() {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ wizardHistory, wizardHistoryPos, wizardExclude })
-    );
-  }
-
-  function restoreSession() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    try {
-      const data = JSON.parse(raw);
-      wizardHistory = data.wizardHistory || [];
-      wizardHistoryPos = data.wizardHistoryPos ?? -1;
-      wizardExclude = data.wizardExclude || [];
-      if (wizardHistory[wizardHistoryPos]) {
-        renderRecipeCards(wizardHistory[wizardHistoryPos].structured);
-      }
-      updateIndicator();
-    } catch {}
-  }
-
-  restoreSession();
 }
 
 // ==========================
