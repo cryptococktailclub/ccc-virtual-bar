@@ -149,6 +149,7 @@ function initAudioPlayer() {
 
   const trackTitleEl = document.getElementById("track-title");
   const trackArtistEl = document.getElementById("track-artist");
+  const trackDiscInner = trackDisc ? trackDisc.querySelector(".turntable-track-disc-inner") : null;
   const trackDurationEl = document.getElementById("track-duration");
   const timelineBar = document.getElementById("timeline-bar");
   const timelineProgress = document.getElementById("timeline-progress");
@@ -173,18 +174,27 @@ function initAudioPlayer() {
   const audio = new Audio();
   audio.preload = "metadata";
 
-  function setPlayingVisual(isPlaying) {
-    if (platter) platter.classList.toggle("is-playing", isPlaying);
-    if (eq) eq.classList.toggle("is-playing", isPlaying);
-    if (albumArt) albumArt.classList.toggle("glow-active", isPlaying);
-    if (tonearm) tonearm.classList.toggle("is-engaged", isPlaying);
-    if (turntable) turntable.classList.toggle("speaker-drop-active", isPlaying);
-  function setPlayingVisual(isPlaying) {
-    if (platter) platter.classList.toggle("is-playing", isPlaying);
-    if (eq) eq.classList.toggle("is-playing", isPlaying);
-    if (albumArt) albumArt.classList.toggle("glow-active", isPlaying);
-    if (tonearm) tonearm.classList.toggle("is-engaged", isPlaying);
-    if (turntable) turntable.classList.toggle("speaker-drop-active", isPlaying);
+ function setPlayingVisual(isPlaying) {
+  if (platter) platter.classList.toggle("is-playing", isPlaying);
+  if (eq) eq.classList.toggle("is-playing", isPlaying);
+  if (albumArt) albumArt.classList.toggle("glow-active", isPlaying);
+  if (tonearm) tonearm.classList.toggle("is-engaged", isPlaying);
+  if (turntable) turntable.classList.toggle("speaker-drop-active", isPlaying);
+
+  // Disc: spin inner, fade wrapper when stopped
+  if (trackDisc) {
+    if (isPlaying) {
+      trackDisc.classList.add("is-visible");
+      trackDisc.classList.remove("is-hidden");
+    } else {
+      trackDisc.classList.add("is-hidden");
+    }
+  }
+
+  if (trackDiscInner) {
+    trackDiscInner.classList.toggle("is-spinning", isPlaying);
+  }
+}
 
   // NEW: disc spin
   if (trackDisc) trackDisc.classList.toggle("is-spinning", isPlaying);
@@ -218,12 +228,14 @@ if (trackDisc) {
   if (trackDiscArtist) trackDiscArtist.textContent = track.artist || "";
 
   trackDisc.classList.add("is-visible");
+  trackDisc.classList.remove("is-hidden");
 
   // “Land” micro animation on change
   trackDisc.classList.remove("is-landing");
-  void trackDisc.offsetWidth; // force reflow
+  void trackDisc.offsetWidth;
   trackDisc.classList.add("is-landing");
 }
+
 
     // highlight active vinyl + micro "drop"
     vinylRow.querySelectorAll(".vinyl-item").forEach((btn, idx) => {
