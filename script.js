@@ -483,9 +483,9 @@ function initBarBot() {
 
   if (!messagesEl || !formEl || !inputEl || !wizardEl) return;
 
-  // --------------------------------------------------
-  // CHAT
-  // --------------------------------------------------
+  /* =========================
+     CHAT
+     ========================= */
 
   function appendMessage(content, fromBot = false) {
     const row = document.createElement("div");
@@ -525,49 +525,45 @@ function initBarBot() {
     inputEl.value = "";
   });
 
-  // --------------------------------------------------
-  // WIZARD STATE
-  // --------------------------------------------------
+  /* =========================
+     WIZARD STATE
+     ========================= */
 
-  const wizardState = { style: null, ice: null, spirits: [] };
   let wizardHistory = [];
   let wizardHistoryPos = -1;
   let wizardExclude = [];
 
-  const STORAGE_KEY = "ccc_wizard_session_v3";
+  const STORAGE_KEY = "ccc_wizard_session_v4";
 
-  // --------------------------------------------------
-  // BUTTONS
-  // --------------------------------------------------
+  /* =========================
+     BUTTONS (NO DUPLICATES)
+     ========================= */
 
-  const submitBtn =
-    wizardEl.querySelector("[data-wizard-submit]") ||
-    wizardEl.querySelector(".wizard-submit-btn");
+  const submitBtn = wizardEl.querySelector("[data-wizard-submit]");
+  const submitRow = wizardEl.querySelector(".wizard-submit-row");
+  const navRight = submitRow.querySelector(".wizard-nav-right");
 
-  const submitRow = submitBtn.parentElement;
+  const prevBtn = navRight.querySelector("[data-wizard-prev]");
+  const nextBtn = navRight.querySelector("[data-wizard-next]");
 
-  const prevBtn = document.createElement("button");
-  const nextBtn = document.createElement("button");
+  /* =========================
+     INDICATOR (CREATE ONCE)
+     ========================= */
 
-  prevBtn.textContent = "Previous";
-  nextBtn.textContent = "Next";
+  let indicator = wizardEl.querySelector(".wizard-indicator");
+  let crumbs = wizardEl.querySelector(".wizard-breadcrumbs");
 
-  prevBtn.className = nextBtn.className = "wizard-submit-btn ccc-pill";
+  if (!indicator) {
+    indicator = document.createElement("div");
+    indicator.className = "wizard-indicator";
+    submitRow.after(indicator);
+  }
 
-  submitRow.appendChild(prevBtn);
-  submitRow.appendChild(nextBtn);
-
-  // --------------------------------------------------
-  // INDICATOR + BREADCRUMBS
-  // --------------------------------------------------
-
-  const indicator = document.createElement("div");
-  indicator.className = "wizard-indicator";
-  submitRow.after(indicator);
-
-  const crumbs = document.createElement("div");
-  crumbs.className = "wizard-breadcrumbs";
-  indicator.after(crumbs);
+  if (!crumbs) {
+    crumbs = document.createElement("div");
+    crumbs.className = "wizard-breadcrumbs";
+    indicator.after(crumbs);
+  }
 
   function updateIndicator() {
     const total = wizardHistory.length;
@@ -590,11 +586,12 @@ function initBarBot() {
     nextBtn.disabled = wizardHistoryPos >= wizardHistory.length - 1;
   }
 
-  // --------------------------------------------------
-  // NAVIGATION
-  // --------------------------------------------------
+  /* =========================
+     NAVIGATION
+     ========================= */
 
   function jumpTo(index) {
+    if (!wizardHistory[index]) return;
     wizardHistoryPos = index;
     renderRecipeCards(wizardHistory[index].structured);
     updateIndicator();
@@ -604,7 +601,6 @@ function initBarBot() {
   async function runWizard() {
     const structured = await callBartenderAPI({
       mode: "wizard",
-      wizard_preferences: wizardState,
       exclude: wizardExclude,
     });
 
@@ -625,13 +621,17 @@ function initBarBot() {
     saveSession();
   }
 
+  /* =========================
+     EVENTS (BOUND ONCE)
+     ========================= */
+
   submitBtn.onclick = runWizard;
   prevBtn.onclick = () => jumpTo(wizardHistoryPos - 1);
   nextBtn.onclick = () => jumpTo(wizardHistoryPos + 1);
 
-  // --------------------------------------------------
-  // SESSION
-  // --------------------------------------------------
+  /* =========================
+     SESSION
+     ========================= */
 
   function saveSession() {
     localStorage.setItem(
