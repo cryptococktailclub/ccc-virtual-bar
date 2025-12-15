@@ -1046,6 +1046,32 @@ body.theme-platinum .bartender-avatar {
   box-shadow:none;
   transform:none;
 }
+.wizard-indicator.pulse {
+  animation: pulse 0.25s ease-out;
+}
+
+@keyframes pulse {
+  from { transform: scale(0.95); opacity: 0.6; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.wizard-breadcrumbs {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.wizard-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #666;
+  cursor: pointer;
+}
+
+.wizard-dot.active {
+  background: #fff;
+}
 
 /* =========================
    BAR BOT – RECIPE PANEL + CARDS
