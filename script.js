@@ -485,6 +485,37 @@ function initBarBot() {
   const wizardEl = document.getElementById("bartenderWizard");
 
   if (!messagesEl || !formEl || !inputEl || !wizardEl) return;
+// Bind wizard option buttons
+wizardEl.querySelectorAll(".wizard-options").forEach(group => {
+  const key = group.dataset.question;
+  if (!key) return;
+
+  group.querySelectorAll(".wizard-option").forEach(btn => {
+    btn.onclick = () => {
+      const value = btn.dataset.value;
+      if (!value) return;
+
+      if (key === "spirits") {
+        btn.classList.toggle("is-selected");
+        wizardState.spirits = [...wizardEl.querySelectorAll(
+          '.wizard-options[data-question="spirits"] .wizard-option.is-selected'
+        )].map(b => b.dataset.value);
+      } else {
+        wizardState[key] = value;
+        group.querySelectorAll(".wizard-option").forEach(b =>
+          b.classList.toggle("is-selected", b === btn)
+        );
+      }
+
+      // Reset run state on preference change
+      wizardHistory = [];
+      wizardHistoryPos = -1;
+      wizardExclude = [];
+      updateIndicator();
+      saveSession();
+    };
+  });
+});
 
   /* -------------------------
      CHAT
@@ -611,31 +642,38 @@ const wizardState = {
   }
 
   async function runWizard() {
-    const structured = await callBartenderAPI({
-      mode: "wizard",
-      exclude: wizardExclude,
-    });
-
-    if (!structured) return;
-
-    const name = structured?.recipes?.[0]?.name;
-    if (name && wizardExclude.includes(name)) {
-      appendMessage("You’ve seen all matching cocktails.", true);
-      return;
-    }
-
-    if (name) wizardExclude.push(name);
-
-    wizardHistory.push({ structured });
-    wizardHistoryPos = wizardHistory.length - 1;
-
-    updateIndicator();
-    saveSession();
+  // Guard: require at least one spirit
+  if (!wizardState.spirits.length) {
+    appendMessage("Choose at least one spirit to continue.", true);
+    return;
   }
 
-  submitBtn.onclick = runWizard;
-  prevBtn.onclick = () => jumpTo(wizardHistoryPos - 1);
-  nextBtn.onclick = () => jumpTo(wizardHistoryPos + 1);
+  const structured = await callBartenderAPI({
+    mode: "wizard",
+    wizard_preferences: wizardState,
+    exclude: wizardExclude,
+  });
+
+  if (!structured || !structured.recipes?.length) {
+    appendMessage("No more cocktails match your preferences.", true);
+    return;
+  }
+
+  const name = structured.recipes[0].name;
+
+  if (name && wizardExclude.includes(name)) {
+    appendMessage("You’ve seen all matching cocktails.", true);
+    return;
+  }
+
+  if (name) wizardExclude.push(name);
+
+  wizardHistory.push({ structured });
+  wizardHistoryPos = wizardHistory.length - 1;
+
+  updateIndicator();
+  saveSession();
+}
 
   /* -------------------------
      SESSION
