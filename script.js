@@ -527,6 +527,12 @@ function initBarBot() {
     callBartenderAPI({ mode: "chat", question: inputEl.value.trim() });
     inputEl.value = "";
   });
+// Wizard preferences (REQUIRED by backend)
+const wizardState = {
+  style: null,     // "light_refreshing" | "spirit_forward"
+  ice: null,       // "on_ice" | "no_ice"
+  spirits: [],     // array of strings
+};
 
   /* -------------------------
      WIZARD STATE
