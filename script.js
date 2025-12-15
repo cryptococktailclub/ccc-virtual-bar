@@ -575,22 +575,13 @@ wizardEl.addEventListener("keydown", (e) => {
   let wizardHistoryPos = -1;
   let wizardExclude = [];
 
-  /* =========================
-     INDICATOR
-  ========================= */
+ /* =========================
+   INDICATOR (DISABLED)
+========================= */
 
-  let indicator = wizardEl.querySelector(".wizard-indicator");
-  if (!indicator) {
-    indicator = document.createElement("div");
-    indicator.className = "wizard-indicator";
-    wizardEl.appendChild(indicator);
-  }
-
-  function updateIndicator() {
-    const total = wizardHistory.length;
-    const current = total ? wizardHistoryPos + 1 : 0;
-    indicator.textContent = `${current} of ${total}`;
-  }
+function updateIndicator() {
+  // intentionally disabled
+}
 
   /* =========================
      WIZARD OPTIONS
