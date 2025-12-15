@@ -485,38 +485,8 @@ function initBarBot() {
   const recipePanel = document.getElementById("bartenderRecipePanel");
 
   if (!messagesEl || !formEl || !inputEl || !wizardEl || !recipePanel) {
-    console.warn("CCC: BarBot missing required DOM elements");
+    console.warn("CCC: BarBot missing required DOM");
     return;
-    // =========================
-// FORCE-ENABLE SEARCH (HARD FIX)
-// =========================
-
-// Ensure Search is never stuck disabled
-submitBtn.disabled = false;
-submitBtn.style.pointerEvents = "auto";
-
-// Enable Search as soon as at least one spirit is selected
-const enableSearchIfReady = () => {
-  submitBtn.disabled = wizardState.spirits.length === 0;
-};
-
-// Run once on load
-enableSearchIfReady();
-
-// Re-check whenever wizard options change
-wizardEl.addEventListener("click", (e) => {
-  if (e.target.closest(".wizard-option")) {
-    enableSearchIfReady();
-  }
-});
-// Keyboard / Enter fallback (guarantees execution)
-wizardEl.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !submitBtn.disabled) {
-    e.preventDefault();
-    submitBtn.click();
-  }
-});
-
   }
 
   /* =========================
@@ -536,12 +506,10 @@ wizardEl.addEventListener("keydown", (e) => {
   }
 
   async function callBartenderAPI(payload) {
-    if (payload.question) {
-      appendMessage(payload.question, false);
-    }
+    if (payload.question) appendMessage(payload.question, false);
 
     try {
-      const res = await fetch(BARTENDER_FUNCTION_PATH, {
+      const res = await fetch("/.netlify/functions/ccc-bartender", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -550,14 +518,10 @@ wizardEl.addEventListener("keydown", (e) => {
       const data = await res.json();
       const structured = data.structured || JSON.parse(data.answer || "{}");
 
-      if (structured) {
-        renderRecipeCards(structured);
-      }
-
+      if (structured) renderRecipeCards(structured);
       appendMessage(structured?.summary || data.answer || "Cheers.", true);
       return structured;
-    } catch (err) {
-      console.error("CCC: Bartender API failed", err);
+    } catch {
       appendMessage("Bar Bot is offline.", true);
       return null;
     }
@@ -586,20 +550,6 @@ wizardEl.addEventListener("keydown", (e) => {
   let wizardExclude = [];
 
   /* =========================
-     BUTTONS
-  ========================= */
-
-  const submitBtn = wizardEl.querySelector("[data-wizard-submit]");
-  const prevBtn = wizardEl.querySelector("[data-wizard-prev]");
-  const nextBtn = wizardEl.querySelector("[data-wizard-next]");
-  const submitRow = wizardEl.querySelector(".wizard-submit-row");
-
-  if (!submitBtn || !prevBtn || !nextBtn || !submitRow) {
-    console.warn("CCC: Wizard buttons missing");
-    return;
-  }
-
-  /* =========================
      INDICATOR
   ========================= */
 
@@ -607,51 +557,48 @@ wizardEl.addEventListener("keydown", (e) => {
   if (!indicator) {
     indicator = document.createElement("div");
     indicator.className = "wizard-indicator";
-    submitRow.after(indicator);
+    wizardEl.appendChild(indicator);
   }
 
   function updateIndicator() {
     const total = wizardHistory.length;
     const current = total ? wizardHistoryPos + 1 : 0;
     indicator.textContent = `${current} of ${total}`;
-
-    prevBtn.disabled = wizardHistoryPos <= 0;
-    nextBtn.disabled = wizardHistoryPos >= wizardHistory.length - 1;
   }
 
   /* =========================
      WIZARD OPTIONS
   ========================= */
 
-  wizardEl.querySelectorAll(".wizard-options").forEach(group => {
+  wizardEl.addEventListener("click", (e) => {
+    const option = e.target.closest(".wizard-option");
+    if (!option) return;
+
+    const group = option.closest(".wizard-options");
+    if (!group) return;
+
     const key = group.dataset.question;
-    if (!key) return;
+    const value = option.dataset.value;
+    if (!key || !value) return;
 
-    group.querySelectorAll(".wizard-option").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const value = btn.dataset.value;
-        if (!value) return;
+    if (key === "spirits") {
+      option.classList.toggle("is-selected");
+      wizardState.spirits = [...group.querySelectorAll(".wizard-option.is-selected")]
+        .map(b => b.dataset.value);
+    } else {
+      wizardState[key] = value;
+      group.querySelectorAll(".wizard-option")
+        .forEach(b => b.classList.toggle("is-selected", b === option));
+    }
 
-        if (key === "spirits") {
-          btn.classList.toggle("is-selected");
-          wizardState.spirits = [...group.querySelectorAll(".wizard-option.is-selected")]
-            .map(b => b.dataset.value);
-        } else {
-          wizardState[key] = value;
-          group.querySelectorAll(".wizard-option")
-            .forEach(b => b.classList.toggle("is-selected", b === btn));
-        }
-
-        wizardHistory = [];
-        wizardHistoryPos = -1;
-        wizardExclude = [];
-        updateIndicator();
-      });
-    });
+    wizardHistory = [];
+    wizardHistoryPos = -1;
+    wizardExclude = [];
+    updateIndicator();
   });
 
   /* =========================
-     WIZARD RUN
+     WIZARD RUN (CORE)
   ========================= */
 
   async function runWizard() {
@@ -680,27 +627,42 @@ wizardEl.addEventListener("keydown", (e) => {
   }
 
   /* =========================
-     NAVIGATION
+     GLOBAL DELEGATED SEARCH
+     (UNBREAKABLE)
   ========================= */
 
-  submitBtn.addEventListener("click", runWizard);
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-wizard-submit]")) {
+      e.preventDefault();
+      runWizard();
+    }
 
-  prevBtn.addEventListener("click", () => {
-    if (wizardHistoryPos <= 0) return;
-    wizardHistoryPos--;
-    renderRecipeCards(wizardHistory[wizardHistoryPos].structured);
-    updateIndicator();
+    if (e.target.closest("[data-wizard-prev]")) {
+      if (wizardHistoryPos > 0) {
+        wizardHistoryPos--;
+        renderRecipeCards(wizardHistory[wizardHistoryPos].structured);
+        updateIndicator();
+      }
+    }
+
+    if (e.target.closest("[data-wizard-next]")) {
+      if (wizardHistoryPos < wizardHistory.length - 1) {
+        wizardHistoryPos++;
+        renderRecipeCards(wizardHistory[wizardHistoryPos].structured);
+        updateIndicator();
+      }
+    }
   });
 
-  nextBtn.addEventListener("click", () => {
-    if (wizardHistoryPos >= wizardHistory.length - 1) return;
-    wizardHistoryPos++;
-    renderRecipeCards(wizardHistory[wizardHistoryPos].structured);
-    updateIndicator();
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      runWizard();
+    }
   });
 
   updateIndicator();
 }
+
 
 // ==========================
 // RENDER RECIPE CARDS
