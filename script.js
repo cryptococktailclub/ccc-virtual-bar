@@ -481,102 +481,182 @@ function initBarBot() {
   const recipePanel = document.getElementById("bartenderRecipePanel");
   const wizardEl = document.getElementById("bartenderWizard");
 
-  if (!messagesEl || !formEl || !inputEl) {
-    console.warn("CCC: Bar Bot elements missing; skipping AI bartender wiring.");
-    return;
-  }
+  if (!messagesEl || !formEl || !inputEl || !wizardEl) return;
 
   // --------------------------------------------------
-  // CHAT HELPERS
+  // CHAT
   // --------------------------------------------------
 
   function appendMessage(content, fromBot = false) {
     const row = document.createElement("div");
     row.className = `bartender-message ${fromBot ? "bartender-bot" : "bartender-user"}`;
-
-    if (fromBot) {
-      const avatar = document.createElement("div");
-      avatar.className = "bartender-avatar";
-      row.appendChild(avatar);
-    }
-
+    if (fromBot) row.innerHTML = `<div class="bartender-avatar"></div>`;
     const text = document.createElement("div");
     text.className = "bartender-text";
     text.innerHTML = content;
     row.appendChild(text);
-
     messagesEl.appendChild(row);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
-  let typingEl = null;
-
-  function showTyping() {
-    typingEl = document.createElement("div");
-    typingEl.className = "bartender-message bartender-bot bartender-typing";
-    typingEl.innerHTML =
-      '<div class="bartender-avatar"></div>' +
-      '<div class="bartender-text"><span>.</span><span>.</span><span>.</span></div>';
-    messagesEl.appendChild(typingEl);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function hideTyping() {
-    if (typingEl?.parentNode) typingEl.parentNode.removeChild(typingEl);
-    typingEl = null;
-  }
-
-  // --------------------------------------------------
-  // API CALL
-  // --------------------------------------------------
-
-  async function callBartenderAPI(payload, { showQuestionInChat = false } = {}) {
-    if (showQuestionInChat && payload.question) {
-      appendMessage(payload.question, false);
-    }
-
-    showTyping();
-
+  async function callBartenderAPI(payload) {
+    appendMessage(payload.question || "Finding a cocktail…", false);
     try {
       const res = await fetch(BARTENDER_FUNCTION_PATH, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
-      hideTyping();
-
-      if (!res.ok) {
-        appendMessage("Bar Bot is temporarily offline.", true);
-        return null;
-      }
-
       const data = await res.json();
-      let structured = data.structured || null;
-
-      if (!structured && typeof data.answer === "string") {
-        try {
-          structured = JSON.parse(data.answer);
-        } catch {}
-      }
-
+      const structured = data.structured || JSON.parse(data.answer || "{}");
       if (structured) renderRecipeCards(structured);
-
-      appendMessage(structured?.summary || data.answer || "Unable to format response.", true);
+      appendMessage(structured?.summary || data.answer, true);
       return structured;
-    } catch (err) {
-      hideTyping();
-      appendMessage("Bar Bot error. Check Netlify function.", true);
+    } catch {
+      appendMessage("Bar Bot is offline.", true);
       return null;
     }
   }
 
+  formEl.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!inputEl.value.trim()) return;
+    callBartenderAPI({ mode: "chat", question: inputEl.value.trim() });
+    inputEl.value = "";
+  });
+
   // --------------------------------------------------
-  // FREE TEXT CHAT
+  // WIZARD STATE
   // --------------------------------------------------
 
-  formEl.addEventListener("submit", (e) => {
-    e.pre
+  const wizardState = { style: null, ice: null, spirits: [] };
+  let wizardHistory = [];
+  let wizardHistoryPos = -1;
+  let wizardExclude = [];
+
+  const STORAGE_KEY = "ccc_wizard_session_v3";
+
+  // --------------------------------------------------
+  // BUTTONS
+  // --------------------------------------------------
+
+  const submitBtn =
+    wizardEl.querySelector("[data-wizard-submit]") ||
+    wizardEl.querySelector(".wizard-submit-btn");
+
+  const submitRow = submitBtn.parentElement;
+
+  const prevBtn = document.createElement("button");
+  const nextBtn = document.createElement("button");
+
+  prevBtn.textContent = "Previous";
+  nextBtn.textContent = "Next";
+
+  prevBtn.className = nextBtn.className = "wizard-submit-btn ccc-pill";
+
+  submitRow.appendChild(prevBtn);
+  submitRow.appendChild(nextBtn);
+
+  // --------------------------------------------------
+  // INDICATOR + BREADCRUMBS
+  // --------------------------------------------------
+
+  const indicator = document.createElement("div");
+  indicator.className = "wizard-indicator";
+  submitRow.after(indicator);
+
+  const crumbs = document.createElement("div");
+  crumbs.className = "wizard-breadcrumbs";
+  indicator.after(crumbs);
+
+  function updateIndicator() {
+    const total = wizardHistory.length;
+    const current = total ? wizardHistoryPos + 1 : 0;
+
+    indicator.textContent = `${current} of ${total}`;
+    indicator.classList.remove("pulse");
+    void indicator.offsetWidth;
+    indicator.classList.add("pulse");
+
+    crumbs.innerHTML = "";
+    wizardHistory.forEach((_, i) => {
+      const dot = document.createElement("span");
+      dot.className = "wizard-dot" + (i === wizardHistoryPos ? " active" : "");
+      dot.onclick = () => jumpTo(i);
+      crumbs.appendChild(dot);
+    });
+
+    prevBtn.disabled = wizardHistoryPos <= 0;
+    nextBtn.disabled = wizardHistoryPos >= wizardHistory.length - 1;
+  }
+
+  // --------------------------------------------------
+  // NAVIGATION
+  // --------------------------------------------------
+
+  function jumpTo(index) {
+    wizardHistoryPos = index;
+    renderRecipeCards(wizardHistory[index].structured);
+    updateIndicator();
+    saveSession();
+  }
+
+  async function runWizard() {
+    const structured = await callBartenderAPI({
+      mode: "wizard",
+      wizard_preferences: wizardState,
+      exclude: wizardExclude,
+    });
+
+    if (!structured) return;
+
+    const name = structured?.recipes?.[0]?.name;
+    if (name && wizardExclude.includes(name)) {
+      appendMessage("You’ve seen all matching cocktails.", true);
+      return;
+    }
+
+    if (name) wizardExclude.push(name);
+
+    wizardHistory.push({ structured });
+    wizardHistoryPos = wizardHistory.length - 1;
+
+    updateIndicator();
+    saveSession();
+  }
+
+  submitBtn.onclick = runWizard;
+  prevBtn.onclick = () => jumpTo(wizardHistoryPos - 1);
+  nextBtn.onclick = () => jumpTo(wizardHistoryPos + 1);
+
+  // --------------------------------------------------
+  // SESSION
+  // --------------------------------------------------
+
+  function saveSession() {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ wizardHistory, wizardHistoryPos, wizardExclude })
+    );
+  }
+
+  function restoreSession() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      wizardHistory = data.wizardHistory || [];
+      wizardHistoryPos = data.wizardHistoryPos ?? -1;
+      wizardExclude = data.wizardExclude || [];
+      if (wizardHistory[wizardHistoryPos]) {
+        renderRecipeCards(wizardHistory[wizardHistoryPos].structured);
+      }
+      updateIndicator();
+    } catch {}
+  }
+
+  restoreSession();
+}
 
 // ==========================
 // RENDER RECIPE CARDS
