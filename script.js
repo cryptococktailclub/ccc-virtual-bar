@@ -487,6 +487,36 @@ function initBarBot() {
   if (!messagesEl || !formEl || !inputEl || !wizardEl || !recipePanel) {
     console.warn("CCC: BarBot missing required DOM elements");
     return;
+    // =========================
+// FORCE-ENABLE SEARCH (HARD FIX)
+// =========================
+
+// Ensure Search is never stuck disabled
+submitBtn.disabled = false;
+submitBtn.style.pointerEvents = "auto";
+
+// Enable Search as soon as at least one spirit is selected
+const enableSearchIfReady = () => {
+  submitBtn.disabled = wizardState.spirits.length === 0;
+};
+
+// Run once on load
+enableSearchIfReady();
+
+// Re-check whenever wizard options change
+wizardEl.addEventListener("click", (e) => {
+  if (e.target.closest(".wizard-option")) {
+    enableSearchIfReady();
+  }
+});
+// Keyboard / Enter fallback (guarantees execution)
+wizardEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !submitBtn.disabled) {
+    e.preventDefault();
+    submitBtn.click();
+  }
+});
+
   }
 
   /* =========================
