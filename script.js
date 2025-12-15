@@ -486,7 +486,9 @@ function initBarBot() {
     return;
   }
 
-  // ---- Chat helpers ----
+  // --------------------------------------------------
+  // CHAT HELPERS
+  // --------------------------------------------------
 
   function appendMessage(content, fromBot = false) {
     const row = document.createElement("div");
@@ -508,6 +510,7 @@ function initBarBot() {
   }
 
   let typingEl = null;
+
   function showTyping() {
     typingEl = document.createElement("div");
     typingEl.className = "bartender-message bartender-bot bartender-typing";
@@ -519,25 +522,23 @@ function initBarBot() {
   }
 
   function hideTyping() {
-    if (typingEl && typingEl.parentNode) {
-      typingEl.parentNode.removeChild(typingEl);
-    }
+    if (typingEl?.parentNode) typingEl.parentNode.removeChild(typingEl);
     typingEl = null;
   }
 
-   // Shared API call for wizard + free-text chat
-  // UPDATED: returns `structured` so wizard can manage history/indicator cleanly
-  async function callBartenderAPI(payload, { showQuestionInChat = false } = {}) {
-    const questionText = payload.question || "";
+  // --------------------------------------------------
+  // API CALL
+  // --------------------------------------------------
 
-    if (showQuestionInChat && questionText) {
-      appendMessage(questionText, false);
+  async function callBartenderAPI(payload, { showQuestionInChat = false } = {}) {
+    if (showQuestionInChat && payload.question) {
+      appendMessage(payload.question, false);
     }
 
     showTyping();
 
     try {
-      const res = await fetch(BARTENDER_FUNCTION_PATH || "/.netlify/functions/ccc-bartender", {
+      const res = await fetch(BARTENDER_FUNCTION_PATH, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -546,565 +547,36 @@ function initBarBot() {
       hideTyping();
 
       if (!res.ok) {
-        appendMessage("Bar Bot is temporarily offline. Try again shortly.", true);
-        console.error("CCC Bar Bot HTTP error:", res.status, await res.text());
+        appendMessage("Bar Bot is temporarily offline.", true);
         return null;
       }
 
       const data = await res.json();
       let structured = data.structured || null;
 
-      // Fallback: backend sometimes returns JSON string in data.answer
       if (!structured && typeof data.answer === "string") {
         try {
           structured = JSON.parse(data.answer);
-        } catch (err) {
-          console.warn("CCC Bar Bot: could not parse JSON answer:", err);
-        }
+        } catch {}
       }
 
-      // Render recipe cards if provided
-      if (structured) {
-        renderRecipeCards(structured);
-      }
+      if (structured) renderRecipeCards(structured);
 
-      // Chat summary
-      if (structured && structured.summary) {
-        appendMessage(structured.summary, true);
-      } else if (data.answer) {
-        appendMessage(data.answer, true);
-      } else {
-        appendMessage("I had trouble formatting that recipe. Try asking in a slightly different way.", true);
-      }
-
+      appendMessage(structured?.summary || data.answer || "Unable to format response.", true);
       return structured;
     } catch (err) {
       hideTyping();
-      console.error("CCC Bar Bot error:", err);
-      appendMessage(
-        "I couldn’t reach the back bar AI right now. Please check the Netlify function and OpenAI key.",
-        true
-      );
+      appendMessage("Bar Bot error. Check Netlify function.", true);
       return null;
     }
   }
 
-  // ---- Free-text chat submit ----
+  // --------------------------------------------------
+  // FREE TEXT CHAT
+  // --------------------------------------------------
 
   formEl.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const question = inputEl.value.trim();
-    if (!question) return;
-
-    inputEl.value = "";
-
-    const payload = {
-      mode: "chat",
-      question,
-      recipes: [], // legacy field; backend can ignore or use
-    };
-
-    callBartenderAPI(payload, { showQuestionInChat: true });
-  });
-
-  // ---- Wizard wiring (Search / Previous / Next + persistence + shortcuts) ----
-if (wizardEl) {
-  const wizardSubmitBtn =
-    wizardEl.querySelector("[data-wizard-submit]") ||
-    wizardEl.querySelector("#wizardRecommendBtn") ||
-    wizardEl.querySelector(".wizard-submit-btn");
-
-  const wizardOptionGroups = wizardEl.querySelectorAll(".wizard-options");
-
-  // Persistent state for wizard answers
-  const wizardState = {
-    style: null,   // "light_refreshing" | "spirit_forward"
-    ice: null,     // "on_ice" | "no_ice"
-    spirits: [],   // array of strings (multi-select)
-  };
-
-  // --- Session persistence keys ---
-  const WIZARD_STORAGE_KEY = "ccc_wizard_session_v2";
-
-  // --- Rotation + anti-repeat state ---
-  let wizardIndex = 0;
-  let wizardExclude = [];
-  let sessionId =
-    (typeof crypto !== "undefined" && crypto.randomUUID)
-      ? crypto.randomUUID()
-      : String(Date.now());
-
-  // History for Previous/Next navigation
-  // Each entry: { structured, wizardIndex, wizardExclude }
-  let wizardHistory = [];
-  let wizardHistoryPos = -1;
-
-  // ---------- Buttons: Search | Previous | Next ----------
-  if (!wizardSubmitBtn) {
-    console.warn("CCC: Wizard submit button missing.");
-    return;
-  }
-
-  // Remove any legacy "Another option" buttons (in HTML or previously injected)
-  wizardEl.querySelectorAll("button").forEach((btn) => {
-    const t = (btn.textContent || "").trim().toLowerCase();
-    if (t === "another option" || t === "another" || t.includes("another option")) {
-      btn.remove();
-    }
-  });
-
-  // Locate row to place buttons
-  const submitRow =
-    wizardSubmitBtn.closest(".wizard-submit-row") || wizardSubmitBtn.parentElement;
-
-  // Force Search label + pill styling
-  wizardSubmitBtn.textContent = "Search";
-  wizardSubmitBtn.classList.add("ccc-pill");
-
-  // Find/create Previous + Next
-  let wizardPrevBtn = wizardEl.querySelector("[data-wizard-prev]");
-  let wizardNextBtn = wizardEl.querySelector("[data-wizard-next]");
-
-  if (!wizardPrevBtn) {
-    wizardPrevBtn = document.createElement("button");
-    wizardPrevBtn.type = "button";
-    wizardPrevBtn.setAttribute("data-wizard-prev", "true");
-    submitRow.appendChild(wizardPrevBtn);
-  }
-  wizardPrevBtn.textContent = "Previous";
-  wizardPrevBtn.className = "wizard-submit-btn ccc-pill wizard-prev-btn";
-  wizardPrevBtn.disabled = true;
-
-  if (!wizardNextBtn) {
-    wizardNextBtn = document.createElement("button");
-    wizardNextBtn.type = "button";
-    wizardNextBtn.setAttribute("data-wizard-next", "true");
-    submitRow.appendChild(wizardNextBtn);
-  }
-  wizardNextBtn.textContent = "Next";
-  wizardNextBtn.className = "wizard-submit-btn ccc-pill wizard-next-btn";
-  wizardNextBtn.disabled = true;
-
-  // Enforce order Search → Previous → Next (Search stays where it is; we move Prev/Next after it)
-  // Remove then re-append to ensure consistent order.
-  if (wizardPrevBtn.parentNode) wizardPrevBtn.parentNode.removeChild(wizardPrevBtn);
-  if (wizardNextBtn.parentNode) wizardNextBtn.parentNode.removeChild(wizardNextBtn);
-  submitRow.appendChild(wizardPrevBtn);
-  submitRow.appendChild(wizardNextBtn);
-
- // =======================================================
-// CCC BAR BOT – CLEAN WIZARD + ACCURATE INDICATOR
-// =======================================================
-
-// ---------- CONFIG ----------
-const WIZARD_SELECTOR = "#wizard";
-const NEXT_BTN_SELECTOR = "#wizard-next";
-
-// Example cocktail data (replace with your real data)
-const COCKTAILS = [
-  { id: 1, name: "Neon Negroni" },
-  { id: 2, name: "Chrome Martini" },
-  { id: 3, name: "Gold Old Fashioned" },
-  { id: 4, name: "Platinum Spritz" }
-];
-
-// ---------- STATE ----------
-let remainingCocktails = [];
-let currentIndex = 0;
-
-// ---------- DOM ----------
-const wizardEl = document.querySelector(WIZARD_SELECTOR);
-const nextBtn = document.querySelector(NEXT_BTN_SELECTOR);
-
-// ---------- INIT ----------
-function initWizard() {
-  // Clone source data (never mutate original)
-  remainingCocktails = [...COCKTAILS];
-  currentIndex = 0;
-
-  ensureIndicator();
-  renderStep();
-  updateIndicator();
-  updateButtonState();
-}
-
-// ---------- INDICATOR ----------
-function ensureIndicator() {
-  let indicator = wizardEl.querySelector("[data-wizard-indicator]");
-  if (!indicator) {
-    indicator = document.createElement("div");
-    indicator.className = "wizard-indicator";
-    indicator.setAttribute("data-wizard-indicator", "true");
-    wizardEl.appendChild(indicator);
-  }
-}
-
-function updateIndicator() {
-  const indicator = wizardEl.querySelector("[data-wizard-indicator]");
-  if (!indicator) return;
-
-  const total = remainingCocktails.length;
-  const current = total === 0 ? 0 : currentIndex + 1;
-
-  indicator.textContent = `${current} of ${total}`;
-}
-
-// ---------- RENDER ----------
-function renderStep() {
-  wizardEl.querySelectorAll(".wizard-step").forEach(el => el.remove());
-
-  if (remainingCocktails.length === 0) {
-    const done = document.createElement("div");
-    done.className = "wizard-step";
-    done.textContent = "No cocktails remaining.";
-    wizardEl.appendChild(done);
-    return;
-  }
-
-  const cocktail = remainingCocktails[currentIndex];
-
-  const step = document.createElement("div");
-  step.className = "wizard-step";
-  step.textContent = cocktail.name;
-
-  wizardEl.appendChild(step);
-}
-
-// ---------- NAVIGATION ----------
-function nextCocktail() {
-  if (remainingCocktails.length === 0) return;
-
-  // Remove current cocktail permanently
-  remainingCocktails.splice(currentIndex, 1);
-
-  // Clamp index
-  if (currentIndex >= remainingCocktails.length) {
-    currentIndex = 0;
-  }
-
-  renderStep();
-  updateIndicator();
-  updateButtonState();
-}
-
-// ---------- UI STATE ----------
-function updateButtonState() {
-  if (!nextBtn) return;
-  nextBtn.disabled = remainingCocktails.length === 0;
-}
-
-// ---------- EVENTS ----------
-if (nextBtn) {
-  nextBtn.addEventListener("click", nextCocktail);
-}
-
-// ---------- START ----------
-initWizard();
-
-
-  // ---------- Persistence ----------
-  function saveWizardSession() {
-    try {
-      const payload = {
-        wizardState,
-        wizardIndex,
-        wizardExclude,
-        sessionId,
-        wizardHistory,
-        wizardHistoryPos,
-        ts: Date.now(),
-      };
-      localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify(payload));
-    } catch (_) {}
-  }
-
-  function loadWizardSession() {
-    try {
-      const raw = localStorage.getItem(WIZARD_STORAGE_KEY);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object") return null;
-      return parsed;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  function resetWizardRunState() {
-    wizardIndex = 0;
-    wizardExclude = [];
-    wizardHistory = [];
-    wizardHistoryPos = -1;
-    wizardIndicatorEl.textContent = "";
-    saveWizardSession();
-  }
-
-  // ---------- Enable/disable buttons ----------
-  function updateWizardCTA() {
-    const ready =
-      !!wizardState.style &&
-      !!wizardState.ice &&
-      Array.isArray(wizardState.spirits) &&
-      wizardState.spirits.length > 0;
-
-    wizardSubmitBtn.disabled = !ready;
-    wizardPrevBtn.disabled = !ready || wizardHistoryPos <= 0;
-
-    const hasAnyHistory = wizardHistoryPos >= 0;
-    const canGoForward = wizardHistoryPos < wizardHistory.length - 1;
-    wizardNextBtn.disabled = !ready || (!hasAnyHistory && !canGoForward);
-  }
-
-  // ---------- Option selection ----------
-  function handleSingleChoice(questionKey, value, buttonEl, groupEl) {
-    const allButtons = groupEl.querySelectorAll(".wizard-option");
-    allButtons.forEach((b) => b.classList.remove("is-selected"));
-    buttonEl.classList.add("is-selected");
-    wizardState[questionKey] = value;
-
-    resetWizardRunState();
-    updateWizardCTA();
-  }
-
-  function handleMultiChoice(value, buttonEl) {
-    const idx = wizardState.spirits.indexOf(value);
-    if (idx >= 0) {
-      wizardState.spirits.splice(idx, 1);
-      buttonEl.classList.remove("is-selected");
-    } else {
-      wizardState.spirits.push(value);
-      buttonEl.classList.add("is-selected");
-    }
-
-    resetWizardRunState();
-    updateWizardCTA();
-  }
-
-  wizardOptionGroups.forEach((groupEl) => {
-    const questionKey = groupEl.getAttribute("data-question");
-    if (!questionKey) return;
-
-    groupEl.querySelectorAll(".wizard-option").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const value = btn.getAttribute("data-value");
-        if (!value) return;
-
-        if (questionKey === "style" || questionKey === "ice") {
-          handleSingleChoice(questionKey, value, btn, groupEl);
-        } else if (questionKey === "spirits") {
-          handleMultiChoice(value, btn);
-        }
-
-        saveWizardSession();
-      });
-    });
-  });
-
-  function buildWizardFriendlyText() {
-    const parts = [];
-
-    if (wizardState.style === "light_refreshing") parts.push("light & refreshing");
-    else if (wizardState.style === "spirit_forward") parts.push("spirit-forward and stirred");
-
-    if (wizardState.ice === "on_ice") parts.push("served on ice");
-    else if (wizardState.ice === "no_ice") parts.push("served up without ice");
-
-    if (wizardState.spirits.length) parts.push(`spirit: ${wizardState.spirits.join(", ")}`);
-
-    return parts.length
-      ? `Searching Milk & Honey for cocktails that are ${parts.join(", ")}.`
-      : "Searching Milk & Honey for a cocktail recommendation.";
-  }
-
-  function buildWizardMarkerText(primarySpirit) {
-    return (
-      `style: ${wizardState.style === "light_refreshing" ? "Light and Refreshing" : "Spirit Forward"}\n` +
-      `icePreference: ${wizardState.ice === "no_ice" ? "No Ice" : "With Ice"}\n` +
-      `spirit: ${primarySpirit}`
-    );
-  }
-
-  function pushWizardHistory(structured) {
-    // truncate forward history if we went back
-    if (wizardHistoryPos < wizardHistory.length - 1) {
-      wizardHistory = wizardHistory.slice(0, wizardHistoryPos + 1);
-    }
-
-    wizardHistory.push({
-      structured,
-      wizardIndex,
-      wizardExclude: [...wizardExclude],
-    });
-
-    wizardHistoryPos = wizardHistory.length - 1;
-    updateWizardIndicator(structured);
-    updateWizardCTA();
-    saveWizardSession();
-  }
-
-  async function runWizardSearch(mode) {
-    const ready =
-      !!wizardState.style &&
-      !!wizardState.ice &&
-      Array.isArray(wizardState.spirits) &&
-      wizardState.spirits.length > 0;
-
-    if (!ready) return;
-
-    // If Next and we have forward history, just replay it
-    if (mode === "next" && wizardHistoryPos < wizardHistory.length - 1) {
-      wizardHistoryPos += 1;
-      const snap = wizardHistory[wizardHistoryPos];
-      if (snap?.structured) {
-        renderRecipeCards(snap.structured);
-        updateWizardIndicator(snap.structured);
-      }
-      updateWizardCTA();
-      saveWizardSession();
-      return;
-    }
-
-    // Search resets everything
-    if (mode === "search") {
-      resetWizardRunState();
-    }
-
-    // Next advances wizardIndex (and uses exclude)
-    if (mode === "next") {
-      wizardIndex += 1;
-    }
-
-    // Primary spirit for marker (backend uses wizard_preferences anyway)
-    const primarySpirit = wizardState.spirits[0] || "";
-
-    // Friendly line in chat
-    appendMessage(buildWizardFriendlyText(), false);
-
-    const payload = {
-      mode: "wizard",
-      question: buildWizardMarkerText(primarySpirit),
-      wizard_preferences: { ...wizardState },
-      wizard_index: wizardIndex,
-      exclude: wizardExclude,
-      session_id: sessionId,
-    };
-
-    const structured = await callBartenderAPI(payload, { showQuestionInChat: false });
-    if (!structured) {
-      updateWizardCTA();
-      saveWizardSession();
-      return;
-    }
-
-    // Add served name to exclude to prevent immediate repeats
-    const servedName = structured?.recipes?.[0]?.name;
-    if (servedName && !wizardExclude.includes(servedName)) wizardExclude.push(servedName);
-
-    pushWizardHistory(structured);
-  }
-
-  function runWizardPrevious() {
-    if (wizardHistoryPos <= 0) return;
-    wizardHistoryPos -= 1;
-    const snap = wizardHistory[wizardHistoryPos];
-    if (snap?.structured) {
-      renderRecipeCards(snap.structured);
-      updateWizardIndicator(snap.structured);
-    }
-    updateWizardCTA();
-    saveWizardSession();
-  }
-
-  // Button wiring
-  wizardSubmitBtn.addEventListener("click", () => runWizardSearch("search"));
-  wizardPrevBtn.addEventListener("click", runWizardPrevious);
-  wizardNextBtn.addEventListener("click", () => runWizardSearch("next"));
-
-  // Keyboard shortcuts: ← Previous, → Next (ignore typing in inputs)
-  function shouldIgnoreKeydown(e) {
-    if (!e) return true;
-    if (e.metaKey || e.ctrlKey || e.altKey) return true;
-
-    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
-    if (tag === "input" || tag === "textarea" || tag === "select") return true;
-    if (e.target && e.target.isContentEditable) return true;
-
-    return false;
-  }
-
-  window.addEventListener("keydown", (e) => {
-    if (shouldIgnoreKeydown(e)) return;
-
-    if (e.key === "ArrowLeft") {
-      if (!wizardPrevBtn.disabled) {
-        e.preventDefault();
-        wizardPrevBtn.click();
-      }
-    } else if (e.key === "ArrowRight") {
-      if (!wizardNextBtn.disabled) {
-        e.preventDefault();
-        wizardNextBtn.click();
-      }
-    }
-  });
-
-  // Restore session on load
-  (function restoreWizardFromStorage() {
-    const stored = loadWizardSession();
-    if (!stored) {
-      updateWizardCTA();
-      return;
-    }
-
-    if (stored.wizardState && typeof stored.wizardState === "object") {
-      wizardState.style = stored.wizardState.style || null;
-      wizardState.ice = stored.wizardState.ice || null;
-      wizardState.spirits = Array.isArray(stored.wizardState.spirits) ? stored.wizardState.spirits : [];
-    }
-
-    wizardIndex = Number.isFinite(Number(stored.wizardIndex)) ? Number(stored.wizardIndex) : 0;
-    wizardExclude = Array.isArray(stored.wizardExclude) ? stored.wizardExclude : [];
-    wizardHistory = Array.isArray(stored.wizardHistory) ? stored.wizardHistory : [];
-    wizardHistoryPos = Number.isFinite(Number(stored.wizardHistoryPos)) ? Number(stored.wizardHistoryPos) : -1;
-
-    if (stored.sessionId) sessionId = String(stored.sessionId);
-
-    // Re-apply selected UI classes
-    try {
-      wizardOptionGroups.forEach((groupEl) => {
-        const key = groupEl.getAttribute("data-question");
-        if (!key) return;
-
-        groupEl.querySelectorAll(".wizard-option").forEach((btn) => {
-          const v = btn.getAttribute("data-value");
-          if (!v) return;
-
-          if (key === "style" || key === "ice") {
-            btn.classList.toggle("is-selected", wizardState[key] === v);
-          } else if (key === "spirits") {
-            btn.classList.toggle("is-selected", wizardState.spirits.includes(v));
-          }
-        });
-      });
-    } catch (_) {}
-
-    // Re-render last result if present
-    const snap = wizardHistoryPos >= 0 ? wizardHistory[wizardHistoryPos] : null;
-    if (snap?.structured) {
-      renderRecipeCards(snap.structured);
-      updateWizardIndicator(snap.structured);
-    }
-
-    updateWizardCTA();
-    saveWizardSession();
-  })();
-
-  // Initial
-  updateWizardCTA();
-  saveWizardSession();
-}
-
-} // <-- closes initBarBot()
+    e.pre
 
 // ==========================
 // RENDER RECIPE CARDS
