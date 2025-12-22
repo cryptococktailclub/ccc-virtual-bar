@@ -1393,6 +1393,20 @@ body.theme-platinum .bartender-avatar {
   flex-wrap: wrap;
   gap: 8px;
 }
+.footer-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-github svg {
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+.footer-github:hover svg {
+  opacity: 1;
+}
 
 .footer-links a {
   border-radius: 999px;
