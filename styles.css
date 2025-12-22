@@ -1393,11 +1393,6 @@ body.theme-platinum .bartender-avatar {
   flex-wrap: wrap;
   gap: 8px;
 }
-.footer-links a {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
 
 .footer-github svg {
   opacity: 0.85;
@@ -1418,6 +1413,20 @@ body.theme-platinum .bartender-avatar {
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
 }
+.footer-github {
+  display: inline-flex;
+  align-items: center;
+}
+
+.footer-github-icon {
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+.footer-github:hover .footer-github-icon {
+  opacity: 1;
+}
+
 /* ============================
    NOW PLAYING FOOTER GRADIENT
    ============================ */
