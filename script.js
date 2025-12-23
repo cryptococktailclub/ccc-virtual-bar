@@ -365,6 +365,40 @@ function initBarTV() {
     console.warn("CCC: Bar TV video element missing.");
     return;
   }
+/* ===============================
+   BAR TV — LAZY LOAD CHANNELS
+================================ */
+
+const VIDEO_SOURCES = [
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_01.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_02.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_03.mp4"
+];
+
+let currentChannelIndex = 0;
+let videoLoaded = false;
+
+function loadBarTVChannel(index) {
+  if (!barTvVideo) return;
+
+  barTvVideo.pause();
+  barTvVideo.src = VIDEO_SOURCES[index];
+  barTvVideo.load();
+  barTvVideo.play().catch(() => {});
+  videoLoaded = true;
+}
+
+tvChannelBtn.addEventListener("click", () => {
+  currentChannelIndex =
+    (currentChannelIndex + 1) % VIDEO_SOURCES.length;
+
+  loadBarTVChannel(currentChannelIndex);
+});
+
+/* Initial lazy load */
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => loadBarTVChannel(0), 500);
+});
 
   let currentChannel = 0;
 
@@ -377,6 +411,8 @@ function initBarTV() {
   }
 
   function loadChannel(index, autoPlay = true) {
+  ensureBarTVActivated();
+
     if (!VIDEO_SOURCES || !VIDEO_SOURCES[index]) {
       console.warn("CCC: Invalid video index", index);
       return;
