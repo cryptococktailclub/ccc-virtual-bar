@@ -488,6 +488,31 @@ function initBarBot() {
     console.warn("CCC: BarBot missing required DOM");
     return;
   }
+ 
+  /* ===============================
+   WIZARD UX STATE (NO INDICATOR)
+================================ */
+
+function updateWizardUX() {
+  wizardQuestions.forEach((q, index) => {
+    q.classList.toggle("is-active", index === wizardStepIndex);
+  });
+
+  nextBtn.disabled = !wizardSelections[wizardStepIndex];
+}
+
+wizardOptions.forEach(btn => {
+  btn.addEventListener("click", () => {
+    btn
+      .closest(".wizard-options")
+      .querySelectorAll(".wizard-option")
+      .forEach(o => o.classList.remove("is-selected"));
+
+    btn.classList.add("is-selected");
+    updateWizardUX();
+  });
+});
+
 // =========================
 // ABSOLUTE FAILSAFE SEARCH
 // =========================
