@@ -1413,6 +1413,7 @@ body.theme-platinum .bartender-avatar {
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
 }
+
 .footer-github {
   display: inline-flex;
   align-items: center;
@@ -1425,6 +1426,22 @@ body.theme-platinum .bartender-avatar {
 
 .footer-github:hover .footer-github-icon {
   opacity: 1;
+}
+.footer-icons {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.footer-icon-link {
+  color: inherit;
+  opacity: 0.75;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.footer-icon-link:hover {
+  opacity: 1;
+  transform: translateY(-1px);
 }
 
 /* ============================
