@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crypto Cocktail Club – Virtual Bar Experience</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Primary meta -->
+  <meta name="theme-color" content="#05010f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta
+    name="description"
+    content="Crypto Cocktail Club’s Virtual Bar Experience – drop a record, watch archival bar tapes, and chat with the Bar Bot bartender."
+  />
+
+  <!-- Favicon + icons (generated from BASE_TRANSPARENT.PNG) -->
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />
+
+  <!-- iOS / Apple touch icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="theme-base">
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="hero-inner">
+      <img src="BASE_TRANSPARENT.PNG" alt="CCC Logo" class="hero-logo" />
+      <h1 class="hero-title">Crypto Cocktail Club</h1>
+      <h2 class="hero-subtitle">Virtual Bar Experience</h2>
+      <p class="hero-tagline">Welcome in. Drop a record and stay awhile.</p>
+    </div>
+  </section>
+
+  <!-- FLOATING HEADER (appears on scroll) -->
+  <header class="top-nav" id="topNav">
+    <div class="brand">
+      <img src="BASE_TRANSPARENT.PNG" class="ccc-logo" alt="Crypto Cocktail Club" />
+      <span class="brand-title">Crypto Cocktail Club</span>
+    </div>
+
+   <nav class="nav-right">
+    <a
+      href="https://cryptococktailclub.com"
+      class="nav-link"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Litepaper
+    </a>
+  </nav>
+  </header>
+
+  <!-- MAIN STACK: VINYL → LISTENING → BAR BOT → BAR TV -->
+
+  <!-- VINYL SHELF -->
+  <section class="section card" id="vinyl-shelf">
+    <h2 class="section-title">Vinyl Shelf</h2>
+    <p class="section-subtitle">Tap a record to drop it onto the deck.</p>
+
+    <div class="vinyl-row" id="vinylRow">
+      <button class="vinyl-item is-active" data-track-index="0">
+        <span class="vinyl-title">Analog Neon</span>
+        <span class="vinyl-note">Toby’s Mix</span>
+      </button>
+
+      <button class="vinyl-item" data-track-index="1">
+        <span class="vinyl-title">Gold Hour Spritz</span>
+        <span class="vinyl-note">Summer Mix</span>
+      </button>
+
+      <button class="vinyl-item" data-track-index="2">
+        <span class="vinyl-title">Midnight Chrome</span>
+        <span class="vinyl-note">Kartell Tribute</span>
+      </button>
+
+      <button class="vinyl-item" data-track-index="3">
+        <span class="vinyl-title">Poolside Mirage</span>
+        <span class="vinyl-note">Solomun Boiler Room</span>
+      </button>
+
+      <button class="vinyl-item" data-track-index="4">
+        <span class="vinyl-title">Khruangbin Live</span>
+        <span class="vinyl-note">Pitchfork Live</span>
+      </button>
+
+      <button class="vinyl-item" data-track-index="5">
+        <span class="vinyl-title">Succession Beats</span>
+        <span class="vinyl-note">Jsco Late-Night</span>
+      </button>
+    
+      <button class="vinyl-item" data-track-index="6">
+    <span class="vinyl-title">Plant Shop Throwbacks</span>
+    <span class="vinyl-note">Love Song Edits · Lotso</span>
+  </button>
+
+    </div>
+  </section>
+<!-- AUDIO PLAYER (REQUIRED FOR MEDIA FUNCTIONALITY) -->
+<audio
+  id="audioPlayer"
+  preload="metadata"
+  playsinline
+  crossorigin="anonymous"
+>
+  <source src="" type="audio/mpeg" />
+</audio>
+
+  <!-- LISTENING ROOM -->
+  <section class="section card" id="listening-room">
+    <h2 class="section-title">Listening Room</h2>
+    <p class="section-subtitle">Choose your vibe.</p>
+
+    <div class="theme-toggle">
+      <button class="theme-pill is-active" data-theme="base">Base</button>
+      <button class="theme-pill" data-theme="gold">Gold</button>
+      <button class="theme-pill" data-theme="platinum">Platinum</button>
+    </div>
+
+    <div class="listening-flex">
+      <!-- Album -->
+      <div class="album-art-wrapper">
+        <div class="album-art" id="albumArt">
+          <img src="BASE_TRANSPARENT.PNG" alt="Crypto Cocktail Club" class="album-logo" />
+        </div>
+      </div>
+
+   <!-- Turntable -->
+<div class="turntable">
+  <div class="turntable-platter" id="turntablePlatter">
+    <div class="turntable-label"></div>
+  </div>
+
+  <!-- NEW: tonearm / needle -->
+  <div class="tonearm" id="tonearm"></div>
+
+  <!-- Track Disc Overlay (title + artist) -->
+  <div id="turntableTrackDisc" class="turntable-track-wrap" aria-hidden="true">
+    <div class="turntable-track-disc-inner">
+      <div class="track-disc-ring"></div>
+      <div class="track-disc-center">
+        <div class="track-disc-text">
+          <div class="track-disc-title" id="trackDiscTitle">Analog Neon</div>
+          <div class="track-disc-artist" id="trackDiscArtist">Toby</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    <!-- Player Panel -->
+    <div class="player-panel">
+      <div class="now-playing-label">Now Playing</div>
+
+      <div class="now-playing-info">
+        <div>
+          <h3 id="track-title">Toby’s Mix</h3>
+          <p id="track-artist">CCC</p>
+        </div>
+        <span id="track-duration" class="track-duration">58:24</span>
+      </div>
+
+      <div class="timeline-bar" id="timeline-bar">
+        <div class="timeline-progress" id="timeline-progress"></div>
+      </div>
+
+      <div class="timeline-meta">
+        <span id="time-current">0:00</span>
+        <span id="time-remaining">-58:24</span>
+      </div>
+
+      <div class="player-controls">
+        <button id="prev-btn" class="icon-btn" type="button">◀◀</button>
+        <button id="play-btn" class="play-btn" type="button">Play</button>
+        <button id="next-btn" class="icon-btn" type="button">▶▶</button>
+
+        <div class="volume-block">
+          <span class="volume-label">Volume</span>
+          <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.8" />
+        </div>
+      </div>
+
+      <div class="player-eq" id="playerEq">
+        <span class="eq-bar"></span>
+        <span class="eq-bar"></span>
+        <span class="eq-bar"></span>
+        <span class="eq-bar"></span>
+      </div>
+    </div>
+  </section>
+
+ <!-- BAR BOT -->
+<section class="section card" id="bar-bot">
+  <h2 class="section-title">Bar Bot</h2>
+ <p class="section-subtitle">
+  Tell Bar Bot what you feel like and it will provide a recommendation and recipe.
+</p>
+
+<!-- PREFERENCE WIZARD -->
+<div id="bartenderWizard">
+
+  <!-- Step 1: Vibe -->
+  <div class="wizard-question">
+    <span class="wizard-label">Step 1 · Vibe</span>
+    <div class="wizard-options" data-question="style">
+      <button type="button" class="wizard-option" data-value="light_refreshing">
+        Light &amp; Refreshing
+        <span class="wizard-option-sub">Bright, juicy, easygoing</span>
+      </button>
+      <button type="button" class="wizard-option" data-value="spirit_forward">
+        Spirit Forward
+        <span class="wizard-option-sub">Bold, boozy, slow sipper</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 2: Ice -->
+  <div class="wizard-question">
+    <span class="wizard-label">Step 2 · Served How</span>
+    <div class="wizard-options" data-question="ice">
+      <button type="button" class="wizard-option" data-value="on_ice">
+        On Ice
+        <span class="wizard-option-sub">Built over a rock</span>
+      </button>
+      <button type="button" class="wizard-option" data-value="no_ice">
+        No Ice
+        <span class="wizard-option-sub">Served up, no ice</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 3: Base Spirit -->
+  <div class="wizard-question">
+    <span class="wizard-label">Step 3 · Base Spirit</span>
+
+    <div class="wizard-groups">
+
+      <div class="wizard-group">
+        <div class="wizard-group-title">Agave &amp; Cane</div>
+        <div class="wizard-options" data-question="spirits">
+          <button type="button" class="wizard-option" data-value="tequila">Tequila</button>
+          <button type="button" class="wizard-option" data-value="mezcal">Mezcal</button>
+          <button type="button" class="wizard-option" data-value="rum">Rum</button>
+          <button type="button" class="wizard-option" data-value="cachaca">Cachaça</button>
+          <button type="button" class="wizard-option" data-value="pisco">Pisco</button>
+        </div>
+      </div>
+
+      <div class="wizard-group">
+        <div class="wizard-group-title">Whiskey &amp; Brandy</div>
+        <div class="wizard-options" data-question="spirits">
+          <button type="button" class="wizard-option" data-value="bourbon">Bourbon</button>
+          <button type="button" class="wizard-option" data-value="rye_whiskey">Rye / Whiskey</button>
+          <button type="button" class="wizard-option" data-value="scotch">Scotch</button>
+          <button type="button" class="wizard-option" data-value="cognac">Cognac</button>
+          <button type="button" class="wizard-option" data-value="apple_brandy">Apple Brandy</button>
+        </div>
+      </div>
+
+      <div class="wizard-group">
+        <div class="wizard-group-title">Clear &amp; Low ABV</div>
+        <div class="wizard-options" data-question="spirits">
+          <button type="button" class="wizard-option" data-value="gin">Gin</button>
+          <button type="button" class="wizard-option" data-value="vodka">Vodka</button>
+          <button type="button" class="wizard-option" data-value="sherry">Sherry</button>
+          <button type="button" class="wizard-option" data-value="amaro">Amaro</button>
+          <button type="button" class="wizard-option" data-value="vermouth">Vermouth</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Wizard Controls -->
+  <div class="wizard-submit-row">
+    <button
+      type="button"
+      class="wizard-submit-btn wizard-submit-gradient"
+      data-wizard-submit
+    >
+      Search
+    </button>
+
+    <div class="wizard-nav-right">
+      <button type="button" class="wizard-nav-btn" data-wizard-prev>
+        Previous
+      </button>
+      <button type="button" class="wizard-nav-btn" data-wizard-next>
+        Next
+      </button>
+    </div>
+  </div>
+
+</div>
+
+  <!-- RECIPE PANEL -->
+  <div class="bartender-recipe-panel" id="bartenderRecipePanel"></div>
+
+  <!-- CHAT THREAD -->
+  <div class="bartender-messages" id="bartenderMessages">
+    <div class="bartender-message bartender-bot">
+      <div class="bartender-avatar"></div>
+      <div class="bartender-text">
+        Welcome back. What are you in the mood for tonight?
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUT FORM -->
+  <form id="bartenderForm" class="bartender-form">
+    <textarea
+      id="bartenderInput"
+      class="bartender-input"
+      rows="2"
+      placeholder="Ask for a classic, a riff, or describe the drink you’re chasing…"
+    ></textarea>
+    <button class="bartender-submit-btn" type="submit">Ask</button>
+  </form>
+</section>
+
+
+  <!-- BAR TV -->
+  <section class="section card" id="bar-tv">
+    <h2 class="section-title">Bar TV</h2>
+    <p class="section-subtitle">Cocktail tapes from the vault.</p>
+
+    <div class="bar-tv-frame">
+      <div class="bar-tv-aspect">
+        <video
+          id="barTvVideo"
+          src="https://visionary-beignet-7d270e.netlify.app/video/bar_tape_01.mp4"
+          playsinline
+          muted
+          loop
+          autoplay
+        ></video>
+      </div>
+
+     <div class="bar-tv-controls">
+  <button id="tvChannelBtn">CH+</button>
+  <button id="tvRewindBtn">« 10s</button>
+  <button id="tvForwardBtn">+10s »</button>
+  <button id="tvPlayBtn">Pause</button>
+  <button id="tvMuteBtn">Sound Off</button>
+  <input type="range" id="tvVolume" min="0" max="1" step="0.05" value="0.5" />
+    </div>
+   </div>
+  </section>
+
+  <!-- LEGAL + FOOTER -->
+  <section class="footer-legal">
+    © Crypto Cocktail Club. All video and audio content featured in this virtual lounge
+    is presented for community enjoyment, cultural reference, and archival appreciation only.
+    CCC does not claim ownership of any third-party recordings. All rights remain with their
+    respective creators and copyright holders. If you are a rights holder and have concerns,
+    please contact us for prompt removal.
+  </section>
+
+  <footer class="footer">
+  <div class="footer-now">
+    <span class="footer-label">Now Playing</span>
+    <span class="footer-track" id="dockTrack">Toby’s Mix — CCC</span>
+  </div>
+
+  <div class="footer-links footer-icons">
+
+  <!-- X (Twitter) -->
+  <a
+    href="https://x.com/Cocktail2Crypto"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Crypto Cocktail Club on X"
+    class="footer-icon-link"
+  >
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+      <path d="M18.244 2H21.5l-7.53 8.6L22.5 22h-6.64l-5.2-6.8L4.6 22H1.34l8.05-9.2L1.5 2h6.8l4.7 6.2L18.244 2z"/>
+    </svg>
+  </a>
+
+  <!-- Discord -->
+  <a
+    href="https://discord.gg/6N6H8nnv"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Crypto Cocktail Club Discord"
+    class="footer-icon-link"
+  >
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+      <path d="M20.317 4.369A19.791 19.791 0 0 0 16.558 3c-.2.36-.43.84-.59 1.23a18.27 18.27 0 0 0-4.94 0c-.16-.39-.4-.87-.6-1.23a19.736 19.736 0 0 0-3.76 1.37C3.88 8.13 3.07 11.81 3.36 15.43c1.53 1.13 3.01 1.82 4.47 2.27.36-.49.69-1.01.98-1.56-.53-.2-1.04-.45-1.53-.73.13-.1.26-.2.38-.3 2.95 1.39 6.16 1.39 9.08 0 .12.1.25.2.38.3-.49.28-1 .53-1.53.73.29.55.62 1.07.98 1.56 1.47-.45 2.95-1.14 4.47-2.27.35-4.21-.6-7.86-3.29-11.06zM8.02 13.75c-.88 0-1.6-.81-1.6-1.81 0-1 .71-1.82 1.6-1.82.89 0 1.62.82 1.6 1.82 0 1-.71 1.81-1.6 1.81zm7.96 0c-.88 0-1.6-.81-1.6-1.81 0-1 .71-1.82 1.6-1.82.89 0 1.62.82 1.6 1.82 0 1-.71 1.81-1.6 1.81z"/>
+    </svg>
+  </a>
+
+  <!-- GitHub (existing icon preserved) -->
+  <a
+    href="https://github.com/cryptococktailclub"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Crypto Cocktail Club GitHub"
+    class="footer-icon-link"
+  >
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+      <path d="M12 0.5C5.73 0.5.5 5.74.5 12.02c0 5.1 3.29 9.42 7.86 10.95.58.11.79-.25.79-.56v-2.03c-3.2.7-3.87-1.54-3.87-1.54-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11.02 11.02 0 0 1 5.8 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.68 5.39-5.24 5.67.41.36.78 1.07.78 2.16v3.2c0 .31.21.67.8.56 4.56-1.53 7.85-5.85 7.85-10.95C23.5 5.74 18.27.5 12 .5z"/>
+    </svg>
+  </a>
+
+</div>
+<!-- LOAD CORE JAVASCRIPT (REQUIRED FOR MEDIA + INTERACTION) -->
+<script src="script.js" defer></script>
+
+</body>
+</html>
+
