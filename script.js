@@ -1,3 +1,31 @@
+// ==========================
+// GLOBAL PAGE CONTEXT
+// ==========================
+
+const IS_LITEPAPER =
+  window.location.pathname.startsWith("/litepaper");
+
+// ==========================
+// GLOBAL TIER PERSISTENCE
+// ==========================
+
+const CCC_TIER_KEY = "ccc-tier";
+
+function applyTier(tier) {
+  document.body.setAttribute("data-tier", tier);
+}
+
+function getSavedTier() {
+  return localStorage.getItem(CCC_TIER_KEY) || "base";
+}
+
+function saveTier(tier) {
+  localStorage.setItem(CCC_TIER_KEY, tier);
+}
+
+// Apply tier immediately on all pages
+applyTier(getSavedTier());
+
 // script.js – CCC Virtual Bar Experience (refactored wizard)
 
 // ==========================
@@ -84,6 +112,9 @@ function formatTime(seconds) {
 // ==========================
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Litepaper: do not run bar logic
+  if (IS_LITEPAPER) return;
+
   initFloatingHeader();
   initThemeToggle();
   initAudioPlayer();
