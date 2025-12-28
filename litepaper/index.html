@@ -1,378 +1,180 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2822
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Cocktail Club — Litepaper</title>
 
-\f0\fs24 \cf0 <!DOCTYPE html>\
-<html lang="en">\
-<head>\
-  <meta charset="UTF-8" />\
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />\
-  <title>Crypto Cocktail Club \'97 Litepaper</title>\
-\
-  <!-- Shared Site Styles -->\
-  <link rel="stylesheet" href="/styles.css" />\
-\
-  <!-- Base Font (match Virtual Bar if already defined there) -->\
-  <link rel="preconnect" href="https://fonts.googleapis.com">\
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">\
-\
-  <style>\
-    /* =========================\
-       LITEPAPER-SPECIFIC STYLES\
-       (Safe to inline)\
-    ========================= */\
-\
-    body \{\
-      font-family: "Inter", system-ui, sans-serif;\
-    \}\
-\
-    main \{\
-      overflow-x: hidden;\
-    \}\
-\
-    section \{\
-      padding: 120px 0;\
-    \}\
-\
-    .container \{\
-      max-width: 1080px;\
-      margin: 0 auto;\
-      padding: 0 24px;\
-    \}\
-\
-    .hero \{\
-      min-height: 85vh;\
-      display: flex;\
-      align-items: center;\
-      background:\
-        radial-gradient(circle at 70% 40%, rgba(255,20,147,0.14), transparent 55%),\
-        radial-gradient(circle at 30% 60%, rgba(255,183,0,0.10), transparent 55%);\
-    \}\
-\
-    .hero h1 \{\
-      font-size: clamp(36px, 6vw, 64px);\
-      font-weight: 500;\
-      letter-spacing: -0.02em;\
-      margin-bottom: 24px;\
-    \}\
-\
-    .hero p \{\
-      max-width: 680px;\
-      font-size: 18px;\
-      color: var(--muted);\
-    \}\
-\
-    .hero-cta \{\
-      margin-top: 48px;\
-      display: flex;\
-      gap: 20px;\
-      flex-wrap: wrap;\
-    \}\
-\
-    .btn \{\
-      padding: 14px 28px;\
-      border: 1px solid rgba(255,255,255,0.15);\
-      font-size: 12px;\
-      letter-spacing: 0.12em;\
-      text-transform: uppercase;\
-      transition: transform 0.25s ease;\
-    \}\
-\
-    .btn.primary \{\
-      border-color: var(--accent, var(--neon));\
-      box-shadow: var(--glow, var(--glow-neon));\
-    \}\
-\
-    .btn:hover \{\
-      transform: translateY(-1px);\
-    \}\
-\
-    .section-title \{\
-      font-size: 28px;\
-      font-weight: 500;\
-      margin-bottom: 24px;\
-    \}\
-\
-    .section-copy \{\
-      max-width: 720px;\
-      font-size: 16px;\
-      color: var(--muted);\
-    \}\
-\
-    .divider \{\
-      width: 75%;\
-      height: 1px;\
-      margin: 56px auto;\
-      background: linear-gradient(\
-        to right,\
-        transparent,\
-        var(--accent, var(--neon)),\
-        transparent\
-      );\
-      opacity: 0.6;\
-    \}\
-\
-    .grid-3 \{\
-      display: grid;\
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));\
-      gap: 32px;\
-      margin-top: 48px;\
-    \}\
-\
-    .card \{\
-      background: var(--panel);\
-      padding: 32px;\
-      border: 1px solid rgba(255,255,255,0.06);\
-    \}\
-\
-    .card h3 \{\
-      font-size: 18px;\
-      font-weight: 500;\
-      margin-bottom: 12px;\
-    \}\
-\
-    .card p \{\
-      font-size: 14px;\
-      color: var(--muted);\
-    \}\
-\
-    .tiers \{\
-      margin-top: 48px;\
-      border-top: 1px solid rgba(255,255,255,0.1);\
-    \}\
-\
-    .tier \{\
-      display: grid;\
-      grid-template-columns: 1fr 1fr 2fr;\
-      padding: 24px 0;\
-      border-bottom: 1px solid rgba(255,255,255,0.05);\
-      gap: 12px;\
-    \}\
-\
-    .tier strong \{\
-      font-weight: 500;\
-    \}\
-\
-    .tier span \{\
-      font-size: 14px;\
-      color: var(--muted);\
-    \}\
-\
-    footer \{\
-      padding: 96px 0;\
-      text-align: center;\
-      border-top: 1px solid rgba(255,255,255,0.05);\
-      font-size: 13px;\
-      color: var(--muted);\
-    \}\
-\
-    @media (max-width: 600px) \{\
-      section \{\
-        padding: 96px 0;\
-      \}\
-\
-      .tier \{\
-        grid-template-columns: 1fr;\
-      \}\
-\
-      .hero-cta \{\
-        flex-direction: column;\
-      \}\
-    \}\
-  </style>\
-</head>\
-\
-<body data-tier="base">\
-\
-  <!-- SHARED HEADER -->\
-  <header class="site-header">\
-    <nav class="nav">\
-      <div class="nav-left">\
-        <a href="/" class="brand">Crypto Cocktail Club</a>\
-      </div>\
-\
-      <div class="nav-center">\
-        <a href="/">Bar</a>\
-        <a href="/litepaper">Litepaper</a>\
-        <a href="/#membership">Membership</a>\
-      </div>\
-\
-      <div class="nav-right"></div>\
-    </nav>\
-  </header>\
-\
-  <main>\
-\
-    <!-- HERO -->\
-    <section class="hero">\
-      <div class="container">\
-        <h1>A Protocol for Cocktail Ownership</h1>\
-        <p>\
-          Crypto Cocktail Club is building ownership infrastructure for cocktail culture \'97\
-          aligning creators, venues, and members through on-chain access, real-world redemption,\
-          and programmable incentives.\
-        </p>\
-\
-        <div class="hero-cta">\
-          <a href="/#membership" class="btn primary">View Membership NFTs</a>\
-          <a href="/" class="btn">Enter the Virtual Bar</a>\
-        </div>\
-      </div>\
-    </section>\
-\
-    <!-- PROBLEM -->\
-    <section>\
-      <div class="container">\
-        <h2 class="section-title">The Cocktail Economy Is Broken</h2>\
-\
-        <div class="grid-3">\
-          <div class="card">\
-            <h3>Creators Don\'92t Own</h3>\
-            <p>\
-              Cocktail recipes generate long-term cultural and economic value,\
-              yet creators are compensated once and replaced.\
-            </p>\
-          </div>\
-\
-          <div class="card">\
-            <h3>Venues Lack Modern Infrastructure</h3>\
-            <p>\
-              Loyalty programs reward consumption, not community, ownership,\
-              or long-term engagement.\
-            </p>\
-          </div>\
-\
-          <div class="card">\
-            <h3>Fans Can\'92t Participate</h3>\
-            <p>\
-              Guests consume culture but have no stake in the upside\
-              they help create.\
-            </p>\
-          </div>\
-        </div>\
-      </div>\
-    </section>\
-\
-    <!-- MISSION -->\
-    <section>\
-      <div class="container">\
-        <h2 class="section-title">Our Mission</h2>\
-        <p class="section-copy">\
-          Crypto Cocktail Club exists to realign cocktail culture so the people\
-          who create it, serve it, and support it all participate in its value \'97\
-          transparently, sustainably, and without speculation-first incentives.\
-        </p>\
-        <div class="divider"></div>\
-      </div>\
-    </section>\
-\
-    <!-- STRATEGY -->\
-    <section>\
-      <div class="container">\
-        <h2 class="section-title">Strategy</h2>\
-\
-        <div class="grid-3">\
-          <div class="card">\
-            <h3>Membership NFTs</h3>\
-            <p>\
-              Scarce access passes that unlock experiences, drops,\
-              and future protocol participation.\
-            </p>\
-          </div>\
-\
-          <div class="card">\
-            <h3>Redeemable Cocktail IP</h3>\
-            <p>\
-              On-chain recipes designed for real-world redemption\
-              at partner venues.\
-            </p>\
-          </div>\
-\
-          <div class="card">\
-            <h3>Venue Network</h3>\
-            <p>\
-              Bars monetize culture directly \'97 earning even when\
-              their doors are closed.\
-            </p>\
-          </div>\
-        </div>\
-      </div>\
-    </section>\
-\
-    <!-- MEMBERSHIP -->\
-    <section id="membership">\
-      <div class="container">\
-        <h2 class="section-title">Membership Tiers</h2>\
-\
-        <div class="tiers">\
-          <div class="tier">\
-            <strong>Base</strong>\
-            <span>High Supply</span>\
-            <span>Access, community participation, drops</span>\
-          </div>\
-\
-          <div class="tier">\
-            <strong>Gold</strong>\
-            <span>Limited</span>\
-            <span>Priority access, partner perks, enhanced drops</span>\
-          </div>\
-\
-          <div class="tier">\
-            <strong>Platinum</strong>\
-            <span>Ultra-Scarce</span>\
-            <span>Governance influence and protocol participation</span>\
-          </div>\
-        </div>\
-      </div>\
-    </section>\
-\
-    <!-- TOKENOMICS -->\
-    <section>\
-      <div class="container">\
-        <h2 class="section-title">TIPZ Token</h2>\
-        <p class="section-copy">\
-          TIPZ functions as an incentive and settlement layer \'97\
-          rewarding participation, aligning venues and creators,\
-          and powering CCC\'92s protocol economy.\
-          TIPZ is not positioned as a consumer payment token.\
-        </p>\
-      </div>\
-    </section>\
-\
-    <!-- LAUNCH -->\
-    <section>\
-      <div class="container">\
-        <h2 class="section-title">Launch Flow</h2>\
-\
-        <div class="grid-3">\
-          <div class="card">\
-            <h3>Mint</h3>\
-            <p>Acquire a CCC Membership NFT.</p>\
-          </div>\
-\
-          <div class="card">\
-            <h3>Access</h3>\
-            <p>Enter the Virtual Bar and unlock protocol features.</p>\
-          </div>\
-\
-          <div class="card">\
-            <h3>Redeem</h3>\
-            <p>Experience cocktails at partner venues.</p>\
-          </div>\
-        </div>\
-      </div>\
-    </section>\
-\
-  </main>\
-\
-  <footer>\
-    \'a9 Crypto Cocktail Club \'97 Built by bartenders. Designed like a bar.\
-  </footer>\
-\
-</body>\
-</html>\
-}
+  <!-- Shared Site Styles -->
+  <link rel="stylesheet" href="/styles.css" />
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+
+<body data-tier="base" class="litepaper-page">
+
+  <!-- Header -->
+  <header class="site-header">
+    <nav class="nav">
+      <div class="nav-left">
+        <a href="/" class="brand">Crypto Cocktail Club</a>
+      </div>
+
+      <div class="nav-center">
+        <a href="/">Bar</a>
+        <a href="/litepaper">Litepaper</a>
+        <a href="/#membership">Membership</a>
+      </div>
+
+      <div class="nav-right"></div>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container">
+        <h1>A Protocol for Cocktail Ownership</h1>
+        <p>
+          Crypto Cocktail Club is building ownership infrastructure for cocktail culture —
+          aligning creators, venues, and members through on-chain access, real-world redemption,
+          and programmable incentives.
+        </p>
+
+        <div class="hero-cta">
+          <a href="/#membership" class="btn primary">View Membership NFTs</a>
+          <a href="/" class="btn">Enter the Virtual Bar</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEM -->
+    <section>
+      <div class="container">
+        <h2 class="section-title">The Cocktail Economy Is Broken</h2>
+
+        <div class="grid-3">
+          <div class="card">
+            <h3>Creators Don’t Own</h3>
+            <p>
+              Cocktail recipes generate long-term cultural and economic value,
+              yet creators are compensated once and replaced.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Venues Lack Modern Infrastructure</h3>
+            <p>
+              Loyalty programs reward consumption, not community, ownership,
+              or long-term engagement.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Fans Can’t Participate</h3>
+            <p>
+              Guests consume culture but have no stake in the upside
+              they help create.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MISSION -->
+    <section>
+      <div class="container">
+        <h2 class="section-title">Our Mission</h2>
+        <p class="section-copy">
+          Crypto Cocktail Club exists to realign cocktail culture so the people
+          who create it, serve it, and support it all participate in its value —
+          transparently, sustainably, and without speculation-first incentives.
+        </p>
+      </div>
+    </section>
+
+    <!-- STRATEGY -->
+    <section>
+      <div class="container">
+        <h2 class="section-title">Strategy</h2>
+
+        <div class="grid-3">
+          <div class="card">
+            <h3>Membership NFTs</h3>
+            <p>
+              Scarce access passes that unlock experiences, drops,
+              and future protocol participation.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Redeemable Cocktail IP</h3>
+            <p>
+              On-chain recipes designed for real-world redemption
+              at partner venues.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Venue Network</h3>
+            <p>
+              Bars monetize culture directly — earning even when
+              their doors are closed.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MEMBERSHIP -->
+    <section id="membership">
+      <div class="container">
+        <h2 class="section-title">Membership Tiers</h2>
+
+        <div class="tiers">
+          <div class="tier">
+            <strong>Base</strong>
+            <span>High Supply</span>
+            <span>Access, community participation, drops</span>
+          </div>
+
+          <div class="tier">
+            <strong>Gold</strong>
+            <span>Limited</span>
+            <span>Priority access, partner perks, enhanced drops</span>
+          </div>
+
+          <div class="tier">
+            <strong>Platinum</strong>
+            <span>Ultra-Scarce</span>
+            <span>Governance influence and protocol participation</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOKEN -->
+    <section>
+      <div class="container">
+        <h2 class="section-title">TIPZ Token</h2>
+        <p class="section-copy">
+          TIPZ functions as an incentive and settlement layer —
+          rewarding participation, aligning venues and creators,
+          and powering CCC’s protocol economy.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    © Crypto Cocktail Club — Built by bartenders. Designed like a bar.
+  </footer>
+
+  <script src="/script.js" defer></script>
+</body>
+</html>
