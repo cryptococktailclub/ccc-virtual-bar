@@ -2092,3 +2092,72 @@ body.theme-platinum .footer-icon-link:hover {
 .litepaper-page .section {
   margin-bottom: 28px;
 }
+/* ======================================
+   LITEPAPER – READING MODE
+====================================== */
+
+.litepaper-mode {
+  background: radial-gradient(circle at top, #1a0f22 0%, #05010f 55%, #020008 100%);
+}
+
+/* Constrain reading width tighter than UI */
+.litepaper-mode .section {
+  max-width: 760px;
+}
+
+/* Remove card feeling for text sections */
+.litepaper-mode .card {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* Typography hierarchy */
+.litepaper-mode h2 {
+  font-size: 1.25rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.litepaper-mode h3 {
+  font-size: 0.95rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  color: var(--text-muted);
+}
+
+.litepaper-mode p {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #e9e4ff;
+  margin-bottom: 18px;
+}
+
+/* Emphasis styles */
+.litepaper-mode p strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.litepaper-mode p em {
+  color: var(--text-muted);
+  font-style: normal;
+}
+
+/* Section divider (quiet, not loud) */
+.litepaper-mode .section + .section::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin: 28px 0 22px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255,255,255,0.18),
+    transparent
+  );
+}
