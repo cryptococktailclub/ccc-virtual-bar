@@ -2077,3 +2077,18 @@ body.theme-platinum .footer-icon-link:hover {
   filter: drop-shadow(0 0 6px #e8e8e8)
           drop-shadow(0 0 12px rgba(232, 232, 232, 0.7));
 }
+/* =========================
+   LITEPAPER MODE
+========================= */
+
+.litepaper-page .hero {
+  min-height: 70vh;
+}
+
+.litepaper-page .hero-title {
+  font-size: 1.6rem;
+}
+
+.litepaper-page .section {
+  margin-bottom: 28px;
+}
