@@ -1,0 +1,5 @@
+# Serve Litepaper on cryptococktailclub.com
+https://cryptococktailclub.com/*   /litepaper/:splat   200
+
+# Serve Virtual Bar on cryptococktail.club
+https://cryptococktail.club/*      /:splat             200
