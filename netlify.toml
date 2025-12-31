@@ -1,0 +1,14 @@
+[[redirects]]
+  from = "https://cryptococktailclub.com/"
+  to = "/litepaper/index.html"
+  status = 200
+
+[[redirects]]
+  from = "https://cryptococktailclub.com/*"
+  to = "/litepaper/:splat"
+  status = 200
+
+[[redirects]]
+  from = "https://cryptococktail.club/*"
+  to = "/:splat"
+  status = 200
