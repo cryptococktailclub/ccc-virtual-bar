@@ -1,6 +1,0 @@
-# --- LITEPAPER DOMAIN (PRIMARY) ---
-https://cryptococktailclub.com/        /litepaper/index.html   200
-https://cryptococktailclub.com/*       /litepaper/:splat      200
-
-# --- VIRTUAL BAR DOMAIN ---
-https://cryptococktail.club/*          /:splat                200
