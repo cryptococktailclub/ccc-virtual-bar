@@ -1443,6 +1443,25 @@ body.theme-platinum .bartender-avatar {
   opacity: 1;
   transform: translateY(-1px);
 }
+.footer-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  opacity: 0.75;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.footer-icon img {
+  width: 18px;
+  height: 18px;
+}
+
+.footer-icon:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
 
 /* ============================
    NOW PLAYING FOOTER GRADIENT
