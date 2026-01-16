@@ -2180,3 +2180,14 @@ body.theme-platinum .footer-icon-link:hover {
     transparent
   );
 }
+/* =====================================
+   FOOTER COPYRIGHT
+===================================== */
+
+.footer-copyright {
+  margin-top: 14px;
+  font-size: 11px;
+  color: rgba(165, 154, 199, 0.6);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
