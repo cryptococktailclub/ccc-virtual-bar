@@ -80,18 +80,19 @@ const AUDIO_TRACKS = [
   },
 ];
 
-// Bar TV loop tapes
 const VIDEO_SOURCES = [
-  `${MEDIA_BASE}/video/bar_tape_01.mp4`,
-  `${MEDIA_BASE}/video/bar_tape_02.mp4`,
-  `${MEDIA_BASE}/video/bar_tape_03.mp4`,
-  `${MEDIA_BASE}/video/bar_tape_04.mp4`,
-  `${MEDIA_BASE}/video/bar_tape_05.mp4`,
-  `${MEDIA_BASE}/video/bar_tape_06.mp4`,
-  `${MEDIA_BASE}/video/bar_tape_07.mp4`,
-  `${MEDIA_BASE}/video/bar_tape_08.mp4`,
-  `${MEDIA_BASE}/video/bar_tape_09.mp4`,
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_01.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_02.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_03.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_04.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_05.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_06.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_07.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_08.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_09.mp4",
+  "https://visionary-beignet-7d270e.netlify.app/video/bar_tape_10.mp4" // NEW
 ];
+
 
 // Netlify function endpoint for Bar Bot
 const BARTENDER_FUNCTION_PATH = "/.netlify/functions/ccc-bartender";
