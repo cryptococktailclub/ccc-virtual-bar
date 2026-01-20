@@ -385,6 +385,7 @@ function initAudioPlayer() {
 function initBarTV() {
   const videoEl = document.getElementById("barTvVideo");
   const chBtn = document.getElementById("tvChannelBtn");
+  const prevChBtn = document.getElementById("tvPrevChannelBtn"); // CH-
   const playBtn = document.getElementById("tvPlayBtn");
   const muteBtn = document.getElementById("tvMuteBtn");
   const volSlider = document.getElementById("tvVolume");
@@ -398,6 +399,7 @@ function initBarTV() {
   }
 
   let currentChannel = 0;
+  let channelHistory = [];
 
   function applyGlitch() {
     if (!tvShell) return;
@@ -434,12 +436,25 @@ function initBarTV() {
   // Initial channel
   loadChannel(0, true);
 
-  // Channel change
+  // Channel forward (CH+)
   if (chBtn) {
     chBtn.addEventListener("click", () => {
       if (!VIDEO_SOURCES || !VIDEO_SOURCES.length) return;
+
+      channelHistory.push(currentChannel);
+
       const nextIndex = (currentChannel + 1) % VIDEO_SOURCES.length;
       loadChannel(nextIndex, true);
+    });
+  }
+
+  // Channel back (CH-)
+  if (prevChBtn) {
+    prevChBtn.addEventListener("click", () => {
+      if (channelHistory.length === 0) return;
+
+      const prevIndex = channelHistory.pop();
+      loadChannel(prevIndex, true);
     });
   }
 
