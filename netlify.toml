@@ -9,6 +9,18 @@
   status = 200
 
 [[redirects]]
+  from = "https://cryptococktail.club/backroom"
+  to = "https://cryptococktailclub.com/member/"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "https://cryptococktail.club/backroom/*"
+  to = "https://cryptococktailclub.com/member/"
+  status = 302
+  force = true
+
+[[redirects]]
   from = "https://cryptococktail.club/*"
   to = "/:splat"
   status = 200
