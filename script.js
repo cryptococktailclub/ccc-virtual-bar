@@ -937,3 +937,24 @@ function buildRecipeText(recipe, summary) {
 
   return lines.join("\n").trim();
 }
+
+// Ignite the Backroom neon sign only when the entrance comes into view.
+(() => {
+  const backroomEntry = document.querySelector(".backroom-entry");
+  if (!backroomEntry) return;
+
+  if (!("IntersectionObserver" in window)) {
+    backroomEntry.classList.add("is-visible");
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      backroomEntry.classList.add("is-visible");
+      observer.disconnect();
+    });
+  }, { threshold: 0.32 });
+
+  observer.observe(backroomEntry);
+})();
