@@ -954,7 +954,7 @@ function buildRecipeText(recipe, summary) {
       backroomEntry.classList.add("is-visible");
       observer.disconnect();
     });
-  }, { threshold: 0.32 });
+  }, { threshold: 0.48 });
 
   observer.observe(backroomEntry);
 })();
