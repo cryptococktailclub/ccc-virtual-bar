@@ -1,0 +1,1 @@
+Navigation destinations: Litepaper https://cryptococktailclub.com/ ; Whitepaper https://cryptococktailclub.com/whitepaper/ ; Members Bar https://cryptococktailclub.com/member/
