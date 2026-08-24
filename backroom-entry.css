@@ -151,9 +151,23 @@
 
 .backroom-entry .section-title {
   margin-bottom: 14px;
+  color: #ff8fc4;
   font-size: clamp(2.6rem, 7vw, 5.5rem);
   line-height: .95;
   letter-spacing: -.055em;
+  opacity: .06;
+  text-shadow:
+    0 0 2px rgba(255, 239, 247, .72),
+    0 0 16px rgba(255, 71, 151, .52),
+    0 0 42px rgba(255, 31, 128, .3);
+  filter: grayscale(.85) brightness(.2) drop-shadow(0 0 0 transparent);
+  will-change: opacity, filter;
+}
+
+.backroom-entry.is-visible .section-title {
+  animation:
+    backroom-neon-ignite 3.2s steps(1, end) both,
+    backroom-neon-idle-flicker 9s 3.2s linear infinite;
 }
 
 .backroom-entry .section-subtitle {
@@ -464,6 +478,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .backroom-entry-logo,
+  .backroom-entry .section-title,
   .backroom-neon-sign::before,
   .backroom-neon-sign::after,
   .backroom-entry-button {
@@ -478,6 +493,15 @@
       saturate(1.18)
       drop-shadow(0 0 8px rgba(255, 118, 181, .78))
       drop-shadow(0 0 24px rgba(255, 35, 132, .54));
+  }
+
+  .backroom-entry .section-title {
+    opacity: 1;
+    filter:
+      brightness(1.1)
+      saturate(1.2)
+      drop-shadow(0 0 9px rgba(255, 126, 187, .84))
+      drop-shadow(0 0 28px rgba(255, 35, 132, .58));
   }
 
   .backroom-neon-sign::before {
