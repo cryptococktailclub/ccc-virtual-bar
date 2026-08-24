@@ -4,64 +4,144 @@
 
 .backroom-entry {
   position: relative;
-  min-height: 520px;
-  overflow: hidden;
   display: grid;
+  min-height: 720px;
+  padding: 0;
+  overflow: hidden;
   place-items: center;
   text-align: center;
   isolation: isolate;
   background:
-    radial-gradient(circle at 50% 72%, rgba(255, 45, 137, 0.16), transparent 19rem),
-    linear-gradient(180deg, rgba(8, 5, 9, 0.96), rgba(2, 2, 3, 0.99));
-  border-color: rgba(255, 255, 255, 0.09);
+    radial-gradient(circle at 50% 76%, rgba(255, 31, 128, 0.2), transparent 24rem),
+    linear-gradient(180deg, rgba(9, 5, 10, 0.97), rgba(2, 2, 3, 0.995));
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 34px 90px rgba(0, 0, 0, 0.58),
+    inset 0 0 80px rgba(255, 32, 130, 0.025);
 }
 
 .backroom-entry::before {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: -3;
+  z-index: -4;
+  pointer-events: none;
   background:
-    linear-gradient(90deg, transparent 0 49.8%, rgba(255,255,255,.025) 50%, transparent 50.2%),
-    radial-gradient(circle at 50% 100%, rgba(255, 48, 141, .12), transparent 35%);
+    linear-gradient(90deg, transparent 0 49.85%, rgba(255,255,255,.035) 50%, transparent 50.15%),
+    radial-gradient(ellipse at 50% 106%, rgba(255, 45, 139, .22), transparent 42%);
+}
+
+.backroom-entry::after {
+  content: "";
+  position: absolute;
+  left: 13%;
+  right: 13%;
+  bottom: -46px;
+  z-index: -1;
+  height: 150px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(ellipse, rgba(255, 35, 132, .19), transparent 67%);
+  filter: blur(18px);
 }
 
 .backroom-door {
   position: absolute;
-  z-index: -2;
-  width: min(330px, 72vw);
-  height: 430px;
-  bottom: -72px;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 1px solid rgba(255,255,255,.09);
+  inset: 26px clamp(22px, 4vw, 58px) -96px;
+  z-index: -3;
+  width: auto;
+  height: auto;
+  border: 1px solid rgba(255, 216, 235, .17);
   border-bottom: 0;
-  border-radius: 170px 170px 0 0;
-  background: linear-gradient(180deg, rgba(255,255,255,.015), rgba(255, 47, 139, .035));
+  border-radius: 50% 50% 0 0 / 220px 220px 0 0;
+  background:
+    linear-gradient(90deg, transparent 49.88%, rgba(255, 214, 234, .055) 50%, transparent 50.12%),
+    radial-gradient(ellipse at 50% 15%, rgba(255, 43, 138, .055), transparent 48%),
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(255, 30, 127, .035));
   box-shadow:
-    inset 0 0 70px rgba(255, 43, 135, .025),
-    0 0 90px rgba(255, 43, 135, .035);
+    inset 0 0 110px rgba(255, 39, 135, .035),
+    0 0 120px rgba(255, 35, 132, .055);
+  transform: none;
+}
+
+.backroom-door::before {
+  content: "";
+  position: absolute;
+  inset: 18px 22px 0;
+  border: 1px solid rgba(255, 221, 238, .075);
+  border-bottom: 0;
+  border-radius: 50% 50% 0 0 / 202px 202px 0 0;
+  box-shadow: inset 0 0 55px rgba(255, 42, 136, .025);
 }
 
 .backroom-door::after {
   content: "";
   position: absolute;
-  inset: 42% 16% -8%;
-  background: rgba(255, 42, 135, .16);
-  filter: blur(45px);
+  inset: 38% 7% -4%;
+  background:
+    linear-gradient(90deg, transparent 49.8%, rgba(255, 220, 237, .035) 50%, transparent 50.2%),
+    radial-gradient(ellipse at 50% 100%, rgba(255, 31, 128, .23), transparent 66%);
+  filter: blur(32px);
 }
 
 .backroom-entry-content {
-  width: min(700px, calc(100% - 38px));
-  padding: 54px 22px 68px;
+  position: relative;
+  z-index: 1;
+  width: min(780px, calc(100% - 38px));
+  padding: 68px 22px 184px;
+}
+
+.backroom-neon-sign {
+  position: relative;
+  width: clamp(112px, 14vw, 162px);
+  margin: 0 auto 25px;
+}
+
+.backroom-neon-sign::before {
+  content: "";
+  position: absolute;
+  inset: -34%;
+  z-index: -1;
+  border-radius: 50%;
+  opacity: .78;
+  background: radial-gradient(circle, rgba(255, 34, 132, .28), rgba(255, 34, 132, .06) 42%, transparent 70%);
+  filter: blur(14px);
+}
+
+.backroom-neon-sign::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  width: 54%;
+  height: 10%;
+  border-radius: 50%;
+  background: rgba(255, 107, 174, .38);
+  filter: blur(16px);
+  transform: translateX(-50%);
 }
 
 .backroom-entry-logo {
+  position: relative;
   display: block;
-  width: clamp(92px, 13vw, 146px);
+  width: 100%;
   height: auto;
-  margin: 0 auto 24px;
-  filter: drop-shadow(0 0 24px rgba(255, 60, 148, .48));
+  margin: 0;
+  opacity: 1;
+  filter:
+    brightness(1.08)
+    saturate(1.18)
+    drop-shadow(0 0 8px rgba(255, 118, 181, .78))
+    drop-shadow(0 0 24px rgba(255, 35, 132, .54));
+}
+
+.backroom-entry.is-visible .backroom-entry-logo {
+  animation: backroom-neon-ignite 2.45s ease-out both;
+}
+
+.backroom-entry.is-visible .backroom-neon-sign::before,
+.backroom-entry.is-visible .backroom-neon-sign::after {
+  animation: backroom-neon-halo 3.4s 2.25s ease-in-out infinite;
 }
 
 .backroom-eyebrow {
@@ -81,11 +161,12 @@
 }
 
 .backroom-entry .section-subtitle {
-  max-width: 610px;
+  max-width: 650px;
   margin-left: auto;
   margin-right: auto;
-  color: rgba(242, 235, 239, .68);
+  color: rgba(242, 235, 239, .72);
   line-height: 1.65;
+  text-wrap: pretty;
 }
 
 .backroom-benefits {
@@ -101,25 +182,29 @@
   align-items: center;
   min-height: 32px;
   padding: 7px 11px;
-  border: 1px solid rgba(255,255,255,.09);
+  border: 1px solid rgba(255,255,255,.11);
   border-radius: 999px;
-  background: rgba(255,255,255,.025);
-  color: rgba(242,235,239,.72);
+  background: rgba(255,255,255,.035);
+  color: rgba(242,235,239,.76);
   font-size: .72rem;
   white-space: nowrap;
 }
 
 .backroom-entry-button {
+  position: relative;
+  z-index: 4;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 210px;
   min-height: 48px;
   padding: 12px 22px;
-  border: 1px solid rgba(255, 87, 162, .45);
+  border: 1px solid rgba(255, 87, 162, .52);
   border-radius: 999px;
-  background: linear-gradient(135deg, rgba(255, 56, 146, .19), rgba(255,255,255,.035));
-  box-shadow: 0 0 30px rgba(255, 48, 142, .08);
+  background: linear-gradient(135deg, rgba(255, 39, 136, .25), rgba(255,255,255,.045));
+  box-shadow:
+    0 0 34px rgba(255, 48, 142, .12),
+    inset 0 1px 0 rgba(255,255,255,.1);
   color: #fff;
   font-weight: 650;
   text-decoration: none;
@@ -129,36 +214,251 @@
 .backroom-entry-button:hover,
 .backroom-entry-button:focus-visible {
   transform: translateY(-2px);
-  border-color: rgba(255, 105, 174, .75);
-  box-shadow: 0 0 36px rgba(255, 48, 142, .16);
+  border-color: rgba(255, 126, 188, .82);
+  box-shadow:
+    0 0 42px rgba(255, 48, 142, .22),
+    inset 0 1px 0 rgba(255,255,255,.14);
 }
 
 .backroom-entry-note {
   margin: 16px 0 0;
-  color: rgba(242,235,239,.38);
+  color: rgba(242,235,239,.42);
   font-size: .7rem;
+}
+
+.backroom-velvet-rope {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  z-index: 3;
+  width: min(760px, calc(100% - 72px));
+  height: 124px;
+  pointer-events: none;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 18px 20px rgba(0, 0, 0, .72));
+}
+
+.backroom-rope-cord {
+  position: absolute;
+  top: 3px;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  height: 92px;
+  overflow: visible;
+}
+
+.backroom-rope-cord path {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.backroom-rope-shadow {
+  stroke: rgba(0, 0, 0, .62);
+  stroke-width: 27;
+}
+
+.backroom-rope-body {
+  stroke: #cc146d;
+  stroke-width: 19;
+}
+
+.backroom-rope-highlight {
+  stroke: rgba(255, 133, 192, .62);
+  stroke-width: 4;
+}
+
+.backroom-rope-post {
+  position: absolute;
+  bottom: 1px;
+  z-index: 4;
+  width: 34px;
+  height: 104px;
+  border: 1px solid rgba(255, 176, 210, .34);
+  border-radius: 16px 16px 7px 7px;
+  background:
+    linear-gradient(90deg, #6d0a39 0%, #e92983 35%, #ff79b7 50%, #bf105f 72%, #54072d 100%);
+  box-shadow:
+    0 0 22px rgba(255, 31, 128, .28),
+    inset 0 0 9px rgba(255,255,255,.2);
+}
+
+.backroom-rope-post-left {
+  left: 25px;
+}
+
+.backroom-rope-post-right {
+  right: 25px;
+}
+
+.backroom-rope-post::before {
+  content: "";
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  width: 29px;
+  height: 29px;
+  border: 1px solid rgba(255, 206, 228, .48);
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 30%, #ffd1e5, #ef3a8f 31%, #870844 73%);
+  box-shadow: 0 0 18px rgba(255, 53, 145, .48);
+  transform: translateX(-50%);
+}
+
+.backroom-rope-post::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  width: 66px;
+  height: 17px;
+  border: 1px solid rgba(255, 147, 197, .28);
+  border-radius: 50%;
+  background: linear-gradient(180deg, #e0277e, #5b082f);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .5);
+  transform: translateX(-50%);
+}
+
+.backroom-rope-post i {
+  position: absolute;
+  top: 17px;
+  left: 50%;
+  width: 46px;
+  height: 9px;
+  border: 1px solid rgba(255, 187, 216, .34);
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ff78b5, #8d0a48);
+  transform: translateX(-50%);
+}
+
+@keyframes backroom-neon-ignite {
+  0%, 7%, 13% {
+    opacity: .13;
+    filter: grayscale(.75) brightness(.28) drop-shadow(0 0 0 transparent);
+  }
+  8%, 11% {
+    opacity: .82;
+    filter: brightness(1.2) saturate(1.2) drop-shadow(0 0 10px rgba(255, 104, 174, .68));
+  }
+  14%, 19% {
+    opacity: .24;
+    filter: grayscale(.55) brightness(.42) drop-shadow(0 0 3px rgba(255, 104, 174, .24));
+  }
+  20%, 25% {
+    opacity: .96;
+    filter: brightness(1.28) saturate(1.3) drop-shadow(0 0 13px rgba(255, 104, 174, .78));
+  }
+  26%, 31% {
+    opacity: .38;
+    filter: brightness(.62) saturate(.82) drop-shadow(0 0 5px rgba(255, 104, 174, .32));
+  }
+  36%, 100% {
+    opacity: 1;
+    filter:
+      brightness(1.1)
+      saturate(1.2)
+      drop-shadow(0 0 9px rgba(255, 126, 187, .84))
+      drop-shadow(0 0 28px rgba(255, 35, 132, .58));
+  }
+}
+
+@keyframes backroom-neon-halo {
+  0%, 100% { opacity: .66; transform: scale(.98); }
+  50% { opacity: .92; transform: scale(1.035); }
 }
 
 @media (max-width: 640px) {
   .backroom-entry {
-    min-height: 500px;
+    min-height: 690px;
+  }
+
+  .backroom-door {
+    inset: 18px 10px -86px;
+    border-radius: 50% 50% 0 0 / 128px 128px 0 0;
+  }
+
+  .backroom-door::before {
+    inset: 12px 12px 0;
+    border-radius: 50% 50% 0 0 / 116px 116px 0 0;
   }
 
   .backroom-entry-content {
-    padding: 48px 12px 58px;
+    width: min(100% - 20px, 560px);
+    padding: 52px 10px 164px;
+  }
+
+  .backroom-neon-sign {
+    width: 116px;
+    margin-bottom: 22px;
   }
 
   .backroom-benefits {
-    max-width: 340px;
+    display: grid;
+    max-width: 330px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .backroom-benefits span {
+    justify-content: center;
     font-size: .68rem;
+  }
+
+  .backroom-velvet-rope {
+    bottom: 25px;
+    width: calc(100% - 28px);
+    height: 102px;
+  }
+
+  .backroom-rope-cord {
+    height: 76px;
+  }
+
+  .backroom-rope-post {
+    width: 27px;
+    height: 85px;
+  }
+
+  .backroom-rope-post-left {
+    left: 12px;
+  }
+
+  .backroom-rope-post-right {
+    right: 12px;
+  }
+
+  .backroom-rope-post::before {
+    top: -11px;
+    width: 23px;
+    height: 23px;
+  }
+
+  .backroom-rope-post::after {
+    width: 50px;
+    height: 14px;
+  }
+
+  .backroom-rope-post i {
+    top: 14px;
+    width: 36px;
+    height: 7px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .backroom-entry-logo,
+  .backroom-neon-sign::before,
+  .backroom-neon-sign::after,
   .backroom-entry-button {
+    animation: none !important;
     transition: none;
+  }
+
+  .backroom-entry-logo {
+    opacity: 1;
+    filter:
+      brightness(1.08)
+      saturate(1.18)
+      drop-shadow(0 0 8px rgba(255, 118, 181, .78))
+      drop-shadow(0 0 24px rgba(255, 35, 132, .54));
   }
 }
