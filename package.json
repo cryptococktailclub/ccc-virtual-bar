@@ -1,0 +1,22 @@
+{
+  "name": "ccc-virtual-bar",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build:check": "esbuild netlify/functions/ccc-x402-bartender.mjs --bundle --platform=node --format=esm --outfile=.netlify/check/ccc-x402-bartender.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@x402/core": "2.25.0",
+    "@x402/evm": "2.25.0",
+    "@x402/extensions": "2.25.0",
+    "@x402/hono": "2.25.0",
+    "hono": "4.13.7"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
