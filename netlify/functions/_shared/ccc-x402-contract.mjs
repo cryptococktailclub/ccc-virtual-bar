@@ -179,10 +179,28 @@ export function validateBartenderRequest(body) {
 }
 
 export async function readJsonBody(request) {
-  const raw = await request.text();
-  if (new TextEncoder().encode(raw).byteLength > MAX_BODY_BYTES) {
+  const declaredLength = Number(request.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
     throw new InputError(`Request body must be ${MAX_BODY_BYTES} bytes or fewer.`);
   }
+  if (!request.body) throw new InputError("A JSON request body is required.");
+
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder();
+  let raw = "";
+  let bytesRead = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    bytesRead += value.byteLength;
+    if (bytesRead > MAX_BODY_BYTES) {
+      await reader.cancel();
+      throw new InputError(`Request body must be ${MAX_BODY_BYTES} bytes or fewer.`);
+    }
+    raw += decoder.decode(value, { stream: true });
+  }
+  raw += decoder.decode();
+
   if (!raw.trim()) throw new InputError("A JSON request body is required.");
   try {
     return JSON.parse(raw);

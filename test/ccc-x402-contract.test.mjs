@@ -138,6 +138,16 @@ test("JSON body reader enforces syntax and the byte limit", async () => {
     ),
     InputError,
   );
+  await assert.rejects(
+    readJsonBody(
+      new Request("https://example.com", {
+        method: "POST",
+        headers: { "content-length": String(MAX_BODY_BYTES + 1) },
+        body: "{}",
+      }),
+    ),
+    InputError,
+  );
 });
 
 test("internal bartender adapter forwards the validated legacy event", async () => {
