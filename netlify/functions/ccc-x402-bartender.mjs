@@ -360,7 +360,8 @@ export default async (request, context) => {
 };
 
 export const config = {
-  path: [STATUS_PATH, BARTENDER_PATH],
+  // Keep route literals inline so Netlify can statically extract function configuration.
+  path: ["/api/x402", "/api/x402/bartender"],
   rateLimit: {
     windowLimit: 60,
     windowSize: 60,
