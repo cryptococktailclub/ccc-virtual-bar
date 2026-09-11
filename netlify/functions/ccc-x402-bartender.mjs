@@ -3,7 +3,6 @@ import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
 import { paymentMiddleware, x402ResourceServer } from "@x402/hono";
 import { Hono } from "hono";
-import bartenderModule from "./ccc-bartender.js";
 import recipes from "./recipes.json" with { type: "json" };
 
 import {
@@ -22,14 +21,12 @@ import {
   validateBartenderRequest,
 } from "./_shared/ccc-x402-contract.mjs";
 
-function getBartenderHandler() {
+async function getBartenderHandler() {
+  const { default: bartenderModule } = await import("./ccc-bartender.js");
   const { handler } = bartenderModule;
   if (typeof handler !== "function") throw new BartenderError("The internal bartender is unavailable.");
   return handler;
 }
-
-const ALLOWED_HEADERS = "Content-Type, Payment-Signature, X-Payment";
-const EXPOSED_HEADERS = "Payment-Required, Payment-Response, X-Payment-Response";
 
 const inputSchema = {
   type: "object",
@@ -133,40 +130,12 @@ const outputSchema = {
   required: ["service", "version", "request_id", "grounding", "structured"],
 };
 
-const discoveryExtension = declareDiscoveryExtension({
-  bodyType: "json",
-  input: { mode: "chat", question: "Left Hand Cocktail spec" },
-  inputSchema,
-  output: {
-    example: {
-      service: SERVICE_NAME,
-      version: API_VERSION,
-      request_id: "e13fb611-3b25-46a6-b063-745d7f1de3bb",
-      grounding: {
-        policy: "dataset_only",
-        recipe_count: RECIPE_COUNT,
-        no_original_riffs: true,
-      },
-      structured: {
-        summary: "Milk & Honey spec for Left Hand Cocktail.",
-        warnings: [],
-        recipes: [],
-      },
-    },
-    schema: outputSchema,
-  },
-});
-
 function env(name) {
   return globalThis.Netlify?.env?.get(name) ?? "";
 }
 
-function corsHeaders() {
+function apiHeaders() {
   return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": ALLOWED_HEADERS,
-    "Access-Control-Expose-Headers": EXPOSED_HEADERS,
     "Cache-Control": "no-store",
     "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
     "Referrer-Policy": "no-referrer",
@@ -179,7 +148,7 @@ function json(data, status = 200, extraHeaders = {}) {
     status,
     headers: {
       "Content-Type": "application/json; charset=utf-8",
-      ...corsHeaders(),
+      ...apiHeaders(),
       ...extraHeaders,
     },
   });
@@ -187,7 +156,7 @@ function json(data, status = 200, extraHeaders = {}) {
 
 function addResponseHeaders(response) {
   const headers = new Headers(response.headers);
-  for (const [name, value] of Object.entries(corsHeaders())) headers.set(name, value);
+  for (const [name, value] of Object.entries(apiHeaders())) headers.set(name, value);
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -209,6 +178,29 @@ function configProblem(config, requestId) {
 
 function createPaidApp(config) {
   const app = new Hono();
+  const discoveryExtension = declareDiscoveryExtension({
+    bodyType: "json",
+    input: { mode: "chat", question: "Left Hand Cocktail spec" },
+    inputSchema,
+    output: {
+      example: {
+        service: SERVICE_NAME,
+        version: API_VERSION,
+        request_id: "e13fb611-3b25-46a6-b063-745d7f1de3bb",
+        grounding: {
+          policy: "dataset_only",
+          recipe_count: RECIPE_COUNT,
+          no_original_riffs: true,
+        },
+        structured: {
+          summary: "Milk & Honey spec for Left Hand Cocktail.",
+          warnings: [],
+          recipes: [],
+        },
+      },
+      schema: outputSchema,
+    },
+  });
   const facilitatorClient = new HTTPFacilitatorClient({ url: config.facilitatorUrl });
   const resourceServer = new x402ResourceServer(facilitatorClient).register(
     config.network,
@@ -260,7 +252,7 @@ function createPaidApp(config) {
     try {
       const body = await readJsonBody(context.req.raw);
       const payload = validateBartenderRequest(body);
-      const structured = await invokeInternalBartender(getBartenderHandler(), payload);
+      const structured = await invokeInternalBartender(await getBartenderHandler(), payload);
       const grounded = groundStructuredResponse(structured, recipes);
       return context.json(publicResult(grounded, requestId));
     } catch (error) {
@@ -323,7 +315,7 @@ export default async (request, context) => {
   const requestId = context?.requestId || crypto.randomUUID();
   const config = readX402Config(env);
 
-  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders() });
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: { Allow: "GET, POST, OPTIONS" } });
 
   if (url.pathname === STATUS_PATH) {
     if (request.method !== "GET") {

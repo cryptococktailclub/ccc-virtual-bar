@@ -30,11 +30,11 @@ test("paid route fails closed until explicitly activated", async () => {
   assert.equal(response.headers.get("cache-control"), "no-store");
 });
 
-test("CORS preflight is free", async () => {
+test("OPTIONS requests are free", async () => {
   const response = await handler(
     new Request("https://cryptococktail.club/api/x402/bartender", { method: "OPTIONS" }),
     { requestId: "options-test" },
   );
   assert.equal(response.status, 204);
-  assert.match(response.headers.get("access-control-allow-headers"), /Payment-Signature/);
+  assert.equal(response.headers.get("allow"), "GET, POST, OPTIONS");
 });

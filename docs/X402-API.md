@@ -101,6 +101,5 @@ The second request should return `503` while disabled, then `402` after activati
 
 - Responses are marked `no-store` and include a request ID for log correlation.
 - Netlify applies a 60-request-per-minute IP/domain limit before payment processing.
-- CORS exposes the current x402 v2 headers and legacy `X-Payment` compatibility headers.
 - The existing `/api/ccc-bartender` and `/api/ccc-recipes` behavior is unchanged by this addition.
 - The current generic chat fallback can call the existing OpenAI integration. Exact named recipes and wizard recommendations remain deterministic, and every recipe returned by the paid route is rehydrated from `recipes.json`; unknown or invented recipes are removed before settlement.
