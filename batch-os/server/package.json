@@ -5,8 +5,9 @@
   "type": "module",
   "engines": { "node": ">=20" },
   "scripts": {
-    "start": "node server-v04.js & pid=$!; sleep 2; node selftest-v04.js; rc=$?; if [ $rc -ne 0 ]; then kill $pid; exit $rc; fi; wait $pid",
-    "check": "node --check server-v04.js && node --check selftest-v04.js"
+    "start": "node server-v04.js",
+    "check": "node --check server-v04.js && node --check selftest-v04.js",
+    "selftest": "node selftest-v04.js"
   },
   "dependencies": {
     "pg": "8.23.0"
