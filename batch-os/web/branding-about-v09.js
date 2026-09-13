@@ -20,7 +20,6 @@
   const aboutButton = document.querySelector('.nav-link[data-view="about"]');
   if (aboutButton) aboutButton.onclick = () => window.setView('about');
 
-  // Keep the primary workflow nav centered; About belongs beside account controls.
   const header = document.querySelector('.header');
   const accountButton = document.getElementById('accountButton');
   if (header && aboutButton && accountButton) {
@@ -39,7 +38,6 @@
     accountButton.style.justifySelf = 'auto';
   }
 
-  // Force browsers to pick up the transparent-edge official mark instead of a cached v9 favicon.
   document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]').forEach(link => {
     link.href = 'assets/batch-icon.png?v=10';
   });
@@ -58,4 +56,11 @@
     event.preventDefault();
     window.setView('recipes');
   };
+
+  if (!document.querySelector('script[data-batch-monetization]')) {
+    const script = document.createElement('script');
+    script.src = 'monetization-v10.js?v=10';
+    script.dataset.batchMonetization = '1';
+    document.body.appendChild(script);
+  }
 })();
