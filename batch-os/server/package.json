@@ -1,11 +1,14 @@
 {
   "name": "batch-os-api",
-  "version": "0.3.0-beta",
+  "version": "0.4.0-beta",
   "private": true,
   "type": "module",
   "engines": { "node": ">=20" },
   "scripts": {
-    "start": "node server-v03.js",
-    "check": "node --check server-v03.js"
+    "start": "node server-v04.js",
+    "check": "node --check server-v04.js"
+  },
+  "dependencies": {
+    "pg": "8.23.0"
   }
 }
