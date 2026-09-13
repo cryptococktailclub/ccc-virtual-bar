@@ -5,10 +5,10 @@ window.BATCH_OS_CONFIG = {
 window.addEventListener('load', () => {
   const style = document.createElement('link');
   style.rel = 'stylesheet';
-  style.href = 'styles-v07.css';
+  style.href = 'styles-v08.css';
   document.head.appendChild(style);
 
   const script = document.createElement('script');
-  script.src = 'navigation-v07.js';
+  script.src = 'navigation-v08.js';
   document.body.appendChild(script);
 });
