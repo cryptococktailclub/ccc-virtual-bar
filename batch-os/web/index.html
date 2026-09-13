@@ -3,129 +3,160 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#111827">
-  <title>Batch OS — Event Beverage Production</title>
-  <link rel="stylesheet" href="styles-v02.css">
+  <meta name="theme-color" content="#ffffff">
+  <title>Batch OS</title>
+  <link rel="stylesheet" href="styles-v03.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div><strong>Batch OS</strong><small>Event Beverage Production</small></div>
-      <span class="beta">BETA v0.2</span>
-    </div>
-    <div id="status" class="status">Connecting…</div>
+  <header class="app-header">
+    <a class="wordmark" href="#" aria-label="Batch OS home">Batch OS</a>
+    <nav class="nav">
+      <button class="nav-button active" data-view="recipes">Recipes</button>
+      <button class="nav-button" data-view="create">New recipe</button>
+    </nav>
   </header>
 
-  <nav class="modebar" aria-label="Batch OS modes">
-    <button id="eventMode" class="mode active">Event Builder</button>
-    <button id="singleMode" class="mode">Single Batch</button>
-  </nav>
-
-  <main class="shell">
-    <aside class="library panel">
-      <div class="panel-title">
-        <div><span class="eyebrow">CCC CANONICAL LIBRARY</span><h2>Cocktails</h2></div>
-        <span id="recipeCount" class="pill">—</span>
-      </div>
-      <p id="libraryHint" class="hint">Select cocktails to add them to the event menu.</p>
-      <input id="search" class="input" type="search" placeholder="Search recipes or ingredients…">
-      <select id="category" class="input"><option value="">All categories</option></select>
-      <div id="recipeList" class="recipe-list"></div>
-    </aside>
-
-    <section class="workspace panel">
-      <div id="eventPlanner">
-        <div class="workspace-head">
-          <div><span class="eyebrow">MULTI-COCKTAIL PRODUCTION</span><h1>Build an event.</h1><p class="muted">Allocate demand across cocktails, then generate one production and purchasing plan.</p></div>
-          <div class="actions"><button id="eventPrint" class="button secondary">Print packet</button></div>
+  <main class="page">
+    <section id="recipesView">
+      <div class="page-heading">
+        <div>
+          <p class="kicker">BATCH CALCULATOR</p>
+          <h1>Scale any cocktail.</h1>
+          <p class="subtle">Choose a recipe, enter the number of drinks, and get the production batch.</p>
         </div>
-
-        <div class="grid event-inputs">
-          <label>Event name<input id="eventName" class="input" value="Batch OS Beta Event"></label>
-          <label>Guests<input id="eventGuests" class="input" type="number" min="1" value="150"></label>
-          <label>Drinks / guest<input id="eventDrinks" class="input" type="number" min="0" step="0.25" value="2"></label>
-          <label>Overage %<input id="eventOverage" class="input" type="number" min="0" value="10"></label>
-          <label>Default dilution %<input id="eventDilution" class="input" type="number" min="0" value="20"></label>
-          <label>Default package mL<input id="eventBottle" class="input" type="number" min="50" value="750"></label>
-          <label>Vessel size<input id="eventVessel" class="input" type="number" min="0.1" step="0.1" value="12"></label>
-          <label>Vessel unit<select id="eventVesselUnit" class="input"><option>L</option><option>gal</option></select></label>
-          <label>Max fill %<input id="eventMaxFill" class="input" type="number" min="50" max="100" value="90"></label>
-        </div>
-
-        <div class="section menu-section">
-          <div class="section-head"><div><h3>Event menu</h3><p class="muted smalltext">Allocation must total 100%. Up to six cocktails is recommended for service clarity.</p></div><span id="allocationTotal" class="allocation good">0%</span></div>
-          <div id="eventMenu" class="menu-list"><div class="empty-small">Choose cocktails from the library.</div></div>
-        </div>
-
-        <button id="generateEvent" class="button primary wide">Generate event production plan</button>
-
-        <div id="eventResults" hidden>
-          <div class="stats six">
-            <article><span>Menu cocktails</span><strong id="eventMenuCount">—</strong></article>
-            <article><span>Planned pours</span><strong id="eventPours">—</strong></article>
-            <article><span>Final volume</span><strong id="eventYield">—</strong></article>
-            <article><span>Vessels</span><strong id="eventVessels">—</strong></article>
-            <article><span>Purchase units</span><strong id="eventUnits">—</strong></article>
-            <article><span>Est. COGS</span><strong id="eventCogs">—</strong></article>
-          </div>
-
-          <div class="section">
-            <div class="section-head"><div><h3>Cocktail production</h3><p class="muted smalltext">Per-cocktail demand, dilution and vessel plan.</p></div><button id="copyEvent" class="button secondary small">Copy packet</button></div>
-            <div class="table-wrap"><table><thead><tr><th>Cocktail</th><th>Share</th><th>Pours</th><th>Final yield</th><th>Vessels</th></tr></thead><tbody id="eventCocktails"></tbody></table></div>
-          </div>
-
-          <div class="section">
-            <div class="section-head"><div><h3>Consolidated purchasing</h3><p class="muted smalltext">Enter on-hand inventory, package size and unit cost, then recalculate to produce event COGS.</p></div><button id="recalcPurchasing" class="button secondary small">Recalculate purchasing</button></div>
-            <div class="table-wrap"><table><thead><tr><th>Ingredient</th><th>Required</th><th>On hand mL</th><th>Package mL</th><th>Cost / pkg</th><th>Buy</th><th>Cost</th></tr></thead><tbody id="eventPurchasing"></tbody></table></div>
-          </div>
-
-          <div class="grid two">
-            <div class="section"><h3>Prep requirements</h3><div id="eventPrep" class="notes"></div></div>
-            <div class="section"><h3>Data review</h3><div id="eventWarnings" class="notes"></div></div>
-          </div>
-
-          <div class="section"><h3>Cambro / vessel assignments</h3><div id="eventVesselAssignments" class="vessel-grid"></div></div>
-          <div class="section"><h3>Batch labels</h3><div id="eventLabels" class="label-grid"></div></div>
-        </div>
+        <div id="apiStatus" class="status"><span></span> Connecting</div>
       </div>
 
-      <div id="singlePlanner" hidden>
-        <div id="singleEmpty" class="empty"><h1>Build a single production batch.</h1><p>Select a cocktail from the CCC library.</p></div>
-        <div id="singleWorkspace" hidden>
-          <div class="recipe-head">
-            <div><span id="recipeMeta" class="eyebrow"></span><h1 id="recipeName"></h1><p id="recipeService" class="muted"></p></div>
-            <button id="singlePrint" class="button secondary">Print sheet</button>
+      <div class="layout">
+        <aside class="recipe-browser">
+          <div class="search-row">
+            <input id="search" class="field" type="search" placeholder="Search recipes">
+            <button id="newRecipeShortcut" class="icon-button" aria-label="Create recipe">+</button>
           </div>
-          <div class="grid inputs">
-            <label>Guests<input id="guests" class="input" type="number" min="1" value="100"></label>
-            <label>Drinks / guest<input id="drinks" class="input" type="number" min="0" step="0.25" value="2"></label>
-            <label>Menu share %<input id="share" class="input" type="number" min="0" max="100" value="50"></label>
-            <label>Overage %<input id="overage" class="input" type="number" min="0" value="10"></label>
-            <label>Dilution %<input id="dilution" class="input" type="number" min="0" value="20"></label>
-            <label>Bottle size mL<input id="bottle" class="input" type="number" min="50" value="750"></label>
-            <label>Vessel size<input id="vessel" class="input" type="number" min="0.1" step="0.1" value="12"></label>
-            <label>Vessel unit<select id="vesselUnit" class="input"><option>L</option><option>gal</option></select></label>
-            <label>Max fill %<input id="maxFill" class="input" type="number" min="50" max="100" value="90"></label>
+          <div id="customSection" hidden>
+            <div class="list-heading">My recipes</div>
+            <div id="customList" class="recipe-list"></div>
           </div>
-          <button id="calculate" class="button primary">Generate batch plan</button>
-          <div id="singleResults" hidden>
-            <div class="stats">
-              <article><span>Planned pours</span><strong id="pours">—</strong></article>
-              <article><span>Base volume</span><strong id="base">—</strong></article>
-              <article><span>Dilution water</span><strong id="water">—</strong></article>
-              <article><span>Final yield</span><strong id="yield">—</strong></article>
-              <article><span>Vessels</span><strong id="vessels">—</strong></article>
+          <div class="list-heading">Recipes</div>
+          <div id="recipeList" class="recipe-list"></div>
+        </aside>
+
+        <section class="batch-panel">
+          <div id="emptyState" class="empty-state">
+            <h2>Select a recipe</h2>
+            <p>Search the list or create your own recipe.</p>
+          </div>
+
+          <div id="batchWorkspace" hidden>
+            <div class="recipe-title-row">
+              <div>
+                <p id="recipeCategory" class="kicker"></p>
+                <h2 id="recipeName"></h2>
+                <p id="recipeDetails" class="subtle"></p>
+              </div>
+              <button id="editCustom" class="text-button" hidden>Edit recipe</button>
             </div>
-            <div class="section"><div class="section-head"><h3>Production ingredients</h3><button id="copy" class="button secondary small">Copy</button></div><div class="table-wrap"><table><thead><tr><th>Ingredient</th><th>Per drink</th><th>Total</th><th>Purchase</th></tr></thead><tbody id="ingredients"></tbody></table></div></div>
-            <div class="grid two"><div class="section"><h3>Prep / service</h3><div id="prep" class="notes"></div></div><div class="section"><h3>Data review</h3><div id="warnings" class="notes"></div></div></div>
+
+            <div id="sourceRecipe" class="source-recipe"></div>
+
+            <div class="batch-controls">
+              <label class="primary-control">
+                <span>How many drinks?</span>
+                <input id="plannedPours" class="field large-number" type="number" min="1" value="100">
+              </label>
+              <label>
+                <span>Overage</span>
+                <div class="suffix-field"><input id="overage" class="field" type="number" min="0" max="100" value="10"><b>%</b></div>
+              </label>
+              <label>
+                <span>Dilution</span>
+                <div class="suffix-field"><input id="dilution" class="field" type="number" min="0" max="100" value="20"><b>%</b></div>
+              </label>
+              <button id="calculate" class="primary-button">Calculate batch</button>
+            </div>
+
+            <details class="advanced">
+              <summary>Batch settings</summary>
+              <div class="advanced-grid">
+                <label><span>Bottle size</span><div class="suffix-field"><input id="bottleSize" class="field" type="number" min="50" value="750"><b>mL</b></div></label>
+                <label><span>Container size</span><input id="vesselSize" class="field" type="number" min="0.1" step="0.1" value="12"></label>
+                <label><span>Unit</span><select id="vesselUnit" class="field"><option value="L">Liters</option><option value="gal">Gallons</option></select></label>
+              </div>
+            </details>
+
+            <div id="results" hidden>
+              <div class="summary-strip">
+                <div><span>Drinks incl. overage</span><strong id="summaryPours">—</strong></div>
+                <div><span>Final volume</span><strong id="summaryYield">—</strong></div>
+                <div><span>Dilution water</span><strong id="summaryWater">—</strong></div>
+                <div><span>Containers</span><strong id="summaryVessels">—</strong></div>
+              </div>
+
+              <section class="result-section">
+                <div class="section-title"><h3>Batch ingredients</h3><button id="copyBatch" class="text-button">Copy batch</button></div>
+                <div class="table-wrap"><table><thead><tr><th>Ingredient</th><th>Per drink</th><th>Total</th><th>Bottles</th></tr></thead><tbody id="batchIngredients"></tbody></table></div>
+              </section>
+
+              <section id="prepSection" class="result-section" hidden>
+                <h3>Prep separately</h3>
+                <div id="prepItems" class="simple-list"></div>
+              </section>
+
+              <section id="warningSection" class="notice" hidden>
+                <strong>Check recipe details</strong>
+                <div id="warnings"></div>
+              </section>
+
+              <div class="result-actions"><button id="printBatch" class="secondary-button">Print batch sheet</button></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="createView" hidden>
+      <div class="form-page">
+        <button id="backToRecipes" class="back-button">← Recipes</button>
+        <div class="page-heading compact">
+          <div>
+            <p class="kicker">NEW RECIPE</p>
+            <h1 id="createHeading">Create a recipe.</h1>
+            <p class="subtle">Enter the single-drink spec. Batch OS will scale it to any quantity.</p>
           </div>
         </div>
+
+        <form id="recipeForm" class="recipe-form">
+          <label class="full"><span>Recipe name</span><input id="customName" class="field title-field" type="text" placeholder="House Margarita" required></label>
+
+          <div class="form-section">
+            <div class="section-title">
+              <div><h3>Ingredients</h3><p class="subtle small">Enter the amount for one drink.</p></div>
+              <button id="addIngredient" class="text-button" type="button">+ Add ingredient</button>
+            </div>
+            <div id="ingredientRows" class="ingredient-editor"></div>
+          </div>
+
+          <div class="form-section">
+            <h3>Optional details</h3>
+            <div class="details-grid">
+              <label><span>Method</span><input id="customMethod" class="field" type="text" placeholder="Shake"></label>
+              <label><span>Glass</span><input id="customGlass" class="field" type="text" placeholder="Rocks"></label>
+              <label><span>Ice</span><input id="customIce" class="field" type="text" placeholder="Large cube"></label>
+              <label><span>Garnish</span><input id="customGarnish" class="field" type="text" placeholder="Lime wheel"></label>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button id="cancelRecipe" class="secondary-button" type="button">Cancel</button>
+            <button class="primary-button" type="submit">Save & batch</button>
+          </div>
+          <p class="save-note">Beta: custom recipes are saved in this browser.</p>
+        </form>
       </div>
     </section>
   </main>
 
-  <footer>Batch OS beta · CCC remains the canonical recipe source · Production logic centralized for web and future iOS clients</footer>
   <script src="config.js"></script>
-  <script src="app-v02.js"></script>
+  <script src="app-v03.js"></script>
 </body>
 </html>
