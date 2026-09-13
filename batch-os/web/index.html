@@ -160,6 +160,19 @@
 
           <section class="form-section">
             <div class="section-heading">
+              <div>
+                <h3>Organize recipe</h3>
+                <p class="muted small">Optional. Add a style and base spirit so this recipe appears in the same browse system.</p>
+              </div>
+            </div>
+            <div class="detail-grid">
+              <label><span>Style</span><select id="customStyle" class="field"><option value="">Not specified</option></select></label>
+              <label><span>Base spirit</span><select id="customBaseSpirit" class="field"><option value="">Not specified</option></select></label>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="section-heading">
               <div><h3>Ingredients</h3><p class="muted small">Amount for one drink.</p></div>
               <button id="addIngredient" class="text-button" type="button">+ Add</button>
             </div>
@@ -228,5 +241,6 @@
 
   <script src="config.js"></script>
   <script src="app-v05.js"></script>
+  <script src="taxonomy-v06.js"></script>
 </body>
 </html>
