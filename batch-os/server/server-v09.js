@@ -42,7 +42,10 @@ function proxyRequest(req, body = null) {
   return new Promise((resolve, reject) => {
     const headers = { ...req.headers, host: `127.0.0.1:${INNER_PORT}` };
     delete headers.connection;
-    if (body) headers['content-length'] = body.length;
+    delete headers['transfer-encoding'];
+    if (body !== null) headers['content-length'] = String(body.length);
+    else delete headers['content-length'];
+
     const upstream = http.request({
       hostname: '127.0.0.1',
       port: INNER_PORT,
@@ -190,7 +193,8 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    const upstream = await proxyRequest(req);
+    const raw = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method || '') ? await readBuffer(req) : null;
+    const upstream = await proxyRequest(req, raw);
     return sendUpstream(res, upstream);
   } catch (error) {
     console.error('Batch OS messaging gateway error:', error);
@@ -202,5 +206,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PUBLIC_PORT, '0.0.0.0', () => {
-  console.log(`Batch OS messaging gateway 0.9.0-beta listening on ${PUBLIC_PORT}; app gateway on ${INNER_PORT}; welcome=${RESEND_API_KEY && EMAIL_FROM ? 'configured' : 'pending'}; ccc-beehiiv=${BEEHIIV_API_KEY && BEEHIIV_PUBLICATION_ID ? 'configured' : 'pending'}`);
+  console.log(`Batch OS messaging gateway 0.9.1-beta listening on ${PUBLIC_PORT}; app gateway on ${INNER_PORT}; welcome=${RESEND_API_KEY && EMAIL_FROM ? 'configured' : 'pending'}; ccc-beehiiv=${BEEHIIV_API_KEY && BEEHIIV_PUBLICATION_ID ? 'configured' : 'pending'}`);
 });
