@@ -17,9 +17,34 @@
     if (typeof originalSetView === 'function') originalSetView(name);
   };
 
-  document.querySelectorAll('.nav-link[data-view]').forEach(button => {
-    if (button.dataset.view === 'about') button.onclick = () => window.setView('about');
+  const aboutButton = document.querySelector('.nav-link[data-view="about"]');
+  if (aboutButton) aboutButton.onclick = () => window.setView('about');
+
+  // Keep the primary workflow nav centered; About belongs beside account controls.
+  const header = document.querySelector('.header');
+  const accountButton = document.getElementById('accountButton');
+  if (header && aboutButton && accountButton) {
+    let actions = header.querySelector('.header-actions');
+    if (!actions) {
+      actions = document.createElement('div');
+      actions.className = 'header-actions';
+      actions.style.justifySelf = 'end';
+      actions.style.display = 'flex';
+      actions.style.alignItems = 'center';
+      actions.style.gap = '4px';
+      header.appendChild(actions);
+    }
+    actions.appendChild(aboutButton);
+    actions.appendChild(accountButton);
+    accountButton.style.justifySelf = 'auto';
+  }
+
+  // Force browsers to pick up the transparent-edge official mark instead of a cached v9 favicon.
+  document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]').forEach(link => {
+    link.href = 'assets/batch-icon.png?v=10';
   });
+  const brandIcon = document.querySelector('.brand-icon');
+  if (brandIcon) brandIcon.src = 'assets/batch-icon.png?v=10';
 
   document.getElementById('aboutGetStarted')?.addEventListener('click', () => window.setView('recipes'));
   document.getElementById('aboutCreateRecipe')?.addEventListener('click', () => {
