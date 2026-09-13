@@ -56,11 +56,4 @@
     event.preventDefault();
     window.setView('recipes');
   };
-
-  if (!document.querySelector('script[data-batch-monetization]')) {
-    const script = document.createElement('script');
-    script.src = 'monetization-v10.js?v=10';
-    script.dataset.batchMonetization = '1';
-    document.body.appendChild(script);
-  }
 })();
