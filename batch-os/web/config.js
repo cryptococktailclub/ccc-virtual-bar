@@ -16,4 +16,11 @@ window.addEventListener('DOMContentLoaded', () => {
     script.dataset.batchRecipeSuggestions = 'true';
     document.body.appendChild(script);
   }
+
+  if (!document.querySelector('script[data-batch-account-messaging]')) {
+    const script = document.createElement('script');
+    script.src = 'account-messaging-v14.js?v=14';
+    script.dataset.batchAccountMessaging = 'true';
+    document.body.appendChild(script);
+  }
 });
