@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <title>Batch OS — Event Cocktail Production</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="mark">B</span><div><strong>Batch OS</strong><small>Event Cocktail Production</small></div></div>
+    <div id="status" class="status">Connecting…</div>
+  </header>
+
+  <main class="shell">
+    <aside class="library panel">
+      <div class="panel-title"><div><span class="eyebrow">CCC LIBRARY</span><h2>Cocktails</h2></div><span id="recipeCount" class="pill">—</span></div>
+      <input id="search" class="input" type="search" placeholder="Search recipes or ingredients…">
+      <select id="category" class="input"><option value="">All categories</option></select>
+      <div id="recipeList" class="recipe-list"></div>
+    </aside>
+
+    <section class="workspace panel">
+      <div id="empty" class="empty"><span class="mark big">B</span><h1>Build a production batch.</h1><p>Select a cocktail from the CCC library to calculate an event-ready spec.</p></div>
+      <div id="planner" hidden>
+        <div class="recipe-head">
+          <div><span id="recipeMeta" class="eyebrow"></span><h1 id="recipeName"></h1><p id="recipeService" class="muted"></p></div>
+          <button id="print" class="button secondary">Print sheet</button>
+        </div>
+
+        <div class="grid inputs">
+          <label>Guests<input id="guests" class="input" type="number" min="1" value="100"></label>
+          <label>Drinks / guest<input id="drinks" class="input" type="number" min="0" step="0.25" value="2"></label>
+          <label>Menu share %<input id="share" class="input" type="number" min="0" max="100" value="50"></label>
+          <label>Overage %<input id="overage" class="input" type="number" min="0" value="10"></label>
+          <label>Dilution %<input id="dilution" class="input" type="number" min="0" value="20"></label>
+          <label>Bottle size mL<input id="bottle" class="input" type="number" min="50" value="750"></label>
+          <label>Vessel size<input id="vessel" class="input" type="number" min="0.1" step="0.1" value="12"></label>
+          <label>Vessel unit<select id="vesselUnit" class="input"><option>L</option><option>gal</option></select></label>
+        </div>
+
+        <button id="calculate" class="button primary">Generate batch plan</button>
+
+        <div id="results" hidden>
+          <div class="stats">
+            <article><span>Planned pours</span><strong id="pours">—</strong></article>
+            <article><span>Base volume</span><strong id="base">—</strong></article>
+            <article><span>Dilution water</span><strong id="water">—</strong></article>
+            <article><span>Final yield</span><strong id="yield">—</strong></article>
+            <article><span>Vessels</span><strong id="vessels">—</strong></article>
+          </div>
+
+          <div class="section"><div class="section-head"><h3>Production ingredients</h3><button id="copy" class="button secondary small">Copy</button></div><div class="table-wrap"><table><thead><tr><th>Ingredient</th><th>Per drink</th><th>Total</th><th>Purchase</th></tr></thead><tbody id="ingredients"></tbody></table></div></div>
+          <div class="grid two">
+            <div class="section"><h3>Prep / service</h3><div id="prep" class="notes"></div></div>
+            <div class="section"><h3>Data review</h3><div id="warnings" class="notes"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>Batch OS beta · CCC is the canonical recipe source · Production-normalized by Batch OS</footer>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
