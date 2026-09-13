@@ -1,3 +1,3 @@
 window.BATCH_OS_CONFIG = {
-  apiBase: 'http://localhost:10000'
+  apiBase: 'https://batch-os-api-beta.onrender.com'
 };
