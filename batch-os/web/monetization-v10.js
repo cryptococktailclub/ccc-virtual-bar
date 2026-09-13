@@ -22,7 +22,7 @@
 
   function styles(){
     const s=document.createElement('style');
-    s.textContent=`.access-status{display:flex;align-items:center;gap:8px;margin:12px 0 0;font-size:11px;color:#71717a;font-weight:700}.access-dot{width:7px;height:7px;border-radius:50%;background:#f97316}.access-status.paid{color:#18181b}.access-status.paid .access-dot{background:#18181b}.access-upgrade{border:0;background:transparent;color:#f97316;font:inherit;font-weight:800;cursor:pointer;padding:0}.paywall-dialog{border:0;padding:0;background:transparent;max-width:none}.paywal-dialog::backdrop{background:rgba(24,24,27,.46)}.paywall-card{width:min(520px,calc(100vw - 32px));background:#fff;border:1px solid #e4e4e7;border-radius:16px;padding:30px;box-shadow:0 20px 70px rgba(0,0,0,.15)}.paywall-top{display:flex;justify-content:space-between;gap:20px}.paywall-kicker{margin:0 0 8px;color:#f97316;font-size:10px;font-weight:900;letter-spacing:.13em}.paywall-card h2{font-size:30px;letter-spacing:-.035em;line-height:1.08;margin:0 0 12px}.paywall-lead{margin:0;color:#52525b;line-height:1.55}.paywall-price{display:flex;align-items:baseline;gap:8px;margin:26px 0 5px}.paywall-price strong{font-size:42px;letter-spacing:-.04em}.paywall-price span,.paywall-regular,.paywall-note{color:#71717a;font-size:12px}.paywall-list{display:grid;gap:10px;margin:22px 0 26px;padding:0;list-style:none}.paywall-ist li{font-size:13px;padding-left:20px;position:relative}.paywall-list li:before{content:'✓'';position:absolute;left:0;color:#f97316;font-weight:900}.paywall-actions{display:grid;gap:9px}.paywall-buy{height:48px}.paywall-note{text-align:center;margin:3px 0 0}.paywall-close{border:0;background:transparent;color:#a1a1aa;font-size:25px;line-height:1;cursor:pointer}.founding-strip{display:inline-flex;margin:18px 0 0;border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800}.access-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:1000;background:#18181b;color:#fff;border-radius:10px;padding:12px 16px;font-size:13px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.18)}.account-access-row{border:1px solid #e4e4e7;border-radius:8px;padding:12px 13px;font-size:12px}.account-access-row strong{display:block;margin-bottom:4px}.account-access-row span{color:#71717a}.account-upgrade-button{width:100%}@media(max-width:640px){.apaywall-card{padding:24px}.paywall-card h2{font-size:27px}}`;
+    s.textContent=`.access-status{display:flex;align-items:center;gap:8px;margin:12px 0 0;font-size:11px;color:#71717a;font-weight:700}.access-dot{width:7px;height:7px;border-radius:50%;background:#f97316}.access-status.paid{color:#18181b}.access-status.paid .access-dot{background:#18181b}.access-upgrade{border:0;background:transparent;color:#f97316;font:inherit;font-weight:800;cursor:pointer;padding:0}.paywall-dialog{border:0;padding:0;background:transparent;max-width:none}.paywall-dialog::backdrop{background:rgba(24,24,27,.46)}.paywall-card{width:min(520px,calc(100vw - 32px));background:#fff;border:1px solid #e4e4e7;border-radius:16px;padding:30px;box-shadow:0 20px 70px rgba(0,0,0,.15)}.paywall-top{display:flex;justify-content:space-between;gap:20px}.paywall-kicker{margin:0 0 8px;color:#f97316;font-size:10px;font-weight:900;letter-spacing:.13em}.paywall-card h2{font-size:30px;letter-spacing:-.035em;line-height:1.08;margin:0 0 12px}.paywall-lead{margin:0;color:#52525b;line-height:1.55}.paywall-price{display:flex;align-items:baseline;gap:8px;margin:26px 0 5px}.paywall-price strong{font-size:42px;letter-spacing:-.04em}.paywall-price span,.paywall-regular,.paywall-note{color:#71717a;font-size:12px}.paywall-list{display:grid;gap:10px;margin:22px 0 26px;padding:0;list-style:none}.paywall-list li{font-size:13px;padding-left:20px;position:relative}.paywall-list li:before{content:'✓';position:absolute;left:0;color:#f97316;font-weight:900}.paywall-actions{display:grid;gap:9px}.paywall-buy{height:48px}.paywall-note{text-align:center;margin:3px 0 0}.paywall-close{border:0;background:transparent;color:#a1a1aa;font-size:25px;line-height:1;cursor:pointer}.founding-strip{display:inline-flex;margin:18px 0 0;border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800}.access-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:1000;background:#18181b;color:#fff;border-radius:10px;padding:12px 16px;font-size:13px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.18)}.account-access-row{border:1px solid #e4e4e7;border-radius:8px;padding:12px 13px;font-size:12px}.account-access-row strong{display:block;margin-bottom:4px}.account-access-row span{color:#71717a}.account-upgrade-button{width:100%}@media(max-width:640px){.paywall-card{padding:24px}.paywall-card h2{font-size:27px}}`;
     document.head.appendChild(s);
   }
 
@@ -39,26 +39,26 @@
 
   function openPaywall(){
     build(); const exhausted=uses()>=Number(access.freeBatchLimit||5);
-    paywallTitle.textContent=exhausted?`You've used your ${access.freeBatchLimit||5} free batches.`:'Keep batching without limits.';
-    paywallLead.textContent=exhausted?'Unlock permanent Batch OS access to keep calculating batches and add cloud storage, history, and production memory.':`You have ${left()} free batch${left()===1?'':'es'} remaining. Unlock now for permanent access.`;
-    paywallPrice.textContent=`$${access.foundingPriceUsd||19}`;
-    paywallRegular.textContent=`Founding price · Regular price $${access.regularPriceUsd||29}`;
-    paywallBuy.textContent=`Unlock Batch OS — $${access.foundingPriceUsd||19}`;
-    paywallDialog.showModal();
+    document.getElementById('paywallTitle').textContent=exhausted?`You've used your ${access.freeBatchLimit||5} free batches.`:'Keep batching without limits.';
+    document.getElementById('paywallLead').textContent=exhausted?'Unlock permanent Batch OS access to keep calculating batches and add cloud storage, history, and production memory.':`You have ${left()} free batch${left()===1?'':'es'} remaining. Unlock now for permanent access.`;
+    document.getElementById('paywallPrice').textContent=`$${access.foundingPriceUsd||19}`;
+    document.getElementById('paywallRegular').textContent=`Founding price · Regular price $${access.regularPriceUsd||29}`;
+    document.getElementById('paywallBuy').textContent=`Unlock Batch OS — $${access.foundingPriceUsd||19}`;
+    document.getElementById('paywallDialog').showModal();
   }
 
   async function beginCheckout(){
     await refreshAccess();
-    if(access.paid){paywallDialog?.close();toast('Batch OS is already unlocked on this account.');return}
-    if(typeof state==='undefined'||!state.user){pendingCheckout=true;paywallDialog?.close();toast('Create or sign in to your Batch OS account to unlock permanent access.');document.getElementById('accountButton')?.click();return}
+    if(access.paid){document.getElementById('paywallDialog')?.close();toast('Batch OS is already unlocked on this account.');return}
+    if(typeof state==='undefined'||!state.user){pendingCheckout=true;document.getElementById('paywallDialog')?.close();toast('Create or sign in to your Batch OS account to unlock permanent access.');document.getElementById('accountButton')?.click();return}
     if(!access.checkoutUrl){alert('Checkout is temporarily unavailable. Please try again.');return}
     const u=new URL(access.checkoutUrl); if(state.user?.email) u.searchParams.set('prefilled_email',state.user.email); location.href=u.toString();
   }
 
-  function ensureStatus(){if(accessStatus) return;const c=document.querySelector('.controls');if(!c)return;const r=document.createElement('div');r.id='accessStatus';r.className='access-status';c.insertAdjacentElement('afterend',r)}
+  function ensureStatus(){if(document.getElementById('accessStatus')) return;const c=document.querySelector('.controls');if(!c)return;const r=document.createElement('div');r.id='accessStatus';r.className='access-status';c.insertAdjacentElement('afterend',r)}
 
   function updateUI(){
-    ensureStatus(); const row=document.getEmentById('accessStatus');
+    ensureStatus(); const row=document.getElementById('accessStatus');
     if(row){if(access.paid){row.className='access-status paid';row.innerHTML='<span class="access-dot"></span><span>Founding Access · Unlimited batches</span>'}else{row.className='access-status';row.innerHTML=`<span class="access-dot"></span><span>${left()} of ${access.freeBatchLimit||5} free batches left</span>${left()===0?'<button class="access-upgrade" type="button">Unlock</button>':''}`;row.querySelector('.access-upgrade')?.addEventListener('click',openPaywall)}}
     const hero=document.querySelector('.about-hero'); if(hero&&!hero.querySelector('.founding-strip')){const x=document.createElement('div');x.className='founding-strip';x.textContent=`5 batches free · $${access.foundingPriceUsd||19} once for Founding Access · No subscription`;hero.querySelector('.about-actions')?.insertAdjacentElement('beforebegin',x)}
     const menu=document.querySelector('.account-menu-card'); if(menu){menu.querySelector('.account-access-row')?.remove();menu.querySelector('.account-upgrade-button')?.remove();const x=document.createElement('div');x.className='account-access-row';x.innerHTML=access.paid?'<strong>Founding Access</strong><span>Permanent access · Unlimited batches</span>':`<strong>Free trial</strong><span>${left()} batch${left()===1?'':'es'} remaining</span>`;menu.querySelector('.account-summary')?.insertAdjacentElement('afterend',x);if(!access.paid){const b=document.createElement('button');b.type='button';b.className='primary-button account-upgrade-button';b.textContent=`Unlock for $${access.foundingPriceUsd||19}`;b.onclick=()=>{document.getElementById('accountMenuDialog')?.close();openPaywall()};x.insertAdjacentElement('afterend',b)}}
@@ -71,7 +71,7 @@
 
   function wrapRecipeSaving(){
     const f=document.getElementById('recipeForm');if(!f||f.dataset.paywallWrapped==='1')return;const original=f.onsubmit;f.dataset.paywallWrapped='1';
-    f.onsubmit=async e=>{if(access.paid||typeof state==='undefined||!state.user)return original?.call(f,e);const user=state.user;state.user=null;try{return await original?.call(f,e)}finally{state.user=user;typeof updateAccountUI==='function'&&updateAccountUI()}};
+    f.onsubmit=async e=>{if(access.paid||typeof state==='undefined'||!state.user)return original?.call(f,e);const user=state.user;state.user=null;try{return await original?.call(f,e)}finally{state.user=user;typeof updateAccountUI==='function'&&updateAccountUI()}};
   }
 
   function wrapSaveBatch(){const b=document.getElementById('saveBatch');if(!b||b.dataset.paywallWrapped==='1')return;const original=b.onclick;b.dataset.paywallWrapped='1';b.onclick=e=>{if(!access.paid){openPaywall();return}return original?.call(b,e)}}
