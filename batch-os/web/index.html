@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#ffffff">
   <title>Batch OS</title>
-  <link rel="stylesheet" href="styles-v04.css">
+  <link rel="stylesheet" href="styles-v05.css">
 </head>
 <body>
   <header class="header">
@@ -35,11 +35,31 @@
 
           <div id="customSection" hidden>
             <div class="list-label">My recipes</div>
-            <div id="customList" class="recipe-list"></div>
+            <div id="customList" class="recipe-list personal-list"></div>
           </div>
 
-          <div class="list-label">Recipes</div>
-          <div id="recipeList" class="recipe-list"></div>
+          <div id="recentSection" hidden>
+            <div class="list-heading-row">
+              <div class="list-label">Recent batches</div>
+              <button id="viewAllBatches" class="mini-link">View all</button>
+            </div>
+            <div id="recentList" class="recent-list"></div>
+          </div>
+
+          <div class="browse-block">
+            <div class="list-label browse-label">Browse recipes</div>
+            <div class="browse-tabs" role="tablist" aria-label="Browse recipes by style or spirit">
+              <button class="browse-tab active" data-mode="style" role="tab">Style <span id="styleCount">0</span></button>
+              <button class="browse-tab" data-mode="spirit" role="tab">Spirit <span id="spiritCount">0</span></button>
+            </div>
+            <div id="spiritFilters" class="spirit-filters" hidden></div>
+          </div>
+
+          <div class="list-heading-row results-heading">
+            <div id="browseLabel" class="list-label">Styles</div>
+            <span id="browseResultCount" class="result-count">0</span>
+          </div>
+          <div id="recipeList" class="recipe-list library-list"></div>
         </aside>
 
         <section class="workspace">
@@ -181,6 +201,21 @@
     </form>
   </dialog>
 
+  <dialog id="accountMenuDialog" class="dialog">
+    <div class="dialog-card account-menu-card">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">ACCOUNT</p><h2>Batch OS</h2></div>
+        <button id="closeAccountMenu" class="close-button" type="button">×</button>
+      </div>
+      <div class="account-summary">
+        <span>Signed in as</span>
+        <strong id="accountMenuEmail"></strong>
+      </div>
+      <button id="accountSavedButton" class="secondary-button full-button" type="button">Saved batches</button>
+      <button id="accountSignOutButton" class="text-button danger-text" type="button">Sign out</button>
+    </div>
+  </dialog>
+
   <dialog id="savedDialog" class="dialog wide-dialog">
     <div class="dialog-card">
       <div class="dialog-heading">
@@ -192,6 +227,6 @@
   </dialog>
 
   <script src="config.js"></script>
-  <script src="app-v04.js"></script>
+  <script src="app-v05.js"></script>
 </body>
 </html>
