@@ -1,0 +1,1 @@
+Batch OS favicon v0.10 uses the official icon artwork with only the external white canvas removed to transparency. The internal white Cambro mark is unchanged.
