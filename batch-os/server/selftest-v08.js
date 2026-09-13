@@ -8,7 +8,7 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function request(base, path, options = {}, expected = [200]) {
+async function request(base, path, options = {}, expected = [200, 201]) {
   const response = await fetch(`${base}${path}`, options);
   const data = await response.json().catch(() => ({}));
   if (!expected.includes(response.status)) {
