@@ -5,15 +5,19 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#ffffff">
   <title>Batch OS</title>
+  <link rel="icon" type="image/png" href="assets/batch-icon.png?v=9">
+  <link rel="apple-touch-icon" href="assets/batch-icon.png?v=9">
   <link rel="stylesheet" href="styles-v05.css">
   <link rel="stylesheet" href="styles-v08.css?v=8">
+  <link rel="stylesheet" href="styles-v09.css?v=9">
 </head>
 <body>
   <header class="header">
-    <a class="brand" href="#">Batch OS</a>
+    <a class="brand" href="#" aria-label="Batch OS home"><img class="brand-icon" src="assets/batch-icon.png?v=9" alt=""><span class="brand-wordmark">Batch OS</span></a>
     <nav class="nav" aria-label="Main navigation">
       <button class="nav-link active" data-view="recipes">Recipes</button>
       <button class="nav-link" data-view="create">New recipe</button>
+      <button class="nav-link" data-view="about">About</button>
       <button id="savedNav" class="nav-link" hidden>Saved</button>
     </nav>
     <button id="accountButton" class="account-button" hidden>Sign in</button>
@@ -198,6 +202,55 @@
         </form>
       </div>
     </section>
+
+    <section id="aboutView" class="about-view" hidden>
+      <div class="about-hero">
+        <p class="eyebrow">BATCH OS</p>
+        <h1>Batch cocktails with speed, consistency, and clarity.</h1>
+        <p class="about-lead">Batch OS is a production tool for bars, catering teams, and event operators. Turn a single cocktail recipe into a service-ready batch plan without rebuilding the math every time.</p>
+        <div class="about-actions">
+          <button id="aboutGetStarted" class="primary-button compact">Get started</button>
+          <button id="aboutCreateRecipe" class="secondary-button">Create a recipe</button>
+        </div>
+      </div>
+
+      <section class="about-section">
+        <div class="about-section-head"><p class="eyebrow">THE PROBLEM</p><h2>Batching cocktails manually gets messy fast.</h2><p>Spreadsheets, handwritten notes, bottle math, dilution assumptions, and container limits all create opportunities for mistakes—especially when the event gets bigger or the menu changes.</p></div>
+        <div class="about-grid">
+          <div class="about-card"><strong>Inconsistent quality</strong><p>Manual scaling can drift from the original recipe and produce different results from one batch to the next.</p></div>
+          <div class="about-card"><strong>Purchasing errors</strong><p>Incorrect totals lead to too many bottles, not enough bottles, or unnecessary waste.</p></div>
+          <div class="about-card"><strong>Prep confusion</strong><p>Teams lose time translating recipes into production quantities while service deadlines are approaching.</p></div>
+        </div>
+      </section>
+
+      <section class="about-section">
+        <div class="about-section-head"><p class="eyebrow">THE SOLUTION</p><h2>One recipe becomes a production-ready batch.</h2><p>Batch OS handles the repetitive production math so beverage teams can focus on execution.</p></div>
+        <ul class="about-features">
+          <li>Scale recipes by number of drinks</li><li>Account for overage and dilution</li><li>Calculate final batch volume</li><li>Estimate bottle quantities</li><li>Plan container requirements</li><li>Save original recipes</li><li>Keep batch history for repeat events</li><li>Browse recipes by style or spirit</li>
+        </ul>
+      </section>
+
+      <section class="about-section">
+        <div class="about-section-head"><p class="eyebrow">HOW IT WORKS</p><h2>Recipe to service plan in four steps.</h2></div>
+        <div class="about-steps">
+          <div class="about-step"><div class="about-step-number">1</div><h3>Choose a recipe</h3><p>Browse by style or spirit, or create your own house recipe.</p></div>
+          <div class="about-step"><div class="about-step-number">2</div><h3>Enter the batch size</h3><p>Tell Batch OS how many drinks you need to produce.</p></div>
+          <div class="about-step"><div class="about-step-number">3</div><h3>Calculate</h3><p>Scale ingredients, dilution, bottles, final volume, and containers automatically.</p></div>
+          <div class="about-step"><div class="about-step-number">4</div><h3>Produce</h3><p>Use the resulting batch sheet as the production reference for prep and service.</p></div>
+        </div>
+      </section>
+
+      <section class="about-section">
+        <div class="about-section-head"><p class="eyebrow">BUILT FOR SERVICE</p><h2>For teams that need repeatable beverage production.</h2></div>
+        <div class="about-grid two-col">
+          <div class="about-card"><strong>Catering & event teams</strong><p>Build accurate production quantities for changing guest counts and cocktail menus.</p></div>
+          <div class="about-card"><strong>Bars & hospitality groups</strong><p>Standardize batching across managers, prep teams, locations, and recurring service.</p></div>
+          <div class="about-card"><strong>Beverage directors</strong><p>Turn recipe standards into operational quantities without maintaining separate calculators.</p></div>
+          <div class="about-card"><strong>Working bartenders</strong><p>Spend less time doing batch math and more time preparing the bar for service.</p></div>
+        </div>
+        <div class="about-cta"><div><h3>From recipe to ready-to-pour.</h3><p>Build the batch. Know the volume. Prep with confidence.</p></div><button id="aboutBottomCta" class="primary-button compact">Open Batch OS</button></div>
+      </section>
+    </section>
   </main>
 
   <dialog id="accountDialog" class="dialog">
@@ -244,5 +297,6 @@
   <script src="app-v05.js"></script>
   <script src="taxonomy-v06.js"></script>
   <script src="navigation-v08.js?v=8"></script>
+  <script src="branding-about-v09.js?v=9"></script>
 </body>
 </html>
