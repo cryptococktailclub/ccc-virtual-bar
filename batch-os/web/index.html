@@ -5,96 +5,105 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#ffffff">
   <title>Batch OS</title>
-  <link rel="stylesheet" href="styles-v03.css">
+  <link rel="stylesheet" href="styles-v04.css">
 </head>
 <body>
-  <header class="app-header">
-    <a class="wordmark" href="#" aria-label="Batch OS home">Batch OS</a>
-    <nav class="nav">
-      <button class="nav-button active" data-view="recipes">Recipes</button>
-      <button class="nav-button" data-view="create">New recipe</button>
+  <header class="header">
+    <a class="brand" href="#">Batch OS</a>
+    <nav class="nav" aria-label="Main navigation">
+      <button class="nav-link active" data-view="recipes">Recipes</button>
+      <button class="nav-link" data-view="create">New recipe</button>
+      <button id="savedNav" class="nav-link" hidden>Saved</button>
     </nav>
+    <button id="accountButton" class="account-button" hidden>Sign in</button>
   </header>
 
   <main class="page">
     <section id="recipesView">
-      <div class="page-heading">
-        <div>
-          <p class="kicker">BATCH CALCULATOR</p>
-          <h1>Scale any cocktail.</h1>
-          <p class="subtle">Choose a recipe, enter the number of drinks, and get the production batch.</p>
-        </div>
-        <div id="apiStatus" class="status"><span></span> Connecting</div>
+      <div class="intro">
+        <p class="eyebrow">BATCH CALCULATOR</p>
+        <h1>Scale a cocktail.</h1>
+        <p>Choose a recipe, enter the number of drinks, and get the batch.</p>
       </div>
 
-      <div class="layout">
-        <aside class="recipe-browser">
+      <div class="app-grid">
+        <aside class="browser">
           <div class="search-row">
             <input id="search" class="field" type="search" placeholder="Search recipes">
-            <button id="newRecipeShortcut" class="icon-button" aria-label="Create recipe">+</button>
+            <button id="newRecipeShortcut" class="square-button" aria-label="Create recipe">+</button>
           </div>
+
           <div id="customSection" hidden>
-            <div class="list-heading">My recipes</div>
+            <div class="list-label">My recipes</div>
             <div id="customList" class="recipe-list"></div>
           </div>
-          <div class="list-heading">Recipes</div>
+
+          <div class="list-label">Recipes</div>
           <div id="recipeList" class="recipe-list"></div>
         </aside>
 
-        <section class="batch-panel">
+        <section class="workspace">
           <div id="emptyState" class="empty-state">
             <h2>Select a recipe</h2>
-            <p>Search the list or create your own recipe.</p>
+            <p>Or create your own.</p>
           </div>
 
           <div id="batchWorkspace" hidden>
-            <div class="recipe-title-row">
+            <div class="recipe-heading">
               <div>
-                <p id="recipeCategory" class="kicker"></p>
+                <p id="recipeCategory" class="eyebrow"></p>
                 <h2 id="recipeName"></h2>
-                <p id="recipeDetails" class="subtle"></p>
+                <p id="recipeDetails" class="muted"></p>
               </div>
-              <button id="editCustom" class="text-button" hidden>Edit recipe</button>
+              <button id="editCustom" class="text-button" hidden>Edit</button>
             </div>
 
-            <div id="sourceRecipe" class="source-recipe"></div>
+            <div id="sourceRecipe" class="spec"></div>
 
-            <div class="batch-controls">
-              <label class="primary-control">
+            <div class="controls">
+              <label class="drinks-control">
                 <span>How many drinks?</span>
-                <input id="plannedPours" class="field large-number" type="number" min="1" value="100">
+                <input id="plannedPours" class="field count-input" type="number" min="1" value="100">
               </label>
               <label>
                 <span>Overage</span>
-                <div class="suffix-field"><input id="overage" class="field" type="number" min="0" max="100" value="10"><b>%</b></div>
+                <div class="suffix"><input id="overage" class="field" type="number" min="0" max="100" value="10"><b>%</b></div>
               </label>
               <label>
                 <span>Dilution</span>
-                <div class="suffix-field"><input id="dilution" class="field" type="number" min="0" max="100" value="20"><b>%</b></div>
+                <div class="suffix"><input id="dilution" class="field" type="number" min="0" max="100" value="20"><b>%</b></div>
               </label>
               <button id="calculate" class="primary-button">Calculate batch</button>
             </div>
 
-            <details class="advanced">
+            <details class="settings">
               <summary>Batch settings</summary>
-              <div class="advanced-grid">
-                <label><span>Bottle size</span><div class="suffix-field"><input id="bottleSize" class="field" type="number" min="50" value="750"><b>mL</b></div></label>
+              <div class="settings-grid">
+                <label><span>Bottle size</span><div class="suffix"><input id="bottleSize" class="field" type="number" min="50" value="750"><b>mL</b></div></label>
                 <label><span>Container size</span><input id="vesselSize" class="field" type="number" min="0.1" step="0.1" value="12"></label>
                 <label><span>Unit</span><select id="vesselUnit" class="field"><option value="L">Liters</option><option value="gal">Gallons</option></select></label>
               </div>
             </details>
 
             <div id="results" hidden>
-              <div class="summary-strip">
-                <div><span>Drinks incl. overage</span><strong id="summaryPours">—</strong></div>
+              <div class="summary">
+                <div><span>Drinks</span><strong id="summaryPours">—</strong></div>
                 <div><span>Final volume</span><strong id="summaryYield">—</strong></div>
-                <div><span>Dilution water</span><strong id="summaryWater">—</strong></div>
+                <div><span>Water</span><strong id="summaryWater">—</strong></div>
                 <div><span>Containers</span><strong id="summaryVessels">—</strong></div>
               </div>
 
               <section class="result-section">
-                <div class="section-title"><h3>Batch ingredients</h3><button id="copyBatch" class="text-button">Copy batch</button></div>
-                <div class="table-wrap"><table><thead><tr><th>Ingredient</th><th>Per drink</th><th>Total</th><th>Bottles</th></tr></thead><tbody id="batchIngredients"></tbody></table></div>
+                <div class="section-heading">
+                  <h3>Batch ingredients</h3>
+                  <button id="copyBatch" class="text-button">Copy</button>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead><tr><th>Ingredient</th><th>Per drink</th><th>Total</th><th>Bottles</th></tr></thead>
+                    <tbody id="batchIngredients"></tbody>
+                  </table>
+                </div>
               </section>
 
               <section id="prepSection" class="result-section" hidden>
@@ -107,7 +116,10 @@
                 <div id="warnings"></div>
               </section>
 
-              <div class="result-actions"><button id="printBatch" class="secondary-button">Print batch sheet</button></div>
+              <div class="result-actions">
+                <button id="saveBatch" class="primary-button compact" hidden>Save batch</button>
+                <button id="printBatch" class="secondary-button">Print</button>
+              </div>
             </div>
           </div>
         </section>
@@ -117,46 +129,69 @@
     <section id="createView" hidden>
       <div class="form-page">
         <button id="backToRecipes" class="back-button">← Recipes</button>
-        <div class="page-heading compact">
-          <div>
-            <p class="kicker">NEW RECIPE</p>
-            <h1 id="createHeading">Create a recipe.</h1>
-            <p class="subtle">Enter the single-drink spec. Batch OS will scale it to any quantity.</p>
-          </div>
+        <div class="intro compact-intro">
+          <p class="eyebrow">NEW RECIPE</p>
+          <h1 id="createHeading">Create a recipe.</h1>
+          <p>Enter the recipe for one drink.</p>
         </div>
 
         <form id="recipeForm" class="recipe-form">
-          <label class="full"><span>Recipe name</span><input id="customName" class="field title-field" type="text" placeholder="House Margarita" required></label>
+          <label class="full-field"><span>Recipe name</span><input id="customName" class="field recipe-name-input" type="text" placeholder="House Margarita" required></label>
 
-          <div class="form-section">
-            <div class="section-title">
-              <div><h3>Ingredients</h3><p class="subtle small">Enter the amount for one drink.</p></div>
-              <button id="addIngredient" class="text-button" type="button">+ Add ingredient</button>
+          <section class="form-section">
+            <div class="section-heading">
+              <div><h3>Ingredients</h3><p class="muted small">Amount for one drink.</p></div>
+              <button id="addIngredient" class="text-button" type="button">+ Add</button>
             </div>
             <div id="ingredientRows" class="ingredient-editor"></div>
-          </div>
+          </section>
 
-          <div class="form-section">
+          <section class="form-section">
             <h3>Optional details</h3>
-            <div class="details-grid">
+            <div class="detail-grid">
               <label><span>Method</span><input id="customMethod" class="field" type="text" placeholder="Shake"></label>
               <label><span>Glass</span><input id="customGlass" class="field" type="text" placeholder="Rocks"></label>
               <label><span>Ice</span><input id="customIce" class="field" type="text" placeholder="Large cube"></label>
               <label><span>Garnish</span><input id="customGarnish" class="field" type="text" placeholder="Lime wheel"></label>
             </div>
-          </div>
+          </section>
 
           <div class="form-actions">
             <button id="cancelRecipe" class="secondary-button" type="button">Cancel</button>
-            <button class="primary-button" type="submit">Save & batch</button>
+            <button class="primary-button compact" type="submit">Save & batch</button>
           </div>
-          <p class="save-note">Beta: custom recipes are saved in this browser.</p>
+          <p id="saveNote" class="muted small">Saved on this device.</p>
         </form>
       </div>
     </section>
   </main>
 
+  <dialog id="accountDialog" class="dialog">
+    <form id="accountForm" class="dialog-card">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">BATCH OS ACCOUNT</p><h2>Save across devices.</h2></div>
+        <button id="closeAccount" class="close-button" type="button">×</button>
+      </div>
+      <p class="muted">Sign in to keep your recipes and batch history in the cloud.</p>
+      <label><span>Email</span><input id="accountEmail" class="field" type="email" autocomplete="email" required></label>
+      <label><span>Password</span><input id="accountPassword" class="field" type="password" autocomplete="current-password" minlength="8" required></label>
+      <p id="accountError" class="form-error" hidden></p>
+      <button id="signInButton" class="primary-button compact" type="submit">Sign in</button>
+      <button id="createAccountButton" class="secondary-button full-button" type="button">Create account</button>
+    </form>
+  </dialog>
+
+  <dialog id="savedDialog" class="dialog wide-dialog">
+    <div class="dialog-card">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">SAVED BATCHES</p><h2>Batch history</h2></div>
+        <button id="closeSaved" class="close-button" type="button">×</button>
+      </div>
+      <div id="savedList" class="saved-list"></div>
+    </div>
+  </dialog>
+
   <script src="config.js"></script>
-  <script src="app-v03.js"></script>
+  <script src="app-v04.js"></script>
 </body>
 </html>
