@@ -20,7 +20,10 @@
       <button class="nav-link" data-view="create">New recipe</button>
       <button id="savedNav" class="nav-link" hidden>Saved</button>
     </nav>
-    <button id="accountButton" class="account-button" hidden>Sign in</button>
+    <div class="header-actions">
+      <button class="header-purchase" type="button" data-batch-paywall>Founding Access — $19</button>
+      <button id="accountButton" class="account-button" hidden>Sign in</button>
+    </div>
   </header>
 
   <main class="page">
@@ -82,11 +85,19 @@
               </div>
             </div>
 
-            <div class="hero-actions">
-              <button id="heroBrowseRecipes" class="primary-button compact" type="button">Choose a recipe</button>
-              <button id="heroCreateRecipe" class="secondary-button" type="button">Create a recipe</button>
+            <div class="hero-purchase">
+              <div>
+                <strong>Founding Access</strong>
+                <span>Permanent access · No subscription · Regular price $29</span>
+              </div>
+              <button class="primary-button compact" type="button" data-batch-paywall>Unlock Batch OS — $19</button>
             </div>
-            <p class="hero-note">Start with 5 free completed batch calculations.</p>
+
+            <div class="hero-actions">
+              <button id="heroBrowseRecipes" class="secondary-button" type="button">Start with 5 free batches</button>
+              <button id="heroCreateRecipe" class="text-button hero-create-link" type="button">Create a recipe</button>
+            </div>
+            <p class="hero-note">No credit card required for your first 5 completed calculations.</p>
           </div>
 
           <div id="batchWorkspace" hidden>
@@ -264,7 +275,7 @@
   <script src="app-v05.js"></script>
   <script src="taxonomy-v06.js"></script>
   <script src="navigation-v08.js?v=8"></script>
-  <script src="monetization-v11.js?v=15"></script>
+  <script src="monetization-v11.js?v=16"></script>
   <script src="workspace-home-v11.js?v=11"></script>
 </body>
 </html>
