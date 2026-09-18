@@ -268,6 +268,169 @@ function renderPlan(plan) {
   $('saveBatch').textContent = 'Save batch';
   $('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+function buildPrintSheet() {
+  if (!state.plan || !state.selected) return false;
+
+  const p = state.plan;
+  const recipe = p.recipe || state.selected || {};
+  const sheet = $('printSheet');
+  if (!sheet) return false;
+
+  const ingredients = Array.isArray(p.ingredients) ? p.ingredients : [];
+  const prep = Array.isArray(p.prepItems) ? p.prepItems : [];
+  const vessels = Array.isArray(p.vessels) ? p.vessels : [];
+  const warnings = Array.isArray(p.warnings) ? p.warnings : [];
+  const inputs = p.inputs || {};
+  const summary = p.summary || {};
+  const denseClass = ingredients.length > 8 || prep.length > 5 || vessels.length > 5 ? ' print-dense' : '';
+
+  const icon = window.BatchIcons?.cocktail?.(recipe) || '';
+  const serviceNotes = [
+    recipe.method ? `Method: ${recipe.method}` : '',
+    recipe.glass ? `Glass: ${recipe.glass}` : '',
+    recipe.ice ? `Ice: ${recipe.ice}` : '',
+    recipe.garnish ? `Garnish: ${recipe.garnish}` : ''
+  ].filter(Boolean);
+
+  const generated = new Date().toLocaleString([], {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+
+  const ingredientRows = ingredients.length
+    ? ingredients.map((item, index) => `
+      <tr>
+        <td class="print-row-num">${index + 1}</td>
+        <td><strong>${esc(item.ingredient)}</strong></td>
+        <td>${fmt(item.perDrinkOz, 3)} oz</td>
+        <td class="print-total">${fmt(item.totalLiters)} L</td>
+        <td>${fmt(item.totalMl, 0)} mL</td>
+        <td>${item.bottlesToBuy} × ${fmt(item.bottleSizeMl, 0)} mL</td>
+      </tr>`).join('')
+    : '<tr><td colspan="6">No liquid ingredients were calculated.</td></tr>';
+
+  const dilutionRow = Number(summary.dilutionLiters || 0) > 0
+    ? `<tr class="print-water-row">
+        <td class="print-row-num">+</td>
+        <td><strong>Dilution water</strong></td>
+        <td>${fmt(inputs.dilutionPct, 1)}%</td>
+        <td class="print-total">${fmt(summary.dilutionLiters)} L</td>
+        <td>${fmt(Number(summary.dilutionLiters || 0) * 1000, 0)} mL</td>
+        <td>—</td>
+      </tr>`
+    : '';
+
+  const vesselMarkup = vessels.length
+    ? vessels.map(v => `
+      <div class="print-vessel">
+        <span class="print-vessel-number">${v.vesselNumber}</span>
+        <div>
+          <strong>${esc(summary.vesselLabel || inputs.vesselLabel || 'Batch container')} ${v.vesselNumber}</strong>
+          <span>Fill to ${fmt(v.targetFillLiters)} L · ${fmt(v.fillPct, 1)}% of ${fmt(v.capacityLiters)} L capacity</span>
+        </div>
+      </div>`).join('')
+    : '<p class="print-empty">No container plan available.</p>';
+
+  const prepMarkup = prep.length
+    ? prep.map(item => `
+      <div class="print-prep-item">
+        <span>${esc(item.ingredient)}</span>
+        <strong>${item.totalQuantity != null ? `${fmt(item.totalQuantity, 1)} ${esc(item.unit)}` : esc(item.amount || 'Manual')}</strong>
+      </div>`).join('')
+    : '<p class="print-empty">No separate prep items.</p>';
+
+  const warningsMarkup = warnings.length
+    ? `<section class="print-warning">
+        <h3>Check before service</h3>
+        ${warnings.map(item => `<p><strong>${esc(item.ingredient)}:</strong> ${esc(item.note)}</p>`).join('')}
+      </section>`
+    : '';
+
+  sheet.className = `print-sheet${denseClass}`;
+  sheet.innerHTML = `
+    <div class="print-sheet-inner">
+      <header class="print-header">
+        <div class="print-brand">
+          <span class="print-brand-mark">BATCH OS</span>
+          <span class="print-doc-type">PRODUCTION BATCH SHEET</span>
+        </div>
+        <div class="print-generated">Generated ${esc(generated)}</div>
+      </header>
+
+      <section class="print-title-block">
+        <div class="print-cocktail-icon">${icon}</div>
+        <div class="print-title-copy">
+          <p>${esc(recipe.category || recipe.style || 'COCKTAIL')}</p>
+          <h1>${esc(recipe.name || 'Batch')}</h1>
+          <div class="print-service-notes">${serviceNotes.map(note => `<span>${esc(note)}</span>`).join('')}</div>
+        </div>
+      </section>
+
+      <section class="print-kpis">
+        <div><span>Requested</span><strong>${fmt(summary.requestedPours ?? inputs.plannedPours, 0)}</strong><small>drinks</small></div>
+        <div><span>With overage</span><strong>${fmt(summary.plannedPours, 0)}</strong><small>${fmt(inputs.overagePct, 1)}% over</small></div>
+        <div><span>Final yield</span><strong>${fmt(summary.finalLiters)}</strong><small>liters</small></div>
+        <div><span>Containers</span><strong>${fmt(summary.vesselCount, 0)}</strong><small>${esc(summary.vesselLabel || inputs.vesselLabel || 'vessels')}</small></div>
+      </section>
+
+      <section class="print-section print-ingredients-section">
+        <div class="print-section-head">
+          <h2>Batch build</h2>
+          <span>Measure liquids into the batch vessel, then add dilution water.</span>
+        </div>
+        <table class="print-table">
+          <thead>
+            <tr><th>#</th><th>Ingredient</th><th>Per drink</th><th>Total</th><th>Metric</th><th>Pull</th></tr>
+          </thead>
+          <tbody>${ingredientRows}${dilutionRow}</tbody>
+        </table>
+      </section>
+
+      <div class="print-lower-grid">
+        <section class="print-section">
+          <div class="print-section-head">
+            <h2>Container plan</h2>
+            <span>Target fill by vessel.</span>
+          </div>
+          <div class="print-vessels">${vesselMarkup}</div>
+        </section>
+
+        <section class="print-section">
+          <div class="print-section-head">
+            <h2>Prep separately</h2>
+            <span>Keep out of the liquid batch unless your SOP says otherwise.</span>
+          </div>
+          <div class="print-prep">${prepMarkup}</div>
+        </section>
+      </div>
+
+      ${warningsMarkup}
+
+      <footer class="print-footer">
+        <div><span>Prepared by</span><i></i></div>
+        <div><span>Checked by</span><i></i></div>
+        <div class="print-footer-note">batch-os.com · Keep this sheet with the batch during prep and service.</div>
+      </footer>
+    </div>`;
+
+  sheet.setAttribute('aria-hidden', 'false');
+  return true;
+}
+
+function printProductionSheet() {
+  if (!state.plan) {
+    alert('Calculate the batch before printing.');
+    return;
+  }
+  if (!buildPrintSheet()) return;
+  window.print();
+}
+
+window.addEventListener('afterprint', () => {
+  const sheet = $('printSheet');
+  if (sheet) sheet.setAttribute('aria-hidden', 'true');
+});
+
 function copyBatch() {
   if (!state.plan) return;
   const p = state.plan;
@@ -431,6 +594,7 @@ function loadSavedBatch(batch) {
   $('emptyState').hidden = true;
   $('batchWorkspace').hidden = false;
   $('recipeCategory').textContent = batch.recipe_id ? 'MY RECIPE' : 'SAVED BATCH';
+  if ($('recipeHeadingIcon')) $('recipeHeadingIcon').innerHTML = window.BatchIcons?.cocktail?.(state.selected) || '';
   $('recipeName').textContent = batch.recipe_name;
   $('recipeDetails').textContent = [state.selected.method, state.selected.glass, state.selected.ice, state.selected.garnish ? `Garnish: ${state.selected.garnish}` : ''].filter(Boolean).join(' · ');
   $('editCustom').hidden = !batch.recipe_id;
@@ -456,7 +620,7 @@ $('cancelRecipe').onclick = () => setView('recipes');
 $('search').oninput = renderRecipeLists;
 $('calculate').onclick = calculateBatch;
 $('copyBatch').onclick = copyBatch;
-$('printBatch').onclick = () => window.print();
+$('printBatch').onclick = printProductionSheet;
 $('saveBatch').onclick = saveCurrentBatch;
 $('editCustom').onclick = editSelectedRecipe;
 $('addIngredient').onclick = () => newIngredientRow({});
