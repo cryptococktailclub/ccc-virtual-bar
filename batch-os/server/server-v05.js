@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { URL } from 'node:url';
+import { readFile } from 'node:fs/promises';
 import { Pool } from 'pg';
 import {
   createHash,
@@ -10,7 +11,7 @@ import {
 } from 'node:crypto';
 
 const PORT = Number(process.env.PORT || 10000);
-const API_VERSION = '0.5.0-beta';
+const API_VERSION = '0.5.1-beta';
 const DATABASE_URL = process.env.DATABASE_URL || '';
 const SESSION_DAYS = 30;
 const RECIPE_SOURCES = [
@@ -20,6 +21,7 @@ const RECIPE_SOURCES = [
   'https://raw.githubusercontent.com/cryptococktailclub/ccc-virtual-bar/main/netlify/functions/recipes.json'
 ].filter(Boolean);
 const CACHE_TTL_MS = Number(process.env.RECIPE_CACHE_TTL_MS || 300000);
+const LOCAL_RECIPE_URL = new URL('../../netlify/functions/recipes.json', import.meta.url);
 
 const VULGAR = {
   '¼': 0.25, '½': 0.5, '¾': 0.75,
@@ -121,7 +123,25 @@ function validateCustomRecipe(recipe) {
 }
 async function loadRecipes(force = false) {
   if (!force && recipeCache.recipes && Date.now() - recipeCache.loadedAt < CACHE_TTL_MS) return recipeCache.recipes;
+
   let lastError;
+
+  // Production should not depend on a second website being reachable in order
+  // to display the canonical cocktail library. The repository ships the same
+  // canonical JSON used by CCC, so load that local copy first.
+  try {
+    const raw = await readFile(LOCAL_RECIPE_URL, 'utf8');
+    const payload = JSON.parse(raw);
+    const recipes = Array.isArray(payload) ? payload : payload.recipes;
+    if (!Array.isArray(recipes) || !recipes.length) throw new Error('Local recipe library returned no recipes');
+    recipeCache = { recipes, loadedAt: Date.now() };
+    return recipes;
+  } catch (error) {
+    lastError = error;
+    console.warn(`Batch OS local recipe library unavailable: ${error.message}`);
+  }
+
+  // Remote sources remain recovery fallbacks only.
   for (const source of RECIPE_SOURCES) {
     try {
       const response = await fetch(source, { headers: { Accept: 'application/json', 'User-Agent': `BatchOS/${API_VERSION}` } });
@@ -131,8 +151,12 @@ async function loadRecipes(force = false) {
       if (!Array.isArray(recipes) || !recipes.length) throw new Error('Recipe source returned no recipes');
       recipeCache = { recipes, loadedAt: Date.now() };
       return recipes;
-    } catch (error) { lastError = error; }
+    } catch (error) {
+      lastError = error;
+      console.warn(`Batch OS remote recipe source failed (${source}): ${error.message}`);
+    }
   }
+
   throw lastError || new Error('Recipe library unavailable');
 }
 function lookupRecipe(recipes, name) {
@@ -418,4 +442,10 @@ const server = http.createServer(async (req, res) => {
 });
 
 await initializeDatabase();
+try {
+  const recipes = await loadRecipes(true);
+  console.log(`Batch OS recipe library ready; recipes=${recipes.length}; source=local-first`);
+} catch (error) {
+  console.error(`Batch OS recipe library startup check failed: ${error.message}`);
+}
 server.listen(PORT, '0.0.0.0', () => { console.log(`Batch OS API ${API_VERSION} listening on ${PORT}; persistence=${dbReady ? 'ready' : 'off'}`); });
