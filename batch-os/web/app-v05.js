@@ -189,14 +189,51 @@ function selectRecipe(recipe, type) {
   $('saveBatch').hidden = true;
   renderRecipeLists();
 }
+function selectedBottleSizeMl() {
+  const preset = $('bottleSizePreset')?.value || '750';
+  if (preset === 'custom') return Number($('bottleSize')?.value || 750);
+  return Number(preset || 750);
+}
+
+function selectedContainer() {
+  const active = document.querySelector('.container-preset.active');
+  const custom = active?.dataset.customContainer === 'true';
+
+  if (!custom && active?.dataset.capacityL) {
+    return {
+      vesselSize: Number(active.dataset.capacityL),
+      vesselUnit: 'L',
+      vesselLabel: active.dataset.label || 'Batch container'
+    };
+  }
+
+  const rawSize = Number($('vesselSize')?.value || 0.75);
+  const rawUnit = $('vesselUnit')?.value || 'L';
+  const customLabel = String($('vesselCustomLabel')?.value || '').trim();
+
+  if (rawUnit === 'mL') {
+    return {
+      vesselSize: rawSize / 1000,
+      vesselUnit: 'L',
+      vesselLabel: customLabel || `${fmt(rawSize, 0)} mL custom container`
+    };
+  }
+
+  return {
+    vesselSize: rawSize,
+    vesselUnit: rawUnit,
+    vesselLabel: customLabel || `${fmt(rawSize, 2)} ${rawUnit} custom container`
+  };
+}
+
 function batchPayload() {
+  const container = selectedContainer();
   return {
     plannedPours: Number($('plannedPours').value || 0),
     overagePct: Number($('overage').value || 0),
     dilutionPct: Number($('dilution').value || 0),
-    bottleSizeMl: Number($('bottleSize').value || 750),
-    vesselSize: Number($('vesselSize').value || 12),
-    vesselUnit: $('vesselUnit').value,
+    bottleSizeMl: selectedBottleSizeMl(),
+    ...container,
     maxFillPct: 90
   };
 }
@@ -218,7 +255,7 @@ function renderPlan(plan) {
   $('summaryPours').textContent = fmt(plan.summary.plannedPours, 0);
   $('summaryYield').textContent = `${fmt(plan.summary.finalLiters)} L`;
   $('summaryWater').textContent = `${fmt(plan.summary.dilutionLiters)} L`;
-  $('summaryVessels').textContent = fmt(plan.summary.vesselCount, 0);
+  $('summaryVessels').textContent = plan.summary.vesselLabel ? `${fmt(plan.summary.vesselCount, 0)} × ${plan.summary.vesselLabel}` : fmt(plan.summary.vesselCount, 0);
   $('batchIngredients').innerHTML = plan.ingredients?.length ? plan.ingredients.map(i => `<tr><td><strong>${esc(i.ingredient)}</strong></td><td>${fmt(i.perDrinkOz, 3)} oz</td><td>${fmt(i.totalLiters)} L</td><td>${i.bottlesToBuy} × ${fmt(i.bottleSizeMl, 0)} mL</td></tr>`).join('') : '<tr><td colspan="4">No liquid ingredients could be calculated.</td></tr>';
   const prep = plan.prepItems || [];
   $('prepSection').hidden = prep.length === 0;
@@ -437,4 +474,33 @@ $('closeAccountMenu').onclick = () => $('accountMenuDialog').close();
 resetRecipeForm();
 renderBrowseControls();
 renderRecentBatches();
+function initializeContainerControls() {
+  const bottlePreset = $('bottleSizePreset');
+  const customBottle = $('customBottleSizeLabel');
+  if (bottlePreset && customBottle) {
+    const syncBottle = () => {
+      const isCustom = bottlePreset.value === 'custom';
+      customBottle.hidden = !isCustom;
+      if (!isCustom && $('bottleSize')) $('bottleSize').value = bottlePreset.value;
+    };
+    bottlePreset.addEventListener('change', syncBottle);
+    syncBottle();
+  }
+
+  const presets = [...document.querySelectorAll('.container-preset')];
+  const customFields = $('customContainerFields');
+  presets.forEach(button => {
+    button.addEventListener('click', () => {
+      presets.forEach(item => item.classList.toggle('active', item === button));
+      const custom = button.dataset.customContainer === 'true';
+      if (customFields) customFields.hidden = !custom;
+      if (!custom && button.dataset.capacityL) {
+        if ($('vesselSize')) $('vesselSize').value = button.dataset.capacityL;
+        if ($('vesselUnit')) $('vesselUnit').value = 'L';
+      }
+    });
+  });
+}
+
+initializeContainerControls();
 initialize();
