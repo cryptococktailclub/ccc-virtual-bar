@@ -67,7 +67,7 @@
     const detail = type === 'custom'
       ? ['My recipe', recipe.style, recipe.baseSpirit].filter(Boolean).join(' · ')
       : [recipe.category, recipe.method].filter(Boolean).join(' · ') || 'Cocktail';
-    return `<button class="recipe-item ${active ? 'active' : ''}" data-type="${type}" data-id="${esc(id)}"><strong>${esc(recipe.name)}</strong><small>${esc(detail || 'My recipe')}</small></button>`;
+    const icon = window.BatchIcons?.cocktail?.(recipe) || ''; return `<button class="recipe-item ${active ? 'active' : ''}" data-type="${type}" data-id="${esc(id)}"><span class="recipe-item-icon">${icon}</span><span class="recipe-item-copy"><strong>${esc(recipe.name)}</strong><small>${esc(detail || 'My recipe')}</small></span></button>`;
   };
 
   function customMatchesBrowse(recipe, query) {
