@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="styles-v05.css">
   <link rel="stylesheet" href="styles-v08.css?v=8">
   <link rel="stylesheet" href="styles-v09.css?v=9">
-  <link rel="stylesheet" href="styles-v11.css?v=13">
+  <link rel="stylesheet" href="styles-v11.css?v=14">
 </head>
 <body>
   <header class="header">
@@ -99,10 +99,13 @@
 
           <div id="batchWorkspace" hidden>
             <div class="recipe-heading">
-              <div>
-                <p id="recipeCategory" class="eyebrow"></p>
-                <h2 id="recipeName"></h2>
-                <p id="recipeDetails" class="muted"></p>
+              <div class="recipe-heading-main">
+                <span id="recipeHeadingIcon" class="recipe-heading-icon" aria-hidden="true"></span>
+                <div class="recipe-heading-copy">
+                  <p id="recipeCategory" class="eyebrow"></p>
+                  <h2 id="recipeName"></h2>
+                  <p id="recipeDetails" class="muted"></p>
+                </div>
               </div>
               <button id="editCustom" class="text-button" hidden>Edit</button>
             </div>
@@ -348,7 +351,7 @@
 
   <script src="config.js?v=15"></script>
   <script src="visual-icons-v18.js?v=18"></script>
-  <script src="app-v05.js?v=17"></script>
+  <script src="app-v05.js?v=18"></script>
   <script src="taxonomy-v06.js?v=18"></script>
   <script src="navigation-v08.js?v=8"></script>
   <script src="monetization-v11.js?v=16"></script>
