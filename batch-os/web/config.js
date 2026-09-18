@@ -1,10 +1,12 @@
 const batchOsHost = window.location.hostname.toLowerCase();
 const batchOsProductionHost = batchOsHost === 'batch-os.com' || batchOsHost === 'www.batch-os.com';
 
+// Keep the production web app on the proven Render API origin while the branded
+// api.batch-os.com edge/DNS path is validated independently.
 window.BATCH_OS_CONFIG = {
-  apiBase: batchOsProductionHost
-    ? 'https://api.batch-os.com'
-    : 'https://batch-os-api-beta-934t.onrender.com'
+  apiBase: 'https://batch-os-api-beta-934t.onrender.com',
+  productionHost: batchOsProductionHost,
+  brandedApiBase: 'https://api.batch-os.com'
 };
 
 window.addEventListener('DOMContentLoaded', () => {
