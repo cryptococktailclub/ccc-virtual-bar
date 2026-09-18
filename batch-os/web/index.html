@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="styles-v05.css">
   <link rel="stylesheet" href="styles-v08.css?v=8">
   <link rel="stylesheet" href="styles-v09.css?v=9">
-  <link rel="stylesheet" href="styles-v11.css?v=11">
+  <link rel="stylesheet" href="styles-v11.css?v=12">
 </head>
 <body>
   <header class="header">
@@ -127,10 +127,88 @@
 
             <details class="settings">
               <summary>Batch settings</summary>
-              <div class="settings-grid">
-                <label><span>Bottle size</span><div class="suffix"><input id="bottleSize" class="field" type="number" min="50" value="750"><b>mL</b></div></label>
-                <label><span>Container size</span><input id="vesselSize" class="field" type="number" min="0.1" step="0.1" value="12"></label>
-                <label><span>Unit</span><select id="vesselUnit" class="field"><option value="L">Liters</option><option value="gal">Gallons</option></select></label>
+
+              <div class="settings-section">
+                <div class="settings-section-head">
+                  <strong>Ingredient bottle size</strong>
+                  <span>Used to estimate bottles to purchase.</span>
+                </div>
+                <div class="settings-grid bottle-settings-grid">
+                  <label>
+                    <span>Purchase format</span>
+                    <select id="bottleSizePreset" class="field">
+                      <option value="750" selected>750 mL</option>
+                      <option value="1000">1 L</option>
+                      <option value="1750">1.75 L</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </label>
+                  <label id="customBottleSizeLabel" hidden>
+                    <span>Custom bottle size</span>
+                    <div class="suffix"><input id="bottleSize" class="field" type="number" min="50" step="10" value="750"><b>mL</b></div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <div class="settings-section-head">
+                  <strong>Batch container</strong>
+                  <span>Choose what the finished cocktail will be stored in.</span>
+                </div>
+                <div class="container-preset-grid" id="containerPresetGrid">
+                  <button class="container-preset active" type="button" data-capacity-l="0.75" data-label="750 mL bottle">
+                    <span class="container-preset-name">750 mL bottle</span><span>Repurposed spirit bottle</span>
+                  </button>
+                  <button class="container-preset" type="button" data-capacity-l="1" data-label="1 L bottle">
+                    <span class="container-preset-name">1 L bottle</span><span>Repurposed spirit bottle</span>
+                  </button>
+                  <button class="container-preset" type="button" data-capacity-l="2" data-label="2 L bottle">
+                    <span class="container-preset-name">2 L bottle</span><span>Large bottle</span>
+                  </button>
+                  <button class="container-preset" type="button" data-capacity-l="1.893" data-label="Cambro 2 qt">
+                    <span class="container-preset-name">Cambro 2 qt</span><span>1.9 L</span>
+                  </button>
+                  <button class="container-preset" type="button" data-capacity-l="3.785" data-label="Cambro 4 qt">
+                    <span class="container-preset-name">Cambro 4 qt</span><span>3.8 L</span>
+                  </button>
+                  <button class="container-preset" type="button" data-capacity-l="5.678" data-label="Cambro 6 qt">
+                    <span class="container-preset-name">Cambro 6 qt</span><span>5.7 L</span>
+                  </button>
+                  <button class="container-preset" type="button" data-capacity-l="7.571" data-label="Cambro 8 qt">
+                    <span class="container-preset-name">Cambro 8 qt</span><span>7.6 L</span>
+                  </button>
+                  <button class="container-preset" type="button" data-capacity-l="11.356" data-label="Cambro 12 qt">
+                    <span class="container-preset-name">Cambro 12 qt</span><span>11.4 L</span>
+                  </button>
+                  <button class="container-preset" type="button" data-capacity-l="17.034" data-label="Cambro 18 qt">
+                    <span class="container-preset-name">Cambro 18 qt</span><span>17.0 L</span>
+                  </button>
+                  <button class="container-preset" type="button" data-capacity-l="20.819" data-label="Cambro 22 qt">
+                    <span class="container-preset-name">Cambro 22 qt</span><span>20.8 L</span>
+                  </button>
+                  <button class="container-preset" type="button" data-custom-container="true" data-label="Custom container">
+                    <span class="container-preset-name">Custom</span><span>Any bottle or vessel</span>
+                  </button>
+                </div>
+
+                <div id="customContainerFields" class="custom-container-fields" hidden>
+                  <label>
+                    <span>Capacity</span>
+                    <input id="vesselSize" class="field" type="number" min="0.05" step="0.05" value="0.75">
+                  </label>
+                  <label>
+                    <span>Unit</span>
+                    <select id="vesselUnit" class="field">
+                      <option value="mL">mL</option>
+                      <option value="L" selected>Liters</option>
+                      <option value="gal">Gallons</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Label</span>
+                    <input id="vesselCustomLabel" class="field" type="text" maxlength="60" placeholder="House 1.5 L bottle">
+                  </label>
+                </div>
               </div>
             </details>
 
@@ -269,7 +347,7 @@
   </dialog>
 
   <script src="config.js?v=15"></script>
-  <script src="app-v05.js"></script>
+  <script src="app-v05.js?v=17"></script>
   <script src="taxonomy-v06.js"></script>
   <script src="navigation-v08.js?v=8"></script>
   <script src="monetization-v11.js?v=16"></script>
