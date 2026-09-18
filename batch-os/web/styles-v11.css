@@ -213,3 +213,12 @@
   .recipe-item{grid-template-columns:32px minmax(0,1fr)}
   .recipe-item-icon{width:28px;height:28px}
 }
+
+.recipe-heading-main{display:flex;align-items:center;gap:15px;min-width:0}
+.recipe-heading-icon{width:54px;height:54px;flex:0 0 54px;display:grid;place-items:center}
+.recipe-heading-copy{min-width:0}
+.recipe-heading-copy h2{margin-top:4px}
+@media(max-width:720px){
+  .recipe-heading-main{gap:11px}
+  .recipe-heading-icon{width:44px;height:44px;flex-basis:44px}
+}
