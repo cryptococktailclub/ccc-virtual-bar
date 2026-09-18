@@ -182,6 +182,7 @@ function selectRecipe(recipe, type) {
   $('batchWorkspace').hidden = false;
   $('results').hidden = true;
   $('recipeCategory').textContent = type === 'custom' ? 'MY RECIPE' : (recipe.category || 'RECIPE');
+  if ($('recipeHeadingIcon')) $('recipeHeadingIcon').innerHTML = window.BatchIcons?.cocktail?.(recipe) || '';
   $('recipeName').textContent = recipe.name;
   $('recipeDetails').textContent = [recipe.method, recipe.glass, recipe.ice, recipe.garnish ? `Garnish: ${recipe.garnish}` : ''].filter(Boolean).join(' · ');
   $('editCustom').hidden = type !== 'custom';
