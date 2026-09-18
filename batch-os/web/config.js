@@ -1,5 +1,10 @@
+const batchOsHost = window.location.hostname.toLowerCase();
+const batchOsProductionHost = batchOsHost === 'batch-os.com' || batchOsHost === 'www.batch-os.com';
+
 window.BATCH_OS_CONFIG = {
-  apiBase: 'https://batch-os-api-beta-934t.onrender.com'
+  apiBase: batchOsProductionHost
+    ? 'https://api.batch-os.com'
+    : 'https://batch-os-api-beta-934t.onrender.com'
 };
 
 window.addEventListener('DOMContentLoaded', () => {
