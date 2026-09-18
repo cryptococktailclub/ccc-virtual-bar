@@ -182,6 +182,7 @@ function batchPlan(recipe, params = {}) {
   const vesselSize = safeNumber(params.vesselSize, 12, 0.1, 10000);
   const vesselUnit = ['L', 'gal'].includes(params.vesselUnit) ? params.vesselUnit : 'L';
   const maxFillPct = safeNumber(params.maxFillPct, 90, 50, 100);
+  const vesselLabel = String(params.vesselLabel || '').trim().slice(0, 80);
   const poursWithOverage = safeCeil(plannedPours * (1 + overagePct / 100));
   const normalized = (recipe.ingredients || []).map(normalizeIngredient);
   const liquids = normalized.filter(i => i.batchable && i.unit === 'oz' && Number.isFinite(i.quantity));
@@ -202,8 +203,8 @@ function batchPlan(recipe, params = {}) {
   const warnings = normalized.filter(i => i.status === 'review').map(i => ({ ingredient: i.ingredient, amount: i.amount, note: i.note }));
   return {
     recipe: { name: recipe.name, category: recipe.category, style: recipe.style || '', baseSpirit: recipe.baseSpirit || '', method: recipe.method, glass: recipe.glass, ice: recipe.ice, garnish: recipe.garnish, ingredients: recipe.ingredients || [] },
-    inputs: { plannedPours, overagePct, dilutionPct, bottleSizeMl, vesselSize, vesselUnit, maxFillPct },
-    summary: { requestedPours: plannedPours, plannedPours: poursWithOverage, perDrinkLiquidOz: round(perDrinkOz, 4), baseLiters: round(baseOz * 0.0295735), dilutionLiters: round(dilutionOz * 0.0295735), finalLiters: round(finalLiters), vesselCount: vessels.length },
+    inputs: { plannedPours, overagePct, dilutionPct, bottleSizeMl, vesselSize, vesselUnit, vesselLabel, maxFillPct },
+    summary: { requestedPours: plannedPours, plannedPours: poursWithOverage, perDrinkLiquidOz: round(perDrinkOz, 4), baseLiters: round(baseOz * 0.0295735), dilutionLiters: round(dilutionOz * 0.0295735), finalLiters: round(finalLiters), vesselCount: vessels.length, vesselLabel },
     ingredients, prepItems, vessels, warnings
   };
 }
