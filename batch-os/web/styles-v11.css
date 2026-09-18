@@ -196,3 +196,20 @@
   .container-preset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .custom-container-fields,.bottle-settings-grid{grid-template-columns:1fr}
 }
+
+.batch-line-icon{display:block;width:100%;height:100%;overflow:visible}
+.recipe-item{display:grid;grid-template-columns:38px minmax(0,1fr);align-items:center;gap:9px}
+.recipe-item-icon{width:34px;height:34px;display:grid;place-items:center;opacity:.96}
+.recipe-item-copy{min-width:0}
+.recipe-item-copy strong,.recipe-item-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.container-preset{display:grid;grid-template-columns:42px minmax(0,1fr);grid-template-rows:auto auto;column-gap:8px;align-items:center}
+.container-icon{grid-row:1 / span 2;width:38px;height:38px;display:grid;place-items:center}
+.container-preset .container-preset-name{grid-column:2;margin:0 0 3px}
+.container-preset>span:not(.container-icon):not(.container-preset-name){grid-column:2}
+.container-preset.active .container-icon{transform:scale(1.04)}
+@media(max-width:760px){
+  .container-preset{grid-template-columns:34px minmax(0,1fr)}
+  .container-icon{width:30px;height:30px}
+  .recipe-item{grid-template-columns:32px minmax(0,1fr)}
+  .recipe-item-icon{width:28px;height:28px}
+}
