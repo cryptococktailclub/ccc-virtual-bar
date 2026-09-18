@@ -1,0 +1,140 @@
+/* Batch OS v1.1 — concentrated production workspace */
+.page{
+  max-width:1120px;
+  margin:0 auto;
+  padding:24px 24px 48px;
+}
+.app-grid{
+  display:grid;
+  grid-template-columns:292px minmax(0,760px);
+  gap:28px;
+  justify-content:center;
+  align-items:start;
+}
+.browser{
+  position:sticky;
+  top:88px;
+  height:calc(100vh - 112px);
+  min-height:520px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:0 14px 24px 0;
+  scrollbar-width:thin;
+  scrollbar-color:#d4d4d8 transparent;
+}
+.browser::-webkit-scrollbar{width:6px}
+.browser::-webkit-scrollbar-track{background:transparent}
+.browser::-webkit-scrollbar-thumb{background:#d4d4d8;border-radius:999px}
+.browser::-webkit-scrollbar-thumb:hover{background:#a1a1aa}
+.library-list{max-height:none}
+.personal-list{max-height:none}
+.workspace{
+  min-width:0;
+  border-left:1px solid var(--line);
+  padding-left:28px;
+}
+.workspace-hero{
+  min-height:calc(100vh - 150px);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  max-width:720px;
+  padding:32px 0 56px;
+}
+.workspace-hero h1{
+  max-width:690px;
+  margin:12px 0 16px;
+  font-size:clamp(38px,5vw,58px);
+  line-height:1.02;
+  letter-spacing:-.045em;
+}
+.workspace-hero-lead{
+  max-width:650px;
+  margin:0;
+  color:#52525b;
+  font-size:17px;
+  line-height:1.55;
+}
+.hero-steps{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin:30px 0 24px;
+}
+.hero-step{
+  min-width:0;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:16px;
+  background:#fff;
+}
+.hero-step>span{
+  width:26px;
+  height:26px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  margin-bottom:14px;
+  background:#fff7ed;
+  color:#c2410c;
+  font-size:11px;
+  font-weight:850;
+}
+.hero-step strong{
+  display:block;
+  margin-bottom:5px;
+  font-size:13px;
+}
+.hero-step p{
+  margin:0;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.45;
+}
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.hero-note{
+  margin:12px 0 0;
+  color:#a1a1aa;
+  font-size:11px;
+}
+#batchWorkspace{
+  max-width:760px;
+  padding:18px 0 48px;
+}
+.search-row{margin-bottom:14px}
+.browse-block{margin-top:16px;padding-top:14px}
+.list-label{margin-top:14px}
+.category-stack{padding-bottom:6px}
+
+@media(max-width:900px){
+  .page{padding:20px 18px 42px}
+  .app-grid{grid-template-columns:260px minmax(0,1fr);gap:22px}
+  .workspace{padding-left:22px}
+  .hero-steps{grid-template-columns:1fr}
+  .workspace-hero{min-height:auto;padding:40px 0 56px}
+}
+@media(max-width:720px){
+  .page{padding:18px 16px 40px}
+  .app-grid{display:block}
+  .browser{
+    position:relative;
+    top:auto;
+    height:auto;
+    min-height:0;
+    max-height:440px;
+    margin-bottom:24px;
+    padding-right:8px;
+    border-bottom:1px solid var(--line);
+  }
+  .workspace{
+    border-left:0;
+    padding-left:0;
+  }
+  .workspace-hero{padding:18px 0 44px}
+  .workspace-hero h1{font-size:38px}
+  .hero-steps{grid-template-columns:1fr}
+}
