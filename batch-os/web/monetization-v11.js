@@ -101,6 +101,12 @@
 
   function updateUI(){
     ensureStatus();
+    document.querySelectorAll('[data-batch-paywall]').forEach(button => {
+      button.hidden = Boolean(access.paid);
+      if (!access.paid && button.classList.contains('header-purchase')) {
+        button.textContent = `Founding Access — ${access.foundingPriceUsd||19}`;
+      }
+    });
     const row=document.getElementById('accessStatus');
     const signedIn=typeof state!=='undefined'&&Boolean(state.user);
     if(row){
@@ -227,6 +233,13 @@
       setTimeout(()=>document.getElementById('calculate')?.click(),150);
     }
   }
+
+  document.addEventListener('click', event => {
+    const trigger = event.target?.closest?.('[data-batch-paywall]');
+    if (!trigger) return;
+    event.preventDefault();
+    openPaywall();
+  });
 
   styles();
   build();
